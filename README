@@ -6,11 +6,7 @@ http://sublimation.org/scponly
 administrators who would like to provide access to remote users to
 both read and write local files without providing any remote
 execution priviledges.  Functionally, it is best described as a
-wrapper to the "tried and true" ssh suite of applications.
-
-NOTE - About a week after writing this, a potential vulnerability
-	was discovered in SSH1.  If you're going to use ssh1 
-	with scponly, patch it.
+wrapper to the mostly trusted suite of ssh applications.
 
 A typical usage of scponly is in creating a semi-public account not
 unlike the concept of anonymous login for ftp.  This allows an
@@ -32,15 +28,19 @@ Some Features:
 ==============
 
 - logging:  scponly logs time, client IP, username, and the actual
-request to syslog
+request to syslog.
 
 - choot: scponly can chroot to the user's home directory (or any 
 other directory the user has permissions for), disallowing access 
 to the rest of the filesystem.  
 
-- sftp compatibility.  my testing of sftp against an acponly user 
+- sftp compatibility.  my testing of sftp against an scponly user 
 worked great.  this is probably the cleanest and most usable way 
 for an scponly user to access files.
+
+- WinSCP 2.0 compatibility.
+
+- gftp compatibilty
 
 - security checks: root login is disallowed (though root
 should never be configured to be using scponly as the default shell.)
@@ -54,9 +54,7 @@ invariably looks like this:
 <shell name> -c <remote command>
 
 scponly validates remote requests by examining the third argument.  
-The only commands allowed are "scp" (for ssh1), "sftp-server" (for
-ssh2") and "ls".  Arguments to these commands are passed along
-unmolested.  scponly also verfies the request by disallowing what a
+scponly also verfies the request by disallowing what a normal
 shell would interpret as "special characters".  This prevents
 someone from piggybacking additional commands onto a valid scp
 request.  It may seem that using scponly would prevent using scp to

@@ -1,0 +1,35 @@
+#undef PACKAGE_NAME
+#undef PACKAGE_VERSION
+#undef PACKAGE_BUGREPORT
+
+/* Features */
+#undef SOLARIS_COMPAT
+#undef WINSCP_COMPAT
+#undef GFTP_COMPAT
+#undef ENABLE_SCP
+#undef ENABLE_SFTP
+#undef ENABLE_WILDCARDS
+#undef CHROOTED_NAME
+#undef HAVE_WORDEXP
+#undef HAVE_GLOB
+
+/* Binaries which are launched by core scponly */
+#undef PROG_SFTP_SERVER
+#undef PROG_LS
+#undef PROG_SCP
+#undef PROG_RM
+#undef PROG_LN
+#undef PROG_MV
+#undef PROG_CHMOD
+#undef PROG_CHOWN
+#undef PROG_MKDIR
+#undef PROG_RMDIR
+#define PROG_CD "cd"
+
+/* Binaries launched in WinSCP compatibility mode */
+#ifdef WINSCP_COMPAT
+#undef PROG_PWD
+#undef PROG_GROUPS
+#undef PROG_ECHO
+#endif
+

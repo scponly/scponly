@@ -1,0 +1,131 @@
+#!/bin/sh
+#
+# check that the configure options are correct for chrooted operation:
+
+if [ x@CHROOTED_NAME@ = x ] || [ ! -f ./config.h ]; then
+	echo 
+	echo 'your scponly build is not configured for chrooted operation.'
+	echo 'please reconfigure as follows, then rebuild and reinstall:'
+	echo
+	echo './configure --enable-chrooted-binary (... other options)'
+	echo
+	exit 1
+fi
+
+# the following is a list of binaries that will be staged in the target dir
+BINARIES=`@PROG_GREP@ '#define PROG_' config.h | @PROG_CUT@ -f2 -d\" | @PROG_GREP@ -v ^cd$`
+
+# a function to display a failure message and then exit 
+function fail {
+	echo -e $@
+	exit 1
+}
+
+# "get with default" function
+# this function prompts the user with a query and default reply
+# it returns the user reply
+function getwd {
+	query="$1"
+	default="$2"
+	echo -en "$query [$default]" | cat >&2
+	read response
+	if [ x$response = "x" ]; then
+		response=$default
+	fi
+	echo $response
+}
+
+# "get yes no" function
+# this function prompts the user with a query and will continue to do so
+# until they reply with either "y" or "n"
+function getyn {
+	query="$@"
+	echo -en $query | cat >&2
+	read response
+	while [ x$response != "xy" -a x$response != "xn" ]; do
+		echo -e "\n'y' or 'n' only please...\n" | cat >&2
+		echo -en $query | cat >&2
+		read response
+	done	
+	echo $response
+}
+
+if [ x@PROG_USERADD@ = x ]; then
+	echo "this script requires the program ldd to determine which"
+	fail "shared libraries to copy into your chrooted dir..."
+fi
+if [ x@PROG_LDD@ = x ]; then
+	echo "this script requires the program useradd to add your"
+	fail "chrooted scponly user."
+fi
+
+# we need to be root
+if [ `id -u` != "0" ]; then
+	fail "you must be root to run this script\n"
+fi
+
+echo -n "Install for chroot to what directory? "
+read targetdir
+if [ "x$targetdir" = "x" ]; then
+	fail "need to specify a target directory"
+fi
+
+echo -n "Install for what username? "
+read targetuser
+if [ "x$targetuser" = "x" ]; then
+	fail "need to specify a username"
+fi
+
+@INSTALL@ -d $targetdir
+@INSTALL@ -d $targetdir/usr
+@INSTALL@ -d $targetdir/usr/bin
+@INSTALL@ -d $targetdir/usr/sbin
+@INSTALL@ -d $targetdir/usr/local
+@INSTALL@ -d $targetdir/usr/local/lib
+@INSTALL@ -d $targetdir/usr/local/bin
+@INSTALL@ -d $targetdir/lib
+@INSTALL@ -d $targetdir/usr/lib
+@INSTALL@ -d $targetdir/usr/libexec
+@INSTALL@ -d $targetdir/bin
+@INSTALL@ -d $targetdir/etc
+
+for bin in $BINARIES; do
+	@INSTALL@ -C $bin $targetdir$bin
+done
+
+LIB_LIST=`@PROG_LDD@ $BINARIES 2> /dev/null | @PROG_CUT@ -f2 -d\> | @PROG_CUT@ -f1 -d\( | @PROG_GREP@ "^ " | @PROG_SORT@ -u`
+LIB_LIST="$LIB_LIST /usr/libexec/ld.so"
+if [ "x$LIB_LIST" != "x" ]; then
+	for lib in $LIB_LIST; do
+		@INSTALL@ $lib $targetdir/$lib
+	done
+fi
+
+@PROG_USERADD@ -d "$targetdir" -s "@prefix@/sbin/@CHROOTED_NAME@" $targetuser
+if [ $? -ne 0 ]; then
+	fail "if this user exists, remove it and try again"
+fi
+
+chown 0.0 $targetdir 
+if [ -d $targetdir/.ssh ]; then
+	chown 0.0 $targetdir/.ssh
+fi
+	
+
+if [ ! -d $targetdir/incoming ]; then
+	echo -e "\ncreating  $targetdir/incoming directory for uploading files"
+	@INSTALL@ -o $targetuser -d $targetdir/incoming
+fi
+
+# the following is VERY BSD centric
+# i check for pwd_mkdb before trying to use it
+if [ x@PROG_PWD_MKDB@ = x ]; then
+	echo "this script requires pwd_mkdb to stage a partial password database in your new chrooted dir"
+	echo "depending on your UNIX flavor, the following may be a sufficient substitute:"
+	echo -e "\n\tgrep $targetuser /etc/passwd > $targetdir/etc/passwd"
+	fail "please email joe@sublimation.org with the steps you used if you succeed on a platform this script will not run on and i will update the script"
+fi
+@PROG_GREP@ $targetuser /etc/master.passwd > $targetdir/etc/master.passwd
+pwd_mkdb -d "$targetdir/etc" $targetdir/etc/master.passwd
+rm -rf $targetdir/etc/master.passwd $targetdir/etc/spwd.db
+

@@ -1,3 +1,63 @@
+scponly v3.0
+	04 sep, 2002
+
+	Solaris compatibility patch 
+		- by Rene Klootwijk <rene.klootwijk@rencon.nl>
+
+	gftp compatibility patch 
+		- by Michael <ysothoth@wsia.csi.cuny.edu>
+
+	system() dropped
+		- wildcards are expanded with glob() and wordexp()
+			depending on availability of these
+			functions.
+		
+	autoconf configuration 
+		- original by Andrew Chadwick <andrewc@piffle.org>
+		- expanded by author
+		- Can now set install dirs for other layouts.
+		- Keep Ken McG's makefile changes as much as possible.
+		- /etc/shells hacking has gone away, 'cause you can't
+			do that to a Debian (or any other) install
+			tree in a meaningful way.
+		
+
+scponly v2.4
+	18 aug, 2002
+
+	vulnerability patch!
+		- Derek D. Martin <ddm@pizzashack.org> sent me an exploitable
+			vulnerability condition that can be used to run
+			arbitrary commands, thus circumventing scponly!
+			the exploit is pending but the fix for existing 
+			installations appears below.  new installations 
+			scponly-2.4 are not vulnerable.
+
+		- this vulnerability is POST-authentication and results
+			in no priveledge elevation.
+
+		- the fix:  each user with scponly as his or her shell must
+			have an immutable home directory and .ssh subdirectory.
+			file uploads directly to the home directory are not
+			permitted and in turn, an "incoming" directory or
+			some analog must be used.  Also, it is prudent
+			to audit/remove all dotfiles that are already in a 
+			user's home directory.
+
+		- the following commands will "patch" the vulnerability:
+
+		chown root.root ~scpuser ~scpuser/.ssh
+		mkdir ~scpuser/incoming
+		chown scpuser.scpuser ~scpuser/incoming 
+
+		- the result:
+
+		drwxr-xr-x    2 root     root       4096 Mar 28 20:50 ./
+     		drwxr-xr-x    2 root     root       4096 Mar 28 20:50 .ssh/
+     		drwxr-xr-x    2 user     user       4096 Mar 28 20:50 incoming/
+
+		- this is to prevent a user from using SSH based login params to
+		undermine the shell.
 
 scponly v2.3
 	22 june, 2002

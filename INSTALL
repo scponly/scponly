@@ -1,4 +1,4 @@
-scponly v2.1 Installation Instructions:
+scponly v3.0 Installation Instructions:
 
 http://sublimation.org/scponly
 joe@sublimation.org
@@ -6,6 +6,7 @@ joe@sublimation.org
 Installing scponly is not difficult.  It is not trivial either so I
 advise reading the instructions carefully.  Keep in mind, you CAN
 use scponly as a setuid binary, which should warrant caution.
+
 
 Step 1.  Decide if you want to use chroot() functionality.  
 
@@ -25,52 +26,69 @@ Step 1.  Decide if you want to use chroot() functionality.
 	never done with an effective uid of 0.
   - Lastly, I make no gaurantees this code is unexploitable.  Any
 	system administrator utilizing scponly bears the full
-	responsibility for maintaining a secure system.
+	responsibility for maintaining a secure system. (see 18/08/02
+	CHANGELOG!)
   - Without chroot() functionality, scponly still functions just
 	fine.  However, most all files on any root filesystem for any
 	default installation are globally readable.
   - installing scponly with chroot could incur some pretty hairy
 	troubleshooting.  The binaries and libraries must be set
-	up properly in the chroot subdirectories properly (see 
-	Step 10 below.)  I have provided a simple script to assist
-	in this department.  You can simplify this aspect of the 
-	installation if you can generate statically linked binaries
-	for the following commands:
-
-   ls sh scp sftp-server rm mkdir chmod rmdir pwd mv chown ln sftp-server
+	up properly in the chroot subdirectories properly.
 	
 
-Step 2.  build the binary.  
+Step 2.  Configure your installation.
 
-		make scponly
+	There are only a handful of options to configure scponly.
+	Some to note:
+
+	--enable-chrooted-binary
+
+	This option configures additional compile and install parameters
+	that will set your scponly installation to handle chrooted scponly
+	users.  By default, chrooted scponly binaries are not built.
+
+	--disable-wildcards
+
+	The wildcard processing is new and although I know of no
+	vulnerabilities, the especially paranoid may wish to disable
+	this feature.  Also note, it only relates to "scp" transfers,
+	and not "sftp", which handles its own wildcards.  By default,
+	wildcards are enabled.
+
+	--disable-scp 
+	--disable-sftp
+	--disable-winscp-compat
+
+	"scp" or "sftp" can be excluded altogether at compile time
+	if you know you will not be using one or the other at all.
+
+	If you do not wish to support WinSCP 2.0 compatibility, you
+	can specify the disable option, which will exclude that
+	functionality.  This is for especially paranoid folks that
+	do not like the interactive nature of a WinSCP session.
+	By default, WinSCP 2.0 compatibility is compiled in.
+
+	Other options can be seen using "./configure --help"
 	
-	Alternatively, if you want to make scponly WITHOUT WinSCP
-	compatibility mode, issue the following:
 
-		make scponly_no_compat
+Step 3.  Build the binaries.
 
-	I've built scponly on OpenBSD and Linux, but at present I
-	am unaware of any unix systems it wont compile on.  The code
-	doesnt utilize anything platform-dependant that I am aware
-	of.  (Other than a non-POSIX strsep() call however.)
+	This is the easy part, type "make".
+	
+Step 4.  Install the components.
 
-Step 3. Read the makefile, edit it if you aren't comfortable with
-	the installation parameters.  The defaults should be fine.
+	Type "make install".
+	
+	This will install your manpage and scponly binary.  
 
-Step 4. Become root and:
+Step 5. Edit /etc/shells
 
-		make install
-
-	This will create your logfile and install your scponly binary.
-	It will also create a softlink from scponlyc to scponly.  If
-	you wish to use scponly with chroot(), set the shell for a given
-	user to "scponlyc" instead of "scponly".  
-
-Step 5. Create a directory that you want to share all your files
-	from. (For the remainder of the examples I will use /pub.)
-
-Step 6. Create a user intended for scponly use.  I will make an
-	example of the user "scpdemo".
+	If you have not already done so, add "scponly" to your /etc/shells
+	file, including the full pathname.  If you are using a chrooted
+	scponly install, you should add "scponlyc", also including full 
+	pathname.
+	
+Step 6. Create/Edit a user intended for scponly use.  
 
 	Use your system's "adduser" command to create the user.
 
@@ -78,14 +96,17 @@ Step 6. Create a user intended for scponly use.  I will make an
 	binary.  If you want chroot functionality, the name of the
 	shell is "scponlyc", otherwise it is "scponly".
 
-	Set the home directory to the path decided upon in Step 7.
-	This could be a regular default home directory if you want.
-
 	This could look like:
 
-		adduser -d /pub -s /usr/local/sbin/scponly scpdemo
+		adduser -d /pub -s /usr/local/bin/scponly scpdemo
 
-	Lastly, set the password for this user.
+	or for chrooted:
+
+		adduser -d /pub -s /usr/local/sbin/scponlyc scpdemo
+
+	Where the home directory is "/pub" and the username is "scpdemo".
+
+	Naturally, set the password for this user.
 
 ADDITIONAL STEPS FOR CHROOT-ENABLED INSTALLATIONS ONLY:
 
@@ -101,4 +122,5 @@ Step 7. You will need to install some directories, passwd files,
 
 	This script generates a LIKELY interpretation of the commands
 	you will need to execute in order to get chroot() working.
+	Chroot directory setup isnt especially portable so good luck.
 

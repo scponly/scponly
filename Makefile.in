@@ -1,0 +1,54 @@
+# Autoconfed stuff
+prefix		:= @prefix@
+exec_prefix	:= @exec_prefix@
+bindir		 = @bindir@
+sbindir		 = @sbindir@
+mandir		 = @mandir@
+CFLAGS		 = @CFLAGS@
+INSTALL		 = @INSTALL@
+CC		 = @CC@
+CHROOTED_NAME    = @CHROOTED_NAME@
+CONFDIR         := @sysconfdir@/scponly
+DEBUGFILE       := ${CONFDIR}/debuglevel
+DEFS		:= @DEFS@ -DDEBUGFILE='"${DEBUGFILE}"'
+LN_S		 = @LN_S@
+
+all: scponly
+
+clean:
+	rm -f *.o scponly *~ debuglevel ${CHROOTED_NAME}
+
+love: clean all
+
+scponly: scponly.c helper.c config.h scponly.h 
+	${CC} ${CFLAGS} ${DEFS} -o $@ scponly.c helper.c
+
+install: scponly debuglevel scponly.8
+	${INSTALL} -d ${bindir}
+	${INSTALL} -d ${mandir}/man8
+	${INSTALL} -d ${CONFDIR}
+	${INSTALL} -o 0 -g 0 scponly ${bindir}/scponly
+	${INSTALL} -o 0 -g 0 -m 0644 scponly.8 ${mandir}/man8/scponly.8
+	${INSTALL} -o 0 -g 0 -m 0644 debuglevel ${DEBUGFILE}
+	if test "x${CHROOTED_NAME}" != "x"; then			\
+		${INSTALL} -d ${sbindir};				\
+		rm -f ${sbindir}/${CHROOTED_NAME};			\
+		cp scponly ${CHROOTED_NAME};				\
+		${INSTALL} -o 0 -g 0 -m 4755 ${CHROOTED_NAME} ${sbindir}/${CHROOTED_NAME};	\
+	fi
+
+debuglevel:
+	echo "0" > $@
+
+jail:	install
+	chmod u+x ./setup_chroot.sh
+	./setup_chroot.sh
+
+distclean: clean
+	rm -fr autom4te.cache
+	rm -f config.h config.log config.status Makefile setup_chroot.sh
+
+maintainer-clean: distclean
+	rm -f configure 
+
+

@@ -1,29 +1,26 @@
-.\" Copyright 2001, 2002 joe@sublimation.org.
-.\" All rights reserved.
-.Dd Sept 03, 2002
-.Dt scponly 8
-.Sh NAME
-.Nm scponly
-.Sh SYNOPSIS
-.Nm
-.Nd limited shell for secure file transfers
-.Sh DESCRIPTION
-.Nm
+.TH scponly 8 "Sept 04, 2002" ""
+.SH NAME
+\fBscponly\fP
+.SH SYNOPSIS
+\fBscponly\fP
+\- limited shell for secure file transfers
+.SH DESCRIPTION
+\fBscponly\fP
 is an alternative "shell" (of sorts) for system administrators who would like
 to provide access to remote users to both read and write local files without
 providing any remote execution priviledges.  Functionally, it is best described
 as a wrapper to the trusted suite of ssh applications.
-.Pp
+
 A typical usage of
-.Nm
+\fBscponly\fP
 is in creating a semi-public account not unlike the concept of anonymous login
 for ftp.  This allows an administrator to share files in the same way an
 anonymous ftp setup would, only employing all the protection that ssh provides.
 This is especially significant if you consider that ftp authentications
 traverse public networks in a plaintext format.
-.Pp
+
 Instead of just a single anonymous user,
-.Nm
+\fBscponly\fP
 supports configuring potentially many users, each of which could could be set
 up to provide access to distinct directory trees.  Aside from the installation
 details, each of these users would have their default shell in /etc/passwd set
@@ -31,98 +28,88 @@ to "/usr/local/bin/scponly" (or wherever you choose to install it).  This
 would mean users with this shell can neither login interactively or execute
 commands remotely.  They can however, scp files in and out, governed by the
 usual Unixish file permissions.
-.Sh FEATURES
-.Bl -bullet
-.It
+.SH FEATURES
+.IP \(bu
 Logging:
-.Nm
+\fBscponly\fP
 logs time, client IP, username, and the actual request to syslog.
-.It
+.IP \(bu
 chroot:
-.Nm
+\fBscponly\fP
 can chroot to the user's home directory (or any other directory the user has
 permissions for), disallowing access to the rest of the filesystem.
-.It
-sftp compatibility:  My testing of sftp against an
-.Nm
-user worked great.  This is probably the cleanest and most usable way for an
-.Nm
-user to access files.
-.It
-Security checks:  root login is disallowed (though root should never be
-configured to be using
-.Nm
-as the default shell.)
-.It
-WinSCP 2.0 compatibility.
-.Nm
+.IP \(bu
+sftp compatibility: 
+\fBscponly\fP
+is fully compatible with sftp.
+.IP \(bu
+Security checks:  root login is disallowed, seteuid after chroot.
+.IP \(bu
+WinSCP compatibility.
+\fBscponly\fP
 can be compiled in WinSCP compatibility mode (it will by default) that will
 permit a "semi-interactive" shell that WinSCP can use.
-.It
-gftp compatibility:
-.Nm
-is compatible with gftp if you set "use ssh2 sftp subsys" in your gftp options.
-.El
-.Pp
-.Nm
+.IP \(bu
+gftp compatibility.
+\fBscponly\fP is also fully compatible with gFTP in sftp mode.
+
+\fBscponly\fP
 doesn't do anything to manage read/write permissions.  The ssh applications
 already do that just fine.  If you use
-.Nm ,
+\fB,\fP
 be aware that good old Unix-style file permissions are still doing the work of
 protecting your files.
-.Sh NOTES
-.Bl -bullet
-.It
+.SH NOTES
+.IP \(bu
 As recent as June 26, 2002, vulnerabilities have been
 discovered in OpenSSH.  There is also a SSH1 protocol vulnerability.  If 
 you're going to use
-.Nm
+\fB,\fP
 , be aware it is no more secure than the ssh installation it runs on.
-.It
+.IP \(bu
 I've since discovered that ssh.com's commercial ssh offering supports BOTH
 "dummy users" as well as functionality paralleling
-.Nm .
+\fB.\fP
 I have not been able to find any notes on these features, but I did read that
 they exist.  I will make a point to include more information later.  It appears
 that OpenSSH does not yet support these features.  At this time, I have no
 plans to end-of-life
-.Nm ,
+\fB,\fP
 though ultimately, I recognize that
-.Nm
+\fB,\fP
 should eventually become just a feature of whichever sshd you may run.
-.El
-.Sh FILES
-.Bl -tag -width base/sup/collection/checkouts*xx -compact
-.It Pa /usr/local/bin/scponly
+.SH FILES
+.TP
+.B /usr/local/bin/scponly
 The default location for the shell itself.
-.It Pa /usr/local/sbin/scponlyc
-The default location for the chrooted version of 
-.Nm
-.It Pa /etc/shells
+.TP
+.B /usr/local/sbin/scponlyc
+The default location for the chrooted version.
+.TP
+.B /etc/shells
 To be a proper shell, it has to be included here.
-.El
-.Sh SEE ALSO
-.Xr ssh 1 ,
-.Xr scp 1 ,
-.Xr sftp 1 ,
-.Xr shells 5 ,
-.Xr sshd 8 .
-.Sh AUTHORS
-.An Joe Boyle Aq joe@sublimation.org .
-.Sh LEGALITIES
+.SH SEE ALSO
+\fBssh\fP(1),
+\fBscp\fP(1),
+\fBsftp\fP(1),
+\fBshells\fP(5),
+\fBsshd\fP(8).
+.SH AUTHORS
+An Joe Boyle Aq joe@sublimation.org .
+.SH LEGALITIES
 Copyright (C) 2001, 2002,
-.An Joe Boyle Aq joe@sublimation.org .
-.Pp
+An Joe Boyle Aq joe@sublimation.org .
+
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
-.Pp
+
 1. Redistributions of source code must retain the above copyright notice, this
 list of conditions and the following disclaimer.
-.Pp
+
 2. Redistributions in binary form must reproduce the above copyright notice,
 this list of conditions and the following disclaimer in the documentation
 and/or other materials provided with the distribution.
-.Pp
+
 THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR IMPLIED
 WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
 MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO
@@ -133,6 +120,7 @@ INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
 CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
 IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
 OF SUCH DAMAGE.
-.Sh BUGS
-Versions prior to 2.4 have a vulnerability wherein the .ssh/environment file 
-can be used to override $PATH and $LD_LIBRARY_PATH vars, compromising the shell.
+.SH BUGS
+Versions prior to 2.4 were susceptible to shell circumvention via the 
+$HOME/.ssh/environment file which allowed perversion of LD_LIBRARY_PATH and PATH
+environment variables.

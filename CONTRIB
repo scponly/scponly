@@ -1,8 +1,23 @@
+Ian W. D. Langworth <bass@ccs.neu.edu>
+	- another Solaris compile time fix
+
+Michael <ysothoth@wsia.csi.cuny.edu>
+	- gftp compatibility patch
+
+Rene Klootwijk <rene.klootwijk@rencon.nl>
+	- Solaris syslog patch
+
+Derek D. Martin <ddm@pizzashack.org> 
+	- sent me an exploitable vulnerability condition that 
+	can be used to run arbitrary commands, thus circumventing 
+	scponly!  scponly-2.3 installations and older are vulnerable.
+
 Ken McGlothlen <mcglk@artlogix.com>
 	- manpage and installation makefile improvements
 
 Andrew Chadwick <andrewc@piffle.org>
 	- syslog implementation
+	- autoconf work
 
 dkl at tessellated dot net
 	- compatibility notes and patch

@@ -1,6 +1,5 @@
 /*
- *
- *
+ *	helper functions for scponly
  */
 #include <stdio.h>	// io
 #include <string.h>	// for str*
@@ -10,14 +9,199 @@
 #include <errno.h>	// for debugging
 #include <pwd.h>	// to get username for config parsing
 #include <time.h>	// time
+#include <libgen.h>	// basename
+#include <stdlib.h>	// realloc
 #include <syslog.h>
 #include "scponly.h"
+#include "config.h"
+
+#ifdef HAVE_GLOB
+#include <glob.h>	// for glob()
+#else
+#ifdef HAVE_WORDEXP
+#include <wordexp.h>	// for wordexp()
+#endif
+#endif
 
 #define MAX(x,y)	( ( x > y ) ? x : y )
 
 extern int debuglevel;
 extern char username[MAX_USERNAME];
 extern char homedir[FILENAME_MAX];
+extern cmd_t commands[];
+
+void discard_vector(char **av)
+{
+	char **tmpptr=av;	
+	while (*tmpptr!=NULL)
+		free(*tmpptr++);
+	free(av);
+}
+
+char *flatten_vector(char **av)
+{
+	char **tmpptr=av;	
+	char *temp=NULL;
+	char *outbuf=NULL;
+	int len=0,newlen=0;
+
+	while (*tmpptr!=NULL)
+	{
+		if (outbuf!=NULL)
+		{
+			len = strlen(outbuf);
+			newlen=len + strlen(*tmpptr)+1;
+		}
+		else
+		{
+			len = 0;
+			newlen=strlen(*tmpptr);
+		}
+		if (NULL == (temp = realloc (outbuf, newlen)))
+		{
+			perror("realloc");
+			if (outbuf)
+				free(outbuf);
+			exit(-1);
+		}
+		outbuf=temp;
+		temp=NULL;
+		if (len)
+		{
+			outbuf[len]=' ';
+			strcpy(&outbuf[len+1],*tmpptr);	
+		}
+		else
+			strcpy(outbuf,*tmpptr);	
+		*tmpptr++;
+	}
+	return (outbuf);
+}
+
+int valid_arg_vector(char **av)
+{
+	cmd_t	*cmd=commands;
+
+	while (cmd != NULL)
+	{
+		if (cmd->name == NULL)
+			return 0;
+		if (exact_match(cmd->name,av[0]))
+		{
+			if ((cmd->argflag == 0) && (av[1]!=NULL))
+			{
+				return 0;
+			}
+			return 1;
+		}
+		cmd++;
+	}
+	return 0;
+}
+
+char *substitute_known_path(char *request)
+{
+	cmd_t	*cmd=commands;
+	char *stripped_req=strdup(basename(request));
+	while (cmd != NULL)
+	{
+		if (cmd->name == NULL)
+			break;
+		if (exact_match(basename(cmd->name),stripped_req))
+		{
+			free(request);	// discard old pathname
+			return (strdup(cmd->name));
+		}
+		cmd++;
+	}
+	free(stripped_req);
+	return (basename(request));
+}
+
+char **build_arg_vector(char *request)
+{
+	/*
+	 *  	i strdup vector elements so i know they are
+	 * 	mine to free later.
+	 */
+	char **ap, *argv[MAX_ARGC], *inputstring, *tmpstring, *freeme;
+	char **ap2,**av=(char **)malloc(MAX_ARGC * (sizeof(char *)));
+
+	ap=argv;
+	freeme=inputstring=strdup(request); // make a local copy 
+
+        while (ap < &argv[(MAX_ARGC-1)]) 
+	{
+		if (inputstring && (*inputstring=='"'))
+		{
+			if (NULL != (tmpstring=strchr((inputstring+1),'"')))
+			{
+				*tmpstring++=NULL;
+				*ap=(inputstring+1);
+				
+				if (strsep(&tmpstring, WHITE) == NULL)
+					break;
+				inputstring=tmpstring;
+		
+       			        if (**ap != '\0')
+        				ap++;
+				continue;
+			}
+		}
+		
+        	if ((*ap = strsep(&inputstring, WHITE)) == NULL)
+			break;
+		
+                if (**ap != '\0')
+        		ap++;
+        }
+        *ap = NULL;
+	ap=argv;
+	ap2=av;
+	while (*ap != NULL)
+	{
+		*ap2=strdup(*ap);
+		ap2++;
+		ap++;
+	}
+        *ap2 = NULL;
+	free(freeme);
+	
+	return (av);	
+}
+
+char **expand_wildcards(char **av_old)
+#ifdef HAVE_GLOB
+{
+	char		**av_new=(char **)malloc(MAX_ARGC * (sizeof(char *)));
+	glob_t g;
+	int c_old,c_new,c;	// argument counters
+	int flags = GLOB_NOCHECK | GLOB_TILDE;
+
+	g.gl_offs = c_new = c_old = 0;
+
+	while(av_old[c_old] != NULL )
+	{
+        	if (0 == glob(av_old[c_old++],flags,NULL,&g))
+		{
+			c=0;
+			while((g.gl_pathv[c] != NULL) && (c_new < (MAX_ARGC-1)))
+				av_new[c_new++]=strdup(g.gl_pathv[c++]);
+			globfree(&g);
+		}
+	}
+	av_new[c_new]=NULL;
+	discard_vector(av_old);
+	return av_new;
+}
+
+#else 
+#ifdef HAVE_WORDEXP
+{
+	return NULL;
+}
+#endif
+#endif
 
 int cntchr(char *buf, char x)
 {
@@ -42,7 +226,7 @@ char *logstamp ()
 	if (!ipstring)
 		ipstring = (char *)bad_ip;
 	snprintf(ret_buf, sizeof(ret_buf)-1,
-		 "username: %s(%d), IP and port info: %s", username, getuid(), ipstring);
+		 "username: %s(%d), IP/port: %s", username, getuid(), ipstring);
 	return ret_buf;
 }
 
@@ -86,39 +270,6 @@ inline char *strbeg (char *big, char *small)
 	if (0==strncmp(big,small,strlen(small)))
 		return (big+strlen(small));
 	return NULL;
-}
-
-/* 
- *	this function removes pathnames from the first
- *	part of the shell request.
- *
- *	we need to find the character after the last 
- * 	occurance of a forward slash that is also
- *	before the first whitespace, if it exists
- */
-char *clean_request (char *request)
-{
-        char *fs,*ws,*tfs;
-        int i=0;
-
-	if (debuglevel)
-		syslog(LOG_DEBUG, "check if \"%s\" needs to be cleaned of path info", request);
-        if (((ws=strchr(request,' '))==NULL) && \
-                ((ws=strchr(request,'\t'))==NULL))
-                        ws=&request[strlen(request)];
-        if (((fs=strchr(request,'/')) == NULL) || (fs > ws))
-                return(request);
-        ++fs;
-        while (fs < ws)
-        {
-                tfs=strchr(fs,'/');
-                if ((tfs == NULL) || (tfs > ws))
-                        break;
-                fs=(tfs+1);
-        }
-	if (debuglevel)
-		syslog(LOG_DEBUG, "cleaned request is now \"%s\"\n", fs);
-        return(fs);
 }
 
 /*

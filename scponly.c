@@ -3,14 +3,13 @@
  *
  * 	http://sublimation.org/scponly
  *	joe@sublimation.org
- *
- *	version 2.1: jul 5nd, 2002
  */
 
 #include <stdio.h>	// io
 #include <string.h>	// for str*
-#include <unistd.h>	// for exit
-#include <stdlib.h>	// atexit
+#include <sys/types.h>	// for fork, wait
+#include <sys/wait.h>	// for wait
+#include <unistd.h>	// for exit, fork
 #include <errno.h>
 #include <syslog.h>
 #include "scponly.h"
@@ -21,15 +20,34 @@ int chrooted=0;
 char username[MAX_USERNAME];
 char homedir[FILENAME_MAX];
 
+cmd_t commands[] = { 
+#ifdef ENABLE_SFTP
+	{ PROG_SFTP_SERVER, 0 },
+#endif
+#ifdef ENABLE_SCP
+	{ PROG_LS, 1 }, 
+	{ PROG_CHMOD, 1 },
+	{ PROG_CHOWN, 1 },
+	{ PROG_MKDIR, 1 },
+	{ PROG_RMDIR, 1 },
+	{ PROG_SCP, 1 },
+	{ PROG_CHMOD, 1 },
+	{ PROG_LN, 1 },
+	{ PROG_MV, 1 },
+	{ PROG_RM, 1 },
+#ifdef WINSCP_COMPAT
+	{ PROG_GROUPS, 0 },
+	{ PROG_PWD, 0 },
+	{ PROG_ECHO, 1 },
+#endif
+	{ PROG_CD, 1 },
+#endif
+	NULL };
+
 int process_ssh_request(char *request);
 int winscp_regular_request(char *request);
 int winscp_transit_request(char *request);
 int process_winscp_requests(void);
-
-void cleanup (void)
-{
-	closelog();
-}
 
 int main (int argc, char **argv) 
 {
@@ -47,8 +65,15 @@ int main (int argc, char **argv)
 	if (debuglevel > 1) // debuglevel 1 will still log to syslog
 		logopts |= LOG_PERROR;
 
-	openlog(LOGIDENT, logopts, LOG_AUTHPRIV);
+#ifdef SOLARIS_COMPAT 
+        openlog(PACKAGE_NAME, logopts, LOG_AUTH);
+#else
+        if (debuglevel > 1) // debuglevel 1 will still log to syslog
+                logopts |= LOG_PERROR;
+        openlog(PACKAGE_NAME, logopts, LOG_AUTHPRIV);
+#endif
 
+#ifdef CHROOTED_NAME
 	/*
 	 *	is this a chroot'ed scponly installation?
 	 */
@@ -64,6 +89,7 @@ int main (int argc, char **argv)
 			syslog(LOG_INFO, "chrooted binary in place, will chroot()");
 		chrooted=1;
 	}
+#endif //CHROOTED_NAME
 
 	if (debuglevel)
 	{
@@ -72,9 +98,12 @@ int main (int argc, char **argv)
 		for (i=0;i<argc;i++)
 			syslog(LOG_DEBUG, "\targ %u is %s", i, argv[i]);
 	}
-	if (debuglevel)
-		syslog(LOG_DEBUG, "opened log at LOG_AUTHPRIV, opts 0x%08x", logopts);
-	atexit(cleanup);
+        if (debuglevel)
+#ifdef SOLARIS_COMPAT
+                syslog(LOG_DEBUG, "opened log at LOG_AUTH, opts 0x%08x", logopts);
+#else
+                syslog(LOG_DEBUG, "opened log at LOG_AUTHPRIV, opts 0x%08x", logopts);
+#endif
 
 	if (getuid()==0)
 	{	
@@ -98,6 +127,7 @@ int main (int argc, char **argv)
 		exit (-1);
 	}
 
+#ifdef CHROOTED_NAME
 	if (chrooted)
 	{
 		if (debuglevel)
@@ -112,6 +142,8 @@ int main (int argc, char **argv)
 			exit(-1);
 		}
 	}
+#endif //CHROOTED_NAME
+
 	if (debuglevel)
 		syslog (LOG_DEBUG, "setting uid to %u", getuid());
 	if (-1==(seteuid(getuid())))
@@ -119,14 +151,12 @@ int main (int argc, char **argv)
 		syslog (LOG_ERR, "couldn't revert to my real uid. seteuid: %m");
 		exit(-1);
 	}
+
 #ifdef WINSCP_COMPAT
 	if (argc==1)
 	{
 		if (debuglevel)
-		{
 			syslog (LOG_DEBUG, "entering WinSCP compatibility mode [%s]",logstamp());
-			printf ("entering WinSCP compatibility mode\n");
-		}
 		if (-1==process_winscp_requests())
 		{
 			syslog(LOG_ERR, "failed WinSCP compatibility mode [%s]", logstamp());
@@ -193,12 +223,9 @@ int winscp_regular_request(char *request)
 	/*
 	 *  ignore unalias and unset commands
 	 */
-//	fprintf (stderr, "new_request: %s\n",new_request);
 	if ((NULL!=strbeg(new_request,"unset ")) ||
 		(NULL!=strbeg(new_request,"unalias ")))
-	{
 		retval=0;
-	}
 	else
 	{
 		retval=process_ssh_request(new_request);
@@ -217,13 +244,12 @@ int process_winscp_requests(void)
 
 	winscp_mode=1;
 
-	//printf ("%s0\n",WINSCP_EOF); // reply to initial echo request
 	fflush(stdout);
 
 	/*
 	 *	now process commands interactively
  	 */
-        while (fgets(&linebuf[0],sizeof(linebuf), stdin) != NULL)
+        while (fgets(&linebuf[0],MAX_REQUEST, stdin) != NULL)
 	{
 		ack=0;
 
@@ -252,108 +278,119 @@ int process_winscp_requests(void)
 
 #endif
 
-int exec_request(char *request)
-{
-	char tempbuf[MAX_REQUEST];
-	int err;
-
-	/*
-	 * the following little nugget prevents
-	 * attempts to overflow the cmd buf
-	 */
-	strncpy(tempbuf,request,MAX_REQUEST);
-	tempbuf[MAX_REQUEST-1]='\0';
-
-	/*
-	 * I realize system is a lame version of
-	 * execve, but I actually dont want to 
-	 * handle wildcard expansion or argument
-	 * parsing. leave that to /bin/sh
-	 */
-	syslog(LOG_INFO, "running: %s (%s)",tempbuf, logstamp());
-
-	if (err=system(tempbuf))
-	{
-		if (debuglevel)
-			syslog(LOG_ERR, "system: %m");
-		syslog(LOG_ERR, "system() fail: %s, %s errno=%d [%s]\n",
-		       request,strerror(errno),errno, logstamp());
-	}
-	return err;
-}
-
 int process_ssh_request(char *request)
 {
+	char **av;
+	char *flat_request,*tmpstring;
+	int retval;
+        int reqlen=strlen(request);
+
 	if (debuglevel)
 		syslog(LOG_DEBUG, "processing request: \"%s\"\n", request);
 
+#ifdef GFTP_COMPAT 
+	/*
+	 *	gFTP compatibility hack
+	 */
+	if (NULL != (tmpstring=strbeg(request, "echo -n xsftp ; ")))
+	{
+		request=tmpstring;
+		printf("xsftp");
+		fflush(stdout);
+	}
+#endif
+
+	/*
+	 * we flat out reject special chars
+	 */
 	if (!valid_chars(request))
 		return(-1);
 
-	/*
-	 *	some scp clients like to request a specific path for
-	 *	sftp-server.  i will strip that out here and rely
-	 *	upon sh's $PATH to find the binary 
-	 */
-	request=clean_request(request);
-
-	/*
-	 *	request must be one of a few commands.
-	 *	some commands must be exact matches.
-	 *	others only require the beginning of the string to match.
-	 */
-
-	if (NULL!=strbeg(request,"cd "))
-	{
 #ifdef WINSCP_COMPAT
-		int retval;
-		char *destdir=NULL;
-		int reqlen=strlen(request);
-		destdir=(char *)malloc(reqlen);
-		if (destdir == NULL)
+        if (strbeg(request,PROG_CD))
+        {
+                char *destdir=(char *)malloc(reqlen);
+                if (destdir == NULL)
+                {
+                        perror("malloc");
+                        exit(-1);
+                }
+
+                /*
+                 * well, now that scponly is a persistent shell
+                 * i have to maintain a $PWD.  damn.
+                 * we're going to INSIST upon a double quote
+                 * encapsulated new directory to change to.
+                 */
+                if ((request[(reqlen-1)]=='"') && (request[3]=='"'))
+                {
+                        bzero(destdir,reqlen);
+                        strncpy(destdir,&request[4],reqlen-5);
+                        if (debuglevel)
+                                syslog(LOG_INFO, "chdir: %s (%s)", request, logstamp());
+                        retval=chdir(destdir);
+                        free(destdir);
+                        return(retval);
+                }
+		syslog(LOG_ERR, "bogus chdir request: %s (%s)", request, logstamp());
+		return(-1);
+	}
+#endif
+
+	/*
+	 * convert request string to an arg_vector
+	 */
+	av = build_arg_vector(request);
+
+	/*
+	 * clean any path info from request and substitute our known pathnames
+	 */
+	av[0] = substitute_known_path(av[0]);
+
+	/*
+	 * we only process wildcards for scp commands
+	 */
+#ifdef ENABLE_WILDCARDS
+	if (exact_match(av[0],PROG_SCP))
+		av = expand_wildcards(av);
+#endif
+
+	flat_request = flatten_vector(av);
+
+	if (valid_arg_vector(av))
+	{
+		syslog(LOG_INFO, "running: %s (%s)", flat_request, logstamp());
+#ifdef WINSCP_COMPAT
+		if (winscp_mode)
 		{
-			perror("malloc");
-			exit(-1);
-		}
-		
-		/*
-		 * well, now that scponly is a persistent shell
-		 * i have to maintain a $PWD.  damn.
-		 * we're going to INSIST upon a double quote
-		 * encapsulated new directory to change to.
-		 */
-		if (request[(reqlen-1)]=='"')
-		{
-			if (request[3]=='"') // check first doublequote
-			{	
-				bzero(destdir,reqlen);
-				strncpy(destdir,&request[4],reqlen-5);
-				retval=chdir(destdir);
-				free(destdir);
-				return(retval);
+			int status=0;
+			if (fork() == 0)
+				retval=execve(av[0],av,NULL);
+			else
+			{
+				wait(&status);
+				fflush(stdout);
+				fflush(stderr);
+				discard_vector(av);
+				free(flat_request);
+				return(WEXITSTATUS(status));
 			}
 		}
-
-
+		else
 #endif
-	}
-	else if ((exact_match(request,"ls")) || 
-		(exact_match(SCP2_ARG,request)) || 
+		{
+			retval=execve(av[0],av,NULL);
+		}
+		syslog(LOG_ERR, "failed: %s with error %s(%u) (%s)", flat_request, strerror(errno), errno, logstamp());
+		free(flat_request);
+		discard_vector(av);
 #ifdef WINSCP_COMPAT
-		(exact_match(request,"pwd")) ||
-		(exact_match(request,"groups")) ||
-		(NULL!=strbeg(request,"echo ")) ||
-#endif
-		(NULL!=strbeg(request,"ls ")) || 
-		(NULL!=strbeg(request,"scp ")) ||
-		(NULL!=strbeg(request,"rm ")) ||
-		(NULL!=strbeg(request,"ln ")) ||
-		(NULL!=strbeg(request,"mv ")) ||
-		(NULL!=strbeg(request,"chmod ")) ||
-		(NULL!=strbeg(request,"chown ")) ||
-		(NULL!=strbeg(request,"mkdir ")) ||
-		(NULL!=strbeg(request,"rmdir "))) 
-			return(exec_request(request));
+		if (winscp_mode)
+			return(-1);
+		else
+#endif 
+			exit(errno);
+	}
 
 	/*
 	 *	reaching this point in the code means the request isnt one of
@@ -361,11 +398,12 @@ int process_ssh_request(char *request)
  	 */
 	if (debuglevel)
 	{
-		syslog (LOG_DEBUG, "denied request. not a supported command.\
-supported comands are: ls, scp, %s, pwd, chmod, mkdir, rm, mv, rmdir", SCP2_ARG);
+		if (exact_match(flat_request,request))
+			syslog (LOG_ERR, "denied request: %s [%s]", request, logstamp());
+		else
+			syslog (LOG_ERR, "denied request: %s (resolved to: %s) [%s]", request, flat_request, logstamp());
 	}
-	syslog (LOG_ERR, "denied request [%s]", logstamp());
-
+	free(flat_request); 
 #ifdef WINSCP_COMPAT
 	if (winscp_mode)
 	{
@@ -374,7 +412,6 @@ supported comands are: ls, scp, %s, pwd, chmod, mkdir, rm, mv, rmdir", SCP2_ARG)
 	}
 	else
 #endif 
-	{
 		exit(-1);
-	}
 }
+
