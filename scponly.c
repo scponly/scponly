@@ -58,9 +58,13 @@ cmd_t commands[] =
 	{ PROG_RSYNC, 1 },
 #endif /*ENABLE_RSYNC*/
 
-#ifdef PASSWD_ENABLE
+#ifdef PASSWD_COMPAT
 	{ PROG_PASSWD, 1 },
 #endif /*ENABLE_PASSWD*/
+
+#ifdef SVN_COMPAT
+	{ PROG_SVN, 1 },
+#endif /*ENABLE_SVN*/
 
 	NULL
 };

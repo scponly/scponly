@@ -165,11 +165,11 @@ AC_ARG_ENABLE([chrooted-binary],
               echo -n
       ])
 
-AC_ARG_ENABLE([passwd],
-      AC_HELP_STRING([--enable-passwd], [enable passwd invocation]),
+AC_ARG_ENABLE([passwd-compat],
+      AC_HELP_STRING([--enable-passwd-compat], [enable passwd compatibility]),
       [
               if test "x$enableval" != "xno"; then
-                      AC_DEFINE([PASSWD_ENABLE])
+                      AC_DEFINE([PASSWD_COMPAT])
               fi
       ],[
               echo -n      dnl  Defaults to off, must be turned on explicitly
