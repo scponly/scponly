@@ -16,6 +16,9 @@ scponly v4.0 - 27 nov 2004
 	fixed AIX support in configure script
 		Sven Hoexter <sven@telelev.net>
 
+    compile time configuration of default chdir
+		Daniel Lorch <ml-daniel@lorch.cc>       
+
 scponly v3.12 - 22 mar 2004
 	UNISON bugfix
 

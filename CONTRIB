@@ -1,3 +1,6 @@
+Daniel Lorch <ml-daniel@lorch.cc>       
+	- compile time configuration of default chdir
+
 Andreas Beck <becka-Ynyda@acs.uni-duesseldorf.de> 
 	- passwd support
 
