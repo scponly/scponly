@@ -12,7 +12,7 @@ AC_INIT([scponly.c])
 PACKAGE=scponly
 PACKAGE_NAME=scponly
 AC_DEFINE(PACKAGE_NAME)
-PACKAGE_VERSION=3.3
+PACKAGE_VERSION=3.4
 AC_DEFINE(PACKAGE_VERSION)
 PACKAGE_BUGREPORT=joe@sublimation.org
 AC_DEFINE(PACKAGE_BUGREPORT)
@@ -21,11 +21,13 @@ AC_CONFIG_HEADER([config.h])
 
 AC_CANONICAL_HOST
 
-if test "$host_os" = Solaris; then
+# this temp_os is a brutal hack until i look into the proper way to do this. ie- rtfm
+temp_os=`echo $host_os | cut -c-7`
+if test "$host_os" = solaris; then
 	AC_DEFINE(SOLARIS_COMPAT)
 fi
-
-if test "$host_os" = Irix;  then
+temp_os=`echo $host_os | cut -c-4`
+if test "$temp_os" = irix;  then
   AC_DEFINE(IRIX_COMPAT)
 fi
 

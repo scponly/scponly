@@ -50,11 +50,11 @@ function getyn {
 	echo $response
 }
 
-if [ x@PROG_USERADD@ = x ]; then
+if [ x@PROG_LDD@ = x ]; then
 	echo "this script requires the program ldd to determine which"
 	fail "shared libraries to copy into your chrooted dir..."
 fi
-if [ x@PROG_LDD@ = x ]; then
+if [ x@PROG_USERADD@ = x ]; then
 	echo "this script requires the program useradd to add your"
 	fail "chrooted scponly user."
 fi
@@ -138,7 +138,7 @@ if [ x@PROG_PWD_MKDB@ = x ]; then
 else
 	@PROG_GREP@ $targetuser /etc/master.passwd > $targetdir/etc/master.passwd
 	@PROG_PWD_MKDB@ -d "$targetdir/etc" $targetdir/etc/master.passwd
-	@PROG_RM@ -rf $targetdir/etc/master.passwd $targetdir/etc/spwd.db
+	/bin/rm -rf $targetdir/etc/master.passwd $targetdir/etc/spwd.db
 fi
 
 
