@@ -1,5 +1,12 @@
 #!/bin/sh
 #
+#
+# set default writeable subdirectory here
+defaultusername="scponly"
+defaulthomedirprefix="/home"
+defaultwriteabledir="incoming"
+
+
 # check that the configure options are correct for chrooted operation:
 
 if [ x@CHROOTED_NAME@ = x ] || [ ! -f ./config.h ]; then
@@ -57,10 +64,11 @@ fi
 USE_PW=0;
 if [ x@PROG_USERADD@ = x ]; then
     if [ x@PROG_PW@ = x ]; then
-	echo "this script requires the program useradd or pw to add your"
-	fail "chrooted scponly user."
+		echo "this script requires the program useradd or pw to add your"
+		fail "chrooted scponly user."
+	else
+  		USE_PW=1;
     fi
-    USE_PW=1;
 fi
 
 # we need to be root
@@ -70,31 +78,24 @@ fi
 
 echo
 echo Next we need to set the home directory for this scponly user.
-echo please note that the user\'s home directory MUST NOT be writable
+echo please note that the user\'s home directory MUST NOT be writeable
 echo by the scponly user.  this is important so that the scponly user
 echo cannot subvert the .ssh configuration parameters.
 echo
-echo for this reason, an \"incoming\" subdirectory will be created that
-echo the scponly user can write into.  if you want the scponly user to 
-echo automatically change to this incoming subdirectory upon login, you
-echo can specify this when you specify the user\'s home directory as 
-echo follows:
+echo for this reason, a writeable subdirectory will be created that
+echo the scponly user can write into.  
 echo
-echo set the home dir to /chroot_path//incoming
-echo
-echo when scponly chroots, it will only chroot to "chroot_path" and
-echo afterwards, it will chdir to incoming.
+echo -n "Install for what username? [$defaultusername] "
 
-echo -n "enter the home directory you wish to set for this user: "
-read targetdir
-if [ "x$targetdir" = "x" ]; then
-	fail "need to specify a target directory"
-fi
-
-echo -n "Install for what username? "
 read targetuser
 if [ "x$targetuser" = "x" ]; then
-	fail "need to specify a username"
+	targetuser=$defaultusername
+fi
+
+echo -n "home directory you wish to set for this user: [$defaulthomedirprefix/$targetuser] "
+read targetdir
+if [ "x$targetdir" = "x" ]; then
+	targetdir=$defaulthomedirprefix/$targetuser
 fi
 
 @INSTALL@ -d $targetdir
@@ -110,6 +111,14 @@ fi
 @INSTALL@ -d $targetdir/usr/libexec/openssh
 @INSTALL@ -d $targetdir/bin
 @INSTALL@ -d $targetdir/etc
+
+echo -n "provide the name of the writeable subdirectory [$defaultwriteabledir]: "
+read writeabledir
+
+if [ "x$writeabledir" = "x" ]; then
+	writeabledir=$defaultwriteabledir
+fi
+@INSTALL@ -d $targetdir/$writeabledir
 
 for bin in $BINARIES; do
 	@INSTALL@ -d $targetdir/`dirname $bin`
@@ -168,9 +177,9 @@ if [ -d $targetdir/.ssh ]; then
 	chown 0.0 $targetdir/.ssh
 fi
 
-if [ ! -d $targetdir/incoming ]; then
-	echo -e "\ncreating  $targetdir/incoming directory for uploading files"
-	@INSTALL@ -o $targetuser -d $targetdir/incoming
+if [ ! -d $targetdir/$writeabledir]; then
+	echo -e "\ncreating  $targetdir/$writeabledir directory for uploading files"
+	@INSTALL@ -o $targetuser -d $targetdir/$writeabledir
 fi
 
 # the following is VERY BSD centric
