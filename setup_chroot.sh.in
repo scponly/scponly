@@ -152,6 +152,12 @@ if [ ! -d $targetdir ]; then
 	$INSTALL_PATHNAME -d $targetdir
 fi
 
+if [ ! -d $targetdir/etc ]; then
+	$INSTALL_PATHNAME -d $targetdir/etc
+	@PROG_CHOWN@ 0:0 $targetdir/etc
+	@PROG_CHMOD@ 755 $targetdir/etc
+fi
+
 # add all our binaries
 for bin in $BINARIES; do
 	$INSTALL_PATHNAME -d $targetdir/`@PROG_DIRNAME@ $bin`
@@ -196,7 +202,7 @@ fi
 #
 newuid=`@PROG_ID@ -u $targetuser`
 newgid=`@PROG_ID@ -g $targetuser`
-@PROG_CHOWN@ $newuid:$newguid $targetdir/$writeabledir
+@PROG_CHOWN@ $newuid:$newgid $targetdir/$writeabledir
 
 if [ -f "$postscript" ]; then
 #
@@ -219,6 +225,7 @@ else
 	#	ok we dont have pwd_mkdb, lets improvise:
 	#
 		@PROG_GREP@ $targetuser /etc/passwd > $targetdir/etc/passwd
+
 	else
 	#
 	#	this is for systems which do have pwd_mkdb
