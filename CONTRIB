@@ -49,3 +49,14 @@ dkl at tessellated dot net
 Markus Dobel <mdobel@kawo2.rwth-aachen.de>
 	- logfile bug report
 
+Bjrn Eriksson <bjorn@bjornen.nu>
+	- makefile improvements
+
+Johan Kuuse <kuuse@redantigua.com>
+Thomas Wana <thomas@wana.at>
+Martin Werthmoeller <mw@werthmoeller.de>
+	- setup_chroot improvements
+
+Konrad Krzysztof Krasi?ski <konrad@o5.pl>
+	- WinSCP3 compat patch and install notes
+	- (http://o5.pl/scponly-stuff/):

@@ -133,8 +133,9 @@ will attempt to load /bin/sh, which is not available in the chrooted
 jail.  This is only a problem when you are also using WinSCP compatibiliy,
 because WinSCP will attempt to run "groups" upon connection initialization.
 
-You can either put /bin/sh in your jail, which is a security problem 
-just waiting to happen, or you can deselect "lookup user groups" in the
-WinSCP configuration.  I recommend the latter.
+You have three choices:
+	- you can either put /bin/sh in your jail, which is a security problem 
+	- you can deselect "lookup user groups" in the WinSCP configuration
+	- you can "make groups" using the provided groups.c 
 
 
