@@ -844,7 +844,8 @@ Optional Packages:
   --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
   --with-sftp-server      path to sftp-server binary
                           defaults, to, on+guessed
-  --with-default-chdir    cd to this directory after authentication.
+  --with-default-chdir=DIR
+                          cd to this directory after authentication.
 
 Some influential environment variables:
   CC          C compiler command

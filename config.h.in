@@ -11,12 +11,16 @@
 #undef UNISON_COMPAT 
 #undef ENABLE_SCP2
 #undef ENABLE_SFTP
-#undef ENABLE_DEFAULT_CHDIR
 #undef ENABLE_WILDCARDS
 #undef RESTRICTIVE_FILENAMES
 #undef CHROOTED_NAME
 #undef HAVE_WORDEXP
 #undef HAVE_GLOB
+                                                                                                                                 
+/* cd to this directory after authentication */                                                                                 
+#ifdef ENABLE_DEFAULT_CHDIR                                                                                                     
+#undef DEFAULT_CHDIR                                                                                                            
+#endif   
 
 /* Binaries launched in sftp compat mode */
 #ifdef ENABLE_SFTP
