@@ -836,6 +836,7 @@ Optional Features:
   --enable-rsync-compat   enable rsync compatibility
   --enable-chrooted-binary
                           install chrooted binary 'scponlyc'
+  --enable-svn-compat     enable subversion SCS compatibility
   --enable-passwd-compat  enable passwd compatibility
 
 Optional Packages:
@@ -2829,6 +2830,22 @@ else
 
 fi;
 
+# Check whether --enable-svn-compat or --disable-svn-compat was given.
+if test "${enable_svn_compat+set}" = set; then
+  enableval="$enable_svn_compat"
+
+              if test "x$enableval" != "xno"; then
+                      cat >>confdefs.h <<\_ACEOF
+#define SVN_COMPAT 1
+_ACEOF
+
+              fi
+
+else
+
+              echo -n
+fi;
+
 # Check whether --enable-passwd-compat or --disable-passwd-compat was given.
 if test "${enable_passwd_compat+set}" = set; then
   enableval="$enable_passwd_compat"
@@ -3611,6 +3628,55 @@ fi
 	  test -z $scponly_PROG_RSYNC && echo "Can't find path to 'rsync'" && exit 1
 	  cat >>confdefs.h <<_ACEOF
 #define PROG_RSYNC "$scponly_PROG_RSYNC"
+_ACEOF
+
+fi
+
+if test "x$enable_svn_compat" != "x" && test "x$enable_svn_compat" != "xno"; then
+	{ echo "$as_me:$LINENO: enabling subversion compatability..." >&5
+echo "$as_me: enabling subversion compatability..." >&6;}
+	# Extract the first word of "svn", so it can be a program name with args.
+set dummy svn; ac_word=$2
+echo "$as_me:$LINENO: checking for $ac_word" >&5
+echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6
+if test "${ac_cv_path_scponly_PROG_SVN+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  case $scponly_PROG_SVN in
+  [\\/]* | ?:[\\/]*)
+  ac_cv_path_scponly_PROG_SVN="$scponly_PROG_SVN" # Let the user override the test with a path.
+  ;;
+  *)
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in `echo "$PATH:/bin:/usr/bin:/usr/local/bin" | sed -e 's/:/ /'`
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+  for ac_exec_ext in '' $ac_executable_extensions; do
+  if $as_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
+    ac_cv_path_scponly_PROG_SVN="$as_dir/$ac_word$ac_exec_ext"
+    echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+done
+
+  ;;
+esac
+fi
+scponly_PROG_SVN=$ac_cv_path_scponly_PROG_SVN
+
+if test -n "$scponly_PROG_SVN"; then
+  echo "$as_me:$LINENO: result: $scponly_PROG_SVN" >&5
+echo "${ECHO_T}$scponly_PROG_SVN" >&6
+else
+  echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6
+fi
+
+	  test -z $scponly_PROG_SVN && echo "Can't find path to 'svn'" && exit 1
+	  cat >>confdefs.h <<_ACEOF
+#define PROG_SVN "$scponly_PROG_SVN"
 _ACEOF
 
 fi
@@ -5489,6 +5555,7 @@ s,@scponly_PROG_ID@,$scponly_PROG_ID,;t t
 s,@scponly_PROG_ECHO@,$scponly_PROG_ECHO,;t t
 s,@scponly_PROG_UNISON@,$scponly_PROG_UNISON,;t t
 s,@scponly_PROG_RSYNC@,$scponly_PROG_RSYNC,;t t
+s,@scponly_PROG_SVN@,$scponly_PROG_SVN,;t t
 s,@scponly_PROG_PASSWD@,$scponly_PROG_PASSWD,;t t
 s,@CPP@,$CPP,;t t
 s,@ALLOCA@,$ALLOCA,;t t

@@ -9,6 +9,12 @@ scponly v4.0 - 27 nov 2004
 	added passwd support
 		Andreas Beck <becka-Ynyda@acs.uni-duesseldorf.de> 
 
+	added subversion support
+		Sven Hoexter <sven@telelev.net>
+
+	fixed AIX support in configure script
+		Sven Hoexter <sven@telelev.net>
+
 scponly v3.12 - 22 mar 2004
 	UNISON bugfix
 

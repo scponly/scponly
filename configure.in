@@ -165,6 +165,16 @@ AC_ARG_ENABLE([chrooted-binary],
               echo -n
       ])
 
+AC_ARG_ENABLE([svn-compat],
+      AC_HELP_STRING([--enable-svn-compat], [enable subversion SCS compatibility]),
+      [
+              if test "x$enableval" != "xno"; then
+                      AC_DEFINE([SVN_COMPAT])
+              fi
+      ],[
+              echo -n      dnl  Defaults to off, must be turned on explicitly
+      ])
+
 AC_ARG_ENABLE([passwd-compat],
       AC_HELP_STRING([--enable-passwd-compat], [enable passwd compatibility]),
       [
@@ -211,6 +221,11 @@ if test "x$enable_rsync_compat" != "x" && test "x$enable_rsync_compat" != "xno";
 	AC_MSG_NOTICE([enabling rsync compatability...])
 	SCPONLY_PATH_PROG_DEFINE([PROG_RSYNC],   [rsync], [/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin])
 fi	
+
+if test "x$enable_svn_compat" != "x" && test "x$enable_svn_compat" != "xno"; then
+	AC_MSG_NOTICE([enabling subversion compatability...])
+	SCPONLY_PATH_PROG_DEFINE([PROG_SVN],   [svn],   [/bin:/usr/bin:/usr/local/bin])
+fi
 
 if test "x$enable_passwd_compat" != "x" && test "x$enable_passwd_compat" != "xno"; then
 	AC_MSG_NOTICE([enabling passwd compatability...])
