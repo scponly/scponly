@@ -132,6 +132,9 @@ Step 7. You will need to install some directories, passwd files,
 	system to system.  check in the build_extras directory if
 	make jail has failed you.
 
+	Also see the BUILDING_JAILS.TXT document in this source package
+	for additional help.  Good luck!
+
 	
 That's it, you're done!
 

@@ -863,7 +863,8 @@ Optional Packages:
   --with-sftp-server      path to sftp-server binary
                           defaults, to, on+guessed
   --with-default-chdir=DIR
-                          cd to this directory after authentication.
+                          cd to this directory after authentication (only for
+                          non-interactive logins)
 
 Some influential environment variables:
   CC          C compiler command
