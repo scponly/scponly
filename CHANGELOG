@@ -5,6 +5,7 @@ scponly v3.9 - 17 nov 2003,
 		Johan Kuuse <kuuse@redantigua.com>
 		Thomas Wana <thomas@wana.at>
 		Martin Werthmoeller <mw@werthmoeller.de>
+		Hideyuki KURASHINA <rushani@bl.mmtr.or.jp>
 	WinSCP3 compat patch (http://o5.pl/scponly-stuff/):
 		Konrad Krzysztof Krasinski <konrad@o5.pl>
 	hand-written build scripts for debian and RH9:

@@ -1,27 +1,7 @@
 #!/bin/sh
 #
+# handy functions:
 #
-# set defaults
-defaultusername="scponly"
-defaulthomedirprefix="/home"
-defaultwriteabledir="incoming"
-
-
-# check that the configure options are correct for chrooted operation:
-
-if [ x@CHROOTED_NAME@ = x ] || [ ! -f ./config.h ]; then
-	echo 
-	echo 'your scponly build is not configured for chrooted operation.'
-	echo 'please reconfigure as follows, then rebuild and reinstall:'
-	echo
-	echo './configure --enable-chrooted-binary (... other options)'
-	echo
-	exit 1
-fi
-
-# the following is a list of binaries that will be staged in the target dir
-BINARIES=`@PROG_GREP@ '#define PROG_' config.h | @PROG_CUT@ -f2 -d\" | @PROG_GREP@ -v ^cd$`
-
 # a function to display a failure message and then exit 
 fail ( ) {
 	echo -e $@
@@ -57,11 +37,73 @@ getyn ( ) {
 	echo $response
 }
 
+# configuration 
+#
+# set defaults
+defaultusername="scponly"
+defaulthomedirprefix="/home"
+defaultwriteabledir="incoming"
+
+osnamever=`uname -sr`
+# pathname to platform/OS specific setup scripts
+prescript="build_extras/arch/$osnamever.pre.sh"
+postscript="build_extras/arch/$osnamever.post.sh"
+
+# some directories to install
+CHROOT_SUBDIRS="usr usr/bin usr/sbin usr/local usr/local/lib usr/local/bin lib usr/lib libexec usr/libexec usr/libexec/openssh bin etc"
+
+# the following is a list of binaries that will be staged in the target dir
+BINARIES=`@PROG_GREP@ '#define PROG_' config.h | @PROG_CUT@ -f2 -d\" | @PROG_GREP@ -v ^cd$`
+
+# we set the install path in a variable so the presetup script can overwrite it on systems
+# which require it
+INSTALL_PATHNAME=@INSTALL@
+
+# attempt a best guess at required libs, we can append things in the presetup script if we need to
+LDSOFOUND=0
 if [ x@PROG_LDD@ = x ]; then
 	echo "this script requires the program ldd to determine which"
 	fail "shared libraries to copy into your chrooted dir..."
 fi
-USE_PW=0;
+LIB_LIST=`@PROG_LDD@ $BINARIES 2> /dev/null | @PROG_CUT@ -f2 -d\> | @PROG_CUT@ -f1 -d\( | @PROG_GREP@ "^ " | @PROG_SORT@ -u`
+if [ -f /lib/ld.so ]; then
+	LIB_LIST="$LIB_LIST /lib/ld.so"
+	LDSOFOUND=1
+fi
+if [ -f /libexec/ld-elf.so ]; then
+    LIB_LIST="$LIB_LIST /libexec/ld-elf.so"
+    LDSOFOUND=1
+fi
+if [ -f /usr/libexec/ld.so ]; then
+	LIB_LIST="$LIB_LIST /usr/libexec/ld.so"
+	LDSOFOUND=1
+fi
+if [ -f /lib/ld-linux.so.2 ]; then 
+	LIB_LIST="$LIB_LIST /lib/ld-linux.so.2"
+	LDSOFOUND=1
+fi
+if [ -f /usr/libexec/ld-elf.so.1 ]; then
+	LIB_LIST="$LIB_LIST /usr/libexec/ld-elf.so.1"
+	LDSOFOUND=1
+fi
+
+/bin/ls /lib/libnss_compat* > /dev/null 2>&1 
+if [ $? -eq 0 ]; then
+	LIB_LIST="$LIB_LIST /lib/libnss_compat*"
+fi
+
+# check that the configure options are correct for chrooted operation:
+
+if [ x@CHROOTED_NAME@ = x ] || [ ! -f ./config.h ]; then
+	echo 
+	echo 'your scponly build is not configured for chrooted operation.'
+	echo 'please reconfigure as follows, then rebuild and reinstall:'
+	echo
+	echo './configure --enable-chrooted-binary (... other options)'
+	echo
+	exit 1
+fi
+
 if [ x@PROG_USERADD@ = x ]; then
     if [ x@PROG_PW@ = x ]; then
 		echo "this script requires the program useradd or pw to add your"
@@ -85,81 +127,52 @@ echo
 echo for this reason, a writeable subdirectory will be created that
 echo the scponly user can write into.  
 echo
-echo -n "Install for what username? [$defaultusername] "
 
-read targetuser
-if [ "x$targetuser" = "x" ]; then
-	targetuser=$defaultusername
+targetuser=`getwd "Username to install" "$defaultusername"`
+targetdir=`getwd "home directory you wish to set for this user" "$defaulthomedirprefix/$targetuser"`
+writeabledir=`getwd "name of the writeable subdirectory" "$defaultwriteabledir"`
+
+# append this to the list of subdirectories to create
+CHROOT_SUBDIRS="$CHROOT_SUBDIRS $writeabledir"
+
+#
+#	if you would like to overwrite/extend any of the variables above, do so in the system specific
+#	presetup script.  
+#
+if [ -f "$prescript" ]; then
+#
+#	this system has a pre-chroot setup script, lets run it
+#
+	echo executing $prescript
+	. "$prescript"
 fi
 
-echo -n "home directory you wish to set for this user: [$defaulthomedirprefix/$targetuser] "
-read targetdir
-if [ "x$targetdir" = "x" ]; then
-	targetdir=$defaulthomedirprefix/$targetuser
-fi
-
-@INSTALL@ -d $targetdir
-@INSTALL@ -d $targetdir/usr
-@INSTALL@ -d $targetdir/usr/bin
-@INSTALL@ -d $targetdir/usr/sbin
-@INSTALL@ -d $targetdir/usr/local
-@INSTALL@ -d $targetdir/usr/local/lib
-@INSTALL@ -d $targetdir/usr/local/bin
-@INSTALL@ -d $targetdir/lib
-@INSTALL@ -d $targetdir/usr/lib
-@INSTALL@ -d $targetdir/usr/libexec
-@INSTALL@ -d $targetdir/usr/libexec/openssh
-@INSTALL@ -d $targetdir/bin
-@INSTALL@ -d $targetdir/etc
-
-echo -n "provide the name of the writeable subdirectory [$defaultwriteabledir]: "
-read writeabledir
-
-if [ "x$writeabledir" = "x" ]; then
-	writeabledir=$defaultwriteabledir
-fi
-@INSTALL@ -d $targetdir/$writeabledir
-
-for bin in $BINARIES; do
-	@INSTALL@ -d $targetdir/`dirname $bin`
-	@INSTALL@ $bin $targetdir$bin
-done
-
-LIB_LIST=`@PROG_LDD@ $BINARIES 2> /dev/null | @PROG_CUT@ -f2 -d\> | @PROG_CUT@ -f1 -d\( | @PROG_GREP@ "^ " | @PROG_SORT@ -u`
-
-LDSOFOUND=0
-if [ -f /lib/ld.so ]; then
-	LIB_LIST="$LIB_LIST /lib/ld.so"
-	LDSOFOUND=1
-fi
-if [ -f /usr/libexec/ld.so ]; then
-	LIB_LIST="$LIB_LIST /usr/libexec/ld.so"
-	LDSOFOUND=1
-fi
-if [ -f /lib/ld-linux.so.2 ]; then 
-	LIB_LIST="$LIB_LIST /lib/ld-linux.so.2"
-	LDSOFOUND=1
-fi
-if [ -f /usr/libexec/ld-elf.so.1 ]; then
-	LIB_LIST="$LIB_LIST /usr/libexec/ld-elf.so.1"
-	LDSOFOUND=1
-fi
-
+# if neither the presetup script or the best guess could find ld.so, we have to bail here
 if [ $LDSOFOUND -eq 0 ]; then
 	fail i cant find your equivalent of ld.so
 fi
 
-/bin/ls /lib/libnss_compat* > /dev/null 2>&1 
-if [ $? -eq 0 ]; then
-	LIB_LIST="$LIB_LIST /lib/libnss_compat*"
-fi
+#
+#	ACTUAL MODIFICATIONS BEGIN HERE
+#
+
+$INSTALL_PATHNAME -d $targetdir
+for dir in $CHROOT_SUBDIRS; do
+	$INSTALL_PATHNAME -d $dir
+done
+
+for bin in $BINARIES; do
+	$INSTALL_PATHNAME -d $targetdir/`dirname $bin`
+	$INSTALL_PATHNAME $bin $targetdir$bin
+done
 
 if [ "x$LIB_LIST" != "x" ]; then
 	for lib in $LIB_LIST; do
-		@INSTALL@ -d $targetdir/`dirname $lib`
-		@INSTALL@ $lib $targetdir/$lib
+		$INSTALL_PATHNAME -d $targetdir/`dirname $lib`
+		$INSTALL_PATHNAME $lib $targetdir/$lib
 	done
 fi
+
 if [ $USE_PW -eq 0 ] ; then
     @PROG_USERADD@ -d "$targetdir" -s "@prefix@/sbin/@CHROOTED_NAME@" $targetuser
     if [ $? -ne 0 ]; then
@@ -179,17 +192,37 @@ fi
 
 if [ ! -d $targetdir/$writeabledir]; then
 	echo -e "\ncreating  $targetdir/$writeabledir directory for uploading files"
-	@INSTALL@ -o $targetuser -d $targetdir/$writeabledir
+	$INSTALL_PATHNAME -o $targetuser -d $targetdir/$writeabledir
 fi
 
-# the following is VERY BSD centric
-# i check for pwd_mkdb before trying to use it
-if [ x@PROG_PWD_MKDB@ = x ]; then
-	@PROG_GREP@ $targetuser /etc/passwd > $targetdir/etc/passwd
+if [ -f "$postscript" ]; then
+#
+#   this system has a post-chroot setup script, lets run it
+#
+	echo executing $postcript
+    . "$postscript"
 else
-	@PROG_GREP@ $targetuser /etc/master.passwd > $targetdir/etc/master.passwd
-	@PROG_PWD_MKDB@ -d "$targetdir/etc" $targetdir/etc/master.passwd
-	/bin/rm -rf $targetdir/etc/master.passwd $targetdir/etc/spwd.db
+#
+#	otherwise, revert to the old "best guess" system, which is fine for the BSD family, it seems
+#
+	echo "Your platform ($osnamever) does not have a platform specific setup script."
+	echo "This install script will attempt a best guess."
+	echo "If you perform customizations, please consider sending me your changes."
+	echo "Look to the templates in build_extras/arch."
+	echo " - joe at sublimation dot org"
+	echo
+	if [ x@PROG_PWD_MKDB@ = x ]; then
+	#
+	#	ok we dont have pwd_mkdb, lets improvise:
+	#
+		@PROG_GREP@ $targetuser /etc/passwd > $targetdir/etc/passwd
+	else
+	#
+	#	this is for systems which do have pwd_mkdb
+	#
+		@PROG_GREP@ $targetuser /etc/master.passwd > $targetdir/etc/master.passwd
+		@PROG_PWD_MKDB@ -d "$targetdir/etc" $targetdir/etc/master.passwd
+		/bin/rm -rf $targetdir/etc/master.passwd $targetdir/etc/spwd.db
+	fi
 fi
-
 
