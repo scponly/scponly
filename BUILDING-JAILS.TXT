@@ -39,7 +39,16 @@ A. Build scponly with your site specific options.  Figure out where your
    NOTE: Even if you set it up that way, scponly WILL NOT permit root
    owned sessions, i.e. any session with UID=0
 
-1. Determine your chrooted topology, user visabilty, and file system
+   An "incoming" directory can be created anywhere in the chrooted
+   tree.  The default script creates one in the users home directory.
+   The home directory is not user writeable but the incoming sub
+   directory is.
+
+   BTW: If you use the default setup_chroot.sh script, the top level
+   /etc/password file should already contain the scponly users.
+   This is still a good idea if you build the jail manually.
+
+1. Determine your chrooted topology, user visibilty, and file system
    mounts.  Basically you need to know what >you< want the final
    chrooted environment to be.
 	a. Choose a location for your alternate root.
@@ -54,6 +63,7 @@ A. Build scponly with your site specific options.  Figure out where your
 	      /{altroot}
               /{altroot}/home
               /{altroot}/home/{username}
+              /{altroot}/home/{username}/incoming
               /{altroot}/bin
               /{altroot}/etc
               /{altroot}/lib
@@ -73,8 +83,15 @@ A. Build scponly with your site specific options.  Figure out where your
 	      should be empty and owned by root and not writeable by the
 	      user.
 
-              Synopsis: home directories are empty, root (0.0) owned,
-	      and user readable.  (after chroot are just /home/{username})
+              Synopsis: chrooted home directories are empty, root (0.0)
+	      owned, and user readable.  (after chroot are just
+	      /home/{username})
+
+	      Our multi-user configuration has /{altroot}/misc and 
+	      selected file systems are NFS mounted there.  If you
+	      do this you probably also will want to install a copy
+	      of /etc/group in /{altroot}/etc/group as noted below.
+	      
 
 3. Install the subset of commands and libraries.  This means you copy them
    from the equivalent top level directory.  This is of course where
@@ -90,8 +107,8 @@ A. Build scponly with your site specific options.  Figure out where your
 	This provides the EXPLICIT set of basic commands that work from
 	ssh.  Not any more dangerous than leaving sftp.  IMPORTANT: $PATH
 	doesn't impact these commands, their location is hard coded in
-	scponly making it is difficult or impossible for a user to
-	add commands.  There isn't a shell, hence no real $PATH.
+	scponly making it difficult or impossible for a user to add
+	commands.  There isn't a shell, hence no real $PATH.
 	
 	IMPORTANT: If your standard binaries are in another directory you
 	should put them in the right location in the /{altroot} tree
@@ -134,10 +151,11 @@ A. Build scponly with your site specific options.  Figure out where your
 	it in the right location in the /{altroot} tree.
 
 	/{altroot}/lib
-		d-linux.so.2  libc.so.6  libdl.so.2  libnsl.so.1
+		ld-linux.so.2  libc.so.6  libdl.so.2  libnsl.so.1
 		libnss_compat-2.2.5.so libnss_compat.so.1
 		libnss_compat.so.2 libtermcap.so.2  libutil.so.1
-
+	/{altroot}/lib/tls
+		libc.so.6*  libpthread.so.0*  librt.so.1
 	/{altroot}/usr/lib
 		libcrypto.so.1  libz.so.1
 
