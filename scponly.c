@@ -3,8 +3,10 @@
  *
  * 	http://sublimation.org/scponly
  *	joe@sublimation.org
+ *
+ *	see CONTRIB for additional credits
  */
-
+ 
 #include <stdio.h>	// io
 #include <string.h>	// for str*
 #include <sys/types.h>	// for fork, wait
@@ -260,13 +262,6 @@ int winscp_regular_request(char *request)
 		printf ("0\n");
 		fflush(stdout);
 	}
-#if 0
-	else if (exact_match(new_request, "groups"))
-	{
-		printf("joe wheel php\n");
-		fflush(stdout);
-	}
-#endif
 	/*
 	 *  ignore unalias and unset commands
 	 */
@@ -332,8 +327,34 @@ int process_ssh_request(char *request)
 	int retval;
         int reqlen=strlen(request);
 
+	/*
+	 * bad, unfunctional cmd string from WinSCP 3.0
+	 */
+	char bad_winscp3str[]="test -x /usr/lib/sftp-server && exec /usr/lib/sftp-server test -x /usr/local/lib/sftp-server && exec /usr/local/lib/sftp-server exec sftp-server";
+	/*
+	 * good, working at Slackware 9.0 
+	 */
+	char good_winscp3str[]=PROG_SFTP_SERVER;
+	/*
+	 * little character code correcting
+	 */
+	bad_winscp3str[57]=10;
+	bad_winscp3str[127]=10;
+	
 	if (debuglevel)
 		syslog(LOG_DEBUG, "processing request: \"%s\"\n", request);
+			
+	/*
+	 * comparison of this two cmd`s
+	 */
+	if(strcmp(request,bad_winscp3str)==0)
+	{
+	    /*
+		 * better string we use
+	 	 */
+	    strcpy(request,good_winscp3str);
+	    syslog(LOG_DEBUG, "request fixed: \"[%s]\"\n", request);
+	}
 
 #ifdef GFTP_COMPAT 
 	/*
