@@ -22,6 +22,10 @@
 #undef PROG_SFTP_SERVER
 #endif
 
+#ifdef ENABLE_PASSWD
+#undef PROG_PASSWD
+#endif
+
 /* Binaries launched by vanilla- and win-SCP modes */
 #ifdef ENABLE_SCP2
 #undef PROG_LS

@@ -58,6 +58,30 @@ cmd_t commands[] =
 	{ PROG_RSYNC, 1 },
 #endif /*ENABLE_RSYNC*/
 
+#ifdef PASSWD_ENABLE
+	{ PROG_PASSWD, 1 },
+#endif /*ENABLE_PASSWD*/
+
+	NULL
+};
+
+/*
+ *	several binaries support arbitrary command execution in their arguments
+ *	to prevent this we have to check the arguments for these binaries before
+ *	invoking them.  
+ */
+cmd_arg_t dangerous_args[] =
+{
+	{ PROG_SCP, "-S" },
+	{ PROG_SFTP_SERVER, "-S" },
+#ifdef UNISON_COMPAT
+	{ PROG_UNISON, "-rshcmd" },
+	{ PROG_UNISON, "-sshcmd" },
+	{ PROG_UNISON, "-servercmd" },
+#endif
+#ifdef RSYNC_COMPAT
+	{ PROG_RSYNC, "-e" },
+#endif 
 	NULL
 };
 
@@ -433,6 +457,13 @@ int process_ssh_request(char *request)
 #endif
 
 	flat_request = flatten_vector(av);
+
+	if(check_dangerous_args(av))
+	{
+		syslog(LOG_ERR, "requested command (%s) tried to use disallowed argument (%s))", 
+			flat_request, logstamp());
+		exit(EXIT_FAILURE);
+	}
 
 	if (valid_arg_vector(av))
 	{

@@ -22,6 +22,12 @@ typedef struct
 	char *name;
 	int argflag;
 } cmd_t;
+
+typedef struct
+{
+	char *name;
+	char *badarg;
+} cmd_arg_t;
  
 /*
  * function prototypes
@@ -39,3 +45,4 @@ int valid_arg_vector(char **);
 char *substitute_known_path(char *);
 char *flatten_vector(char **);
 void discard_vector(char **);
+int check_dangerous_args(char **av);

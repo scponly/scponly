@@ -836,6 +836,7 @@ Optional Features:
   --enable-rsync-compat   enable rsync compatibility
   --enable-chrooted-binary
                           install chrooted binary 'scponlyc'
+  --enable-passwd         enable passwd invocation
 
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
@@ -1210,7 +1211,7 @@ cat >>confdefs.h <<\_ACEOF
 #define PACKAGE_NAME 1
 _ACEOF
 
-PACKAGE_VERSION=3.12
+PACKAGE_VERSION=4.0
 cat >>confdefs.h <<\_ACEOF
 #define PACKAGE_VERSION 1
 _ACEOF
@@ -2827,6 +2828,67 @@ else
               echo -n
 
 fi;
+
+# Check whether --enable-passwd or --disable-passwd was given.
+if test "${enable_passwd+set}" = set; then
+  enableval="$enable_passwd"
+
+              if test "x$enableval" != "xno"; then
+                      cat >>confdefs.h <<\_ACEOF
+#define PASSWD_ENABLE 1
+_ACEOF
+
+                      # Extract the first word of "passwd", so it can be a program name with args.
+set dummy passwd; ac_word=$2
+echo "$as_me:$LINENO: checking for $ac_word" >&5
+echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6
+if test "${ac_cv_path_scponly_PROG_PASSWD+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  case $scponly_PROG_PASSWD in
+  [\\/]* | ?:[\\/]*)
+  ac_cv_path_scponly_PROG_PASSWD="$scponly_PROG_PASSWD" # Let the user override the test with a path.
+  ;;
+  *)
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in `echo "$PATH:/bin:/usr/bin:/sbin:/usr/sbin" | sed -e 's/:/ /'`
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+  for ac_exec_ext in '' $ac_executable_extensions; do
+  if $as_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
+    ac_cv_path_scponly_PROG_PASSWD="$as_dir/$ac_word$ac_exec_ext"
+    echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+done
+
+  ;;
+esac
+fi
+scponly_PROG_PASSWD=$ac_cv_path_scponly_PROG_PASSWD
+
+if test -n "$scponly_PROG_PASSWD"; then
+  echo "$as_me:$LINENO: result: $scponly_PROG_PASSWD" >&5
+echo "${ECHO_T}$scponly_PROG_PASSWD" >&6
+else
+  echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6
+fi
+
+	  test -z $scponly_PROG_PASSWD && echo "Can't find path to 'passwd'" && exit 1
+	  cat >>confdefs.h <<_ACEOF
+#define PROG_PASSWD "$scponly_PROG_PASSWD"
+_ACEOF
+
+              fi
+
+else
+
+              echo -n
+fi;
+
 if test "x$scponly_scp_compat" != "x"; then
 	{ echo "$as_me:$LINENO: enabling core WinSCP and Vanilla SCP binaries..." >&5
 echo "$as_me: enabling core WinSCP and Vanilla SCP binaries..." >&6;}
@@ -3564,7 +3626,7 @@ else
   ;;
   *)
   as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
-for as_dir in `echo "$PATH:/bin:/usr/bin:/sbin:/usr/sbin" | sed -e 's/:/ /'`
+for as_dir in `echo "$PATH:/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin" | sed -e 's/:/ /'`
 do
   IFS=$as_save_IFS
   test -z "$as_dir" && as_dir=.
@@ -5405,6 +5467,7 @@ s,@PROG_PW@,$PROG_PW,;t t
 s,@PROG_RM@,$PROG_RM,;t t
 s,@PROG_PWD_MKDB@,$PROG_PWD_MKDB,;t t
 s,@CHROOTED_NAME@,$CHROOTED_NAME,;t t
+s,@scponly_PROG_PASSWD@,$scponly_PROG_PASSWD,;t t
 s,@scponly_PROG_SFTP_SERVER@,$scponly_PROG_SFTP_SERVER,;t t
 s,@scponly_PROG_LS@,$scponly_PROG_LS,;t t
 s,@scponly_PROG_SCP@,$scponly_PROG_SCP,;t t

@@ -1,3 +1,9 @@
+Andreas Beck <becka-Ynyda@acs.uni-duesseldorf.de> 
+	- passwd support
+
+Jason Wies <jason@xc.net>
+	- arbitrary command execution bug report
+
 Hideyuki KURASHINA <rushani@bl.mmtr.or.jp>
 	- missing PROG_RM bug report
 	- UNISON support bug

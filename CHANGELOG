@@ -1,3 +1,14 @@
+
+scponly v4.0 - 27 nov 2004
+	SERIOUS VULNERABILITY FIX: scp/sftp-server/unison/rsync all support the command line
+		specification of "ssh dropins" for alternate crypto tunnels (similar to the way ssh can
+		dropin to replace rsh).  this allows arbitrary command execution on the destination host, 
+		circumventing scponly's sole purpose.  all versions prior to 4.0 are vulnerable.
+	Thanks to Jason Wies <jason@xc.net> for alerting me to this.
+	
+	added passwd support
+		Andreas Beck <becka-Ynyda@acs.uni-duesseldorf.de> 
+
 scponly v3.12 - 22 mar 2004
 	UNISON bugfix
 

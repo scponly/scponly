@@ -29,6 +29,7 @@ extern int debuglevel;
 extern char username[MAX_USERNAME];
 extern char homedir[FILENAME_MAX];
 extern cmd_t commands[];
+extern cmd_arg_t dangerous_args[];
 
 #ifdef SOLARIS_COMPAT
 char* solaris_needs_strsep(char** str, char* delims)
@@ -106,6 +107,46 @@ char *flatten_vector(char **av)
 	return (outbuf);
 }
 
+/*
+ *	since some programs support invoking other programs for their encryption
+ *	(dropings to replace ssh), we must refuse to support these arguments
+ *
+ *	RETURN: 1 means reject this command, 0 means it is safe.
+ */
+int check_dangerous_args(char **av)
+{
+	cmd_arg_t	*cmdarg=dangerous_args;
+	char		**tmpptr=av;
+
+	while (cmdarg != NULL)
+	{
+		if (cmdarg->name == NULL)
+			return 0;
+		if (exact_match(cmdarg->name,av[0]))
+		{
+			/*
+			 *	the command matches one of our dangerous commands
+			 *	check the rest of the vector for dangerous command
+			 *	line arguments
+			 */
+			tmpptr=av;
+			*tmpptr++;
+			while (*tmpptr!=NULL)
+			{
+				if(exact_match(*tmpptr, cmdarg->badarg))
+				{
+					syslog(LOG_ERR, "%s is not permitted for use with %s (%s))", 
+						cmdarg->badarg, cmdarg->name, logstamp());
+					return 1;
+				}
+				*tmpptr++;
+			}
+		}
+		cmdarg++;
+	}
+	return 0;
+}
+
 int valid_arg_vector(char **av)
 {
 	cmd_t	*cmd=commands;
@@ -137,13 +178,12 @@ char *substitute_known_path(char *request)
 			break;
 		if (exact_match(basename(cmd->name),stripped_req))
 		{
-			free(request);	// discard old pathname
+			free(stripped_req); //discard old pathname
 			return (strdup(cmd->name));
 		}
 		cmd++;
 	}
-	free(stripped_req);
-	return (basename(request));
+	return (stripped_req);
 }
 
 char **build_arg_vector(char *request)
@@ -251,7 +291,6 @@ int cntchr(char *buf, char x)
 			count++;
 	return count;
 }
-
 
 char *logstamp ()
 {

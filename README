@@ -84,3 +84,9 @@ you may run.
 NOV 2003 ADDENDUM:
 	OpenSSH still doesnt support configurable chrooting for users OR
 disallowing interactive login.  
+
+NOV 2004 ADDENDUM:
+	OpenSSH still doesnt support configurable chrooting for users OR
+disallowing interactive login.  
+
+
