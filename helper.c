@@ -10,37 +10,76 @@
 #include <errno.h>	// for debugging
 #include <pwd.h>	// to get username for config parsing
 #include <time.h>	// time
+#include <syslog.h>
 #include "scponly.h"
 
 #define MAX(x,y)	( ( x > y ) ? x : y )
 
-extern FILE *log;
 extern int debuglevel;
 extern char username[MAX_USERNAME];
 extern char homedir[FILENAME_MAX];
 
-void log_stamp(void)
+int cntchr(char *buf, char x)
 {
-        time_t now=time(NULL);
-	char *ipstring,bad_ip[10]="no ip?!";
-	char *timebuf=ctime(&now);
+	int count=0;
+	while (*buf!=0)
+		if (*buf++==x)
+			count++;
+	return count;
+}
 
-	timebuf[strlen(timebuf)-1]='\0';
-        fprintf (log,"%s: USER %s (",timebuf,username);
-	if (NULL!=(ipstring=(char *)getenv("SSH_CLIENT")))
-		fprintf (log,"%s) requesting: ",ipstring);
-	else if (NULL!=(ipstring=(char *)getenv("SSH2_CLIENT")))
-		fprintf (log,"%s) requesting: ",ipstring);
-	else
-		fprintf (log, "no IP?!?!");
-	fflush(log);
+
+char *logstamp ()
+{
+	/* Time and pid are handled for us by syslog(3). */
+	static char ret_buf[255];
+	static const char bad_ip[10] = "no ip?!";
+	char *ipstring = NULL;
+	
+	ipstring = (char *)getenv("SSH_CLIENT");
+	if (!ipstring)
+		ipstring = (char *)getenv("SSH2_CLIENT");
+	if (!ipstring)
+		ipstring = (char *)bad_ip;
+	snprintf(ret_buf, sizeof(ret_buf)-1,
+		 "username: %s(%d), IP and port info: %s", username, getuid(), ipstring);
+	return ret_buf;
+}
+
+/*
+ *	if big ends with small, return big without
+ *	small in a new buf, else NULL
+ */
+inline char *strend (char *big, char *small)
+{
+	int blen,slen;
+	slen=strlen(small);
+	blen=strlen(big);
+	if ((blen==0) || (slen==0) || (blen < slen))
+	{
+		return NULL;
+	}
+	if (0 == strcmp(&big[(blen-slen)],small))
+	{
+		char *tempbuf=NULL;
+		tempbuf=(char *)malloc(blen-slen+1);
+		if (tempbuf==NULL)
+		{
+			perror("malloc");
+			exit(-1);
+		}
+		bzero(tempbuf,(blen-slen+1));
+		strncpy(tempbuf, big, blen-slen);
+		return tempbuf;
+	}
+	return NULL;
 }
 
 /*
  *	if big starts with small, return the char after 
  *	the last char in small from big. ahem.
  */
-inline char *strend (char *big, char *small)
+inline char *strbeg (char *big, char *small)
 {
 	if (strlen(big) <= strlen(small))
 		return NULL;
@@ -62,6 +101,8 @@ char *clean_request (char *request)
         char *fs,*ws,*tfs;
         int i=0;
 
+	if (debuglevel)
+		syslog(LOG_DEBUG, "check if \"%s\" needs to be cleaned of path info", request);
         if (((ws=strchr(request,' '))==NULL) && \
                 ((ws=strchr(request,'\t'))==NULL))
                         ws=&request[strlen(request)];
@@ -75,6 +116,8 @@ char *clean_request (char *request)
                         break;
                 fs=(tfs+1);
         }
+	if (debuglevel)
+		syslog(LOG_DEBUG, "cleaned request is now \"%s\"\n", fs);
         return(fs);
 }
 
@@ -105,19 +148,17 @@ int get_uservar(void)
 	
 	if (NULL==(userinfo=getpwuid(getuid())))
 	{
-		log_stamp();
-		fprintf (log,"no knowledge of uid %d\n",getuid());
-		fflush(log);
+		syslog (LOG_WARNING, "no knowledge of uid %d [%s]", getuid(), logstamp());
 		if (debuglevel)
 		{
-			fprintf (stderr,"no knowledge of uid %d\n",getuid());
-			perror("getpwuid");	
+			fprintf (stderr, "no knowledge of uid %d\n", getuid());
+			perror ("getpwuid");
 		}
 		return 0;
 	}
 	if (debuglevel)
-		fprintf (stderr,"retrieved home directory of \"%s\" for user \"%s\"\n",
-			userinfo->pw_dir,userinfo->pw_name);
+		syslog(LOG_DEBUG, "retrieved home directory of \"%s\" for user \"%s\"",
+		       userinfo->pw_dir, userinfo->pw_name);
 	strncpy(username,userinfo->pw_name,MAX_USERNAME);
 	strncpy(homedir,userinfo->pw_dir,FILENAME_MAX);
 	return 1;

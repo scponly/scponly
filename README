@@ -1,4 +1,5 @@
 
+3debe8e4f1c654a658b48dfdc5c2cf9d
 http://sublimation.org/scponly
 
 "scponly" is an alternative 'shell' (of sorts) for system
@@ -31,20 +32,15 @@ Some Features:
 ==============
 
 - logging:  scponly logs time, client IP, username, and the actual
-request to the scponly.log file (by default located in /var/logs)
+request to syslog
 
-- chroot: if compiled with this functionality (see INSTALL), scponly
-can chroot to the user's home directory, disallowing access to the rest
-of the filesystem.  
+- choot: scponly can chroot to the user's home directory (or any 
+other directory the user has permissions for), disallowing access 
+to the rest of the filesystem.  
 
 - sftp compatibility.  my testing of sftp against an acponly user 
 worked great.  this is probably the cleanest and most usable way 
-for an scponly user to access files.  (of course, sftp is not ssh1 
-compatible.)
-
-- file listing: aside from just scp, scponly allows "ls" commands to
-be executed remotely.  this allows remote users to explore the
-directory structure remotely.  
+for an scponly user to access files.
 
 - security checks: root login is disallowed (though root
 should never be configured to be using scponly as the default shell.)
@@ -74,4 +70,13 @@ ssh applications already do that just fine.  If you use scponly, be
 aware that good old unix file permissions are still doing the work
 of protecting your files.
 
-3debe8e4f1c654a658b48dfdc5c2cf9d
+
+MAY 2002 ADDENDUM:
+	I've since discovered that ssh.com's commercial ssh offering 
+supports BOTH "dummy users" as well as scponly-ish functionality.  I
+have not been able to find any notes on these features, but I did read
+that they exist.  I will make a point to include more information later.
+It appears that OpenSSH does not yet support these features.  At this time,
+I have no plans to end-of-life scponly, though ultimately, I recognize
+that scponly should eventually become just a feature of whichever sshd 
+you may run.

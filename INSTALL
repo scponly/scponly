@@ -1,4 +1,4 @@
-scponly v1.3 Installation Instructions:
+scponly v2.1 Installation Instructions:
 
 http://sublimation.org/scponly
 joe@sublimation.org
@@ -35,12 +35,19 @@ Step 1.  Decide if you want to use chroot() functionality.
 	Step 10 below.)  I have provided a simple script to assist
 	in this department.  You can simplify this aspect of the 
 	installation if you can generate statically linked binaries
-	for ls, rm, mv, mkdir, rmdir, chown, ln chmod, scp, and 
-	sftp-server.
+	for the following commands:
+
+   ls sh scp sftp-server rm mkdir chmod rmdir pwd mv chown ln sftp-server
+	
 
 Step 2.  build the binary.  
 
 		make scponly
+	
+	Alternatively, if you want to make scponly WITHOUT WinSCP
+	compatibility mode, issue the following:
+
+		make scponly_no_compat
 
 	I've built scponly on OpenBSD and Linux, but at present I
 	am unaware of any unix systems it wont compile on.  The code

@@ -1,4 +1,47 @@
 
+scponly v2.2
+	11 june, 2002
+
+	syslog implementation
+		- Andrew Chadwick sent in a patch for syslog implementation
+		- scponly now logs properly
+
+
+scponly v2.1
+	5 june, 2002
+
+	chroot bugfix
+		- Volker Kindermann <volker@volker.de> contributed a bug report 
+			regarding WinSCP and chroot usage.  login sets the 
+			interactive market on the binary name so it becomes
+			"-scponlyc".  this was confusing the chroot check.
+		- fixed setup_chroot to include "groups" binary
+
+ 
+scponly v2.0
+	2 july, 2002
+
+	lots of code added for compatibility with WinSCP 2.0
+		- this code actually contradicts the "no interactive commands"
+			mandate of scponly.  scponly now DOES support interactive
+			commands limited to the commands scponly already allowed
+			remote execution of, plus "cd", "groups" and "echo".
+		- since this is new, it can be excluded at compile time
+		- i havent tested against WinSCP 1.0, as i expect it will go away
+			with the advent of WinSCP 2.0
+		- upon various failure conditions, WinSCP will probably freak out
+			when it receives the error messages from scponly.  check
+			your "logging" feature in WinSCP if this starts happening
+
+	install script improved to not append shells to /etc/shells if they are already there
+		- watch for this if you CHANGE your shell path and re-install
+
+
+scponly v1.4
+	may 20, 2002
+	minor bugfix
+		- upon failing to open a logfile, scponly would try to log to logfile.
+
 scponly v1.3
 
 feb 6 2002:

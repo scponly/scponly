@@ -1,0 +1,9 @@
+Andre Chadwick <andrewc@piffle.org>
+	- syslog implementation
+
+dkl at tessellated dot net
+	- compatibility notes and patch
+
+Markus Dobel <mdobel@kawo2.rwth-aachen.de>
+	- logfile bug report
+

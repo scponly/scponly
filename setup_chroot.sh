@@ -1,13 +1,22 @@
 #!/bin/sh
 
-BINARIES="ls sh scp sftp-server rm mkdir chmod rmdir pwd mv chown ln"
+# the following is a list of binaries that will be staged in the target dir
+BINARIES="ls sh scp sftp-server rm mkdir chmod rmdir pwd mv chown ln groups"
+
+# this line will need to be changed if you've also changed
+# the CHROOTED_NAME macro in scponly.h
+
 scponlybin=`which scponlyc`
 
+# a function to display a failure message and then exit 
 function fail {
 	echo -e $@
 	exit 1
 }
 
+# "get with default" function
+# this function prompts the user with a query and default reply
+# it returns the user reply
 function getwd {
 	query="$1"
 	default="$2"
@@ -19,6 +28,9 @@ function getwd {
 	echo $response
 }
 
+# "get yes no" function
+# this function prompts the user with a query and will continue to do so
+# until they reply with either "y" or "n"
 function getyn {
 	query="$@"
 	echo -en $query | cat >&2
@@ -31,16 +43,22 @@ function getyn {
 	echo $response
 }
 
+# we need to be root
 if [ `id -u` != "0" ]; then
 	fail "you must be root to run this script\n"
 fi
 
+# makes sure a directory is set up correctly
 function checkdir {
 	if [ ! -d $1 ]; then 
 		mkdir $1; 
 	fi
+	if [ ! -d $1 ]; then 
+		fail "couldn't create dir $1"
+	fi
 }
 
+# copies a file if it isnt already at the destination location
 function cond_copy {
 	if [ "x$3" != "x" ]; then
 		if [ ! -f $1$2 ]; then
@@ -109,6 +127,16 @@ echo -e "\nsetting up chroot dir for user $targetuser\n"
 useradd -d "$targetdir" -s "$scponlybin" $targetuser
 if [ $? -ne 0 ]; then
 	fail "if this user exists, remove it and try again"
+fi
+
+# the following is VERY BSD centric
+# i check for pwd_mkdb before trying to use it
+PWD_MKDB=`which pwd_mkdb`
+if [ x$PWD_MKDB = "x" ]; then
+	echo this script requires pwd_mkdb to stage a partial password database in your new chrooted dir
+	echo depending on your UNIX flavor, the following may be a sufficient substitue:
+	echo -e "\n"grep $targetuser /etc/passwd > $targetdir/etc/passwd"
+	fail "please email joe@sublimation.org with the steps you used if you succeed on a platform this script will not run on and i will update the script"
 fi
 grep $targetuser /etc/master.passwd > $targetdir/etc/master.passwd
 pwd_mkdb -d "$targetdir/etc" $targetdir/etc/master.passwd
