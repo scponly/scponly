@@ -104,7 +104,7 @@ else if [ -f /lib/ld-linux.so.2 ]; then
 	fi
 fi
 
-@PROG_LS@ /lib/libnss_compat*
+/bin/ls /lib/libnss_compat*
 if [ $? -eq 0 ]; then
 	LIB_LIST="$LIB_LIST /lib/libnss_compat* /lib/ld.so"
 fi
