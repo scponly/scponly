@@ -1,3 +1,6 @@
+Stefan Sami-Soueiha <stefan.sami@gmx.de> 
+        - added cool /chrootdir//homedir home directory interpretation
+
 Sven Hoexter <sven@telelev.net>
 	- configure script bugfix and scponly.c bugfix 
 
