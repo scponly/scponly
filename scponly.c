@@ -323,38 +323,32 @@ int process_winscp_requests(void)
 int process_ssh_request(char *request)
 {
 	char **av;
-	char *flat_request,*tmpstring;
+	char *flat_request,*tmpstring, *tmprequest;
+	char bad_winscp3str[] = "test -x /usr/lib/sftp-server && exec /usr/lib/sftp-server test -x /usr/local/lib/sftp-server && exec /usr/local/lib/sftp-server exec sftp-server";
 	int retval;
         int reqlen=strlen(request);
 
-	/*
-	 * bad, unfunctional cmd string from WinSCP 3.0
-	 */
-	char bad_winscp3str[]="test -x /usr/lib/sftp-server && exec /usr/lib/sftp-server test -x /usr/local/lib/sftp-server && exec /usr/local/lib/sftp-server exec sftp-server";
-	/*
-	 * good, working at Slackware 9.0 
-	 */
-	char good_winscp3str[]=PROG_SFTP_SERVER;
-	/*
-	 * little character code correcting
-	 */
-	bad_winscp3str[57]=10;
-	bad_winscp3str[127]=10;
-	
 	if (debuglevel)
 		syslog(LOG_DEBUG, "processing request: \"%s\"\n", request);
-			
-	/*
-	 * comparison of this two cmd`s
-	 */
+
+	tmprequest=strdup(request);
+
+#ifdef WINSCP_COMPAT			
+
+	bad_winscp3str[57]=10;
+	bad_winscp3str[127]=10;
+
 	if(strcmp(request,bad_winscp3str)==0)
 	{
 	    /*
-		 * better string we use
+		 * switch out the command to use, winscp wont know the difference
 	 	 */
-	    strcpy(request,good_winscp3str);
-	    syslog(LOG_DEBUG, "request fixed: \"[%s]\"\n", request);
+		free(tmprequest);
+		tmprequest=strdup(PROG_SFTP_SERVER);
+	    syslog(LOG_DEBUG, "winscp3 compat correcting to: \"[%s]\"\n", PROG_SFTP_SERVER);
 	}
+#endif
+
 
 #ifdef GFTP_COMPAT 
 	/*
@@ -362,7 +356,8 @@ int process_ssh_request(char *request)
 	 */
 	if (NULL != (tmpstring=strbeg(request, "echo -n xsftp ; ")))
 	{
-		request=tmpstring;
+		free(tmprequest);
+		tmprequest=strdup(tmpstring);
 		printf("xsftp");
 		fflush(stdout);
 	}
@@ -371,11 +366,14 @@ int process_ssh_request(char *request)
 	/*
 	 * we flat out reject special chars
 	 */
-	if (!valid_chars(request))
+	if (!valid_chars(tmprequest))
+	{
+		free(tmprequest);
 		return(-1);
+	}
 
 #ifdef WINSCP_COMPAT
-        if (strbeg(request,PROG_CD))
+        if (strbeg(tmprequest,PROG_CD))
         {
                 char *destdir=(char *)malloc(reqlen);
                 if (destdir == NULL)
@@ -390,17 +388,19 @@ int process_ssh_request(char *request)
                  * we're going to INSIST upon a double quote
                  * encapsulated new directory to change to.
                  */
-                if ((request[(reqlen-1)]=='"') && (request[3]=='"'))
+                if ((tmprequest[(reqlen-1)]=='"') && (tmprequest[3]=='"'))
                 {
                         bzero(destdir,reqlen);
-                        strncpy(destdir,&request[4],reqlen-5);
+                        strncpy(destdir,&tmprequest[4],reqlen-5);
                         if (debuglevel)
-                                syslog(LOG_INFO, "chdir: %s (%s)", request, logstamp());
+                                syslog(LOG_INFO, "chdir: %s (%s)", tmprequest, logstamp());
                         retval=chdir(destdir);
                         free(destdir);
+						free(tmprequest);
                         return(retval);
                 }
-		syslog(LOG_ERR, "bogus chdir request: %s (%s)", request, logstamp());
+		syslog(LOG_ERR, "bogus chdir request: %s (%s)", tmprequest, logstamp());
+		free(tmprequest);
 		return(-1);
 	}
 #endif
@@ -408,7 +408,7 @@ int process_ssh_request(char *request)
 	/*
 	 * convert request string to an arg_vector
 	 */
-	av = build_arg_vector(request);
+	av = build_arg_vector(tmprequest);
 
 	/*
 	 * clean any path info from request and substitute our known pathnames
@@ -443,6 +443,7 @@ int process_ssh_request(char *request)
 				fflush(stderr);
 				discard_vector(av);
 				free(flat_request);
+				free(tmprequest);
 				return(WEXITSTATUS(status));
 			}
 		}
@@ -456,7 +457,10 @@ int process_ssh_request(char *request)
 		discard_vector(av);
 #ifdef WINSCP_COMPAT
 		if (winscp_mode)
+		{
+			free(tmprequest);
 			return(-1);
+		}
 		else
 #endif 
 			exit(errno);
@@ -468,16 +472,17 @@ int process_ssh_request(char *request)
  	 */
 	if (debuglevel)
 	{
-		if (exact_match(flat_request,request))
-			syslog (LOG_ERR, "denied request: %s [%s]", request, logstamp());
+		if (exact_match(flat_request,tmprequest))
+			syslog (LOG_ERR, "denied request: %s [%s]", tmprequest, logstamp());
 		else
-			syslog (LOG_ERR, "denied request: %s (resolved to: %s) [%s]", request, flat_request, logstamp());
+			syslog (LOG_ERR, "denied request: %s (resolved to: %s) [%s]", tmprequest, flat_request, logstamp());
 	}
 	free(flat_request); 
 #ifdef WINSCP_COMPAT
 	if (winscp_mode)
 	{
 		printf ("command not permitted by scponly\n");
+		free(tmprequest);
 		return(-1);
 	}
 	else
