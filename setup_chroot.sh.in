@@ -56,12 +56,11 @@ if [ x@PROG_LDD@ = x ]; then
 fi
 USE_PW=0;
 if [ x@PROG_USERADD@ = x ]; then
-	USE_PW=1;
-else 
     if [ x@PROG_PW@ = x ]; then
 	echo "this script requires the program useradd or pw to add your"
 	fail "chrooted scponly user."
     fi
+    USE_PW=1;
 fi
 
 # we need to be root
