@@ -1,3 +1,6 @@
+Hideyuki KURASHINA <rushani@bl.mmtr.or.jp>   
+	- tons of proofreading and testing
+
 Daniel Lorch <ml-daniel@lorch.cc>       
 	- compile time configuration of default chdir
 
@@ -33,6 +36,7 @@ David N. Blank-Edelman
 
 Martin Werthmoeller <mw@werthmoeller.de>
 	- linux libnss_compat* fix
+	- setup_chroot improvements
 
 Olaf Menkens <Olaf.Menkens@IMK.Fraunhofer.DE>
 	- IRIX compatibility notes
@@ -75,7 +79,6 @@ Bjrn Eriksson <bjorn@bjornen.nu>
 
 Johan Kuuse <kuuse@redantigua.com>
 Thomas Wana <thomas@wana.at>
-Martin Werthmoeller <mw@werthmoeller.de>
 	- setup_chroot improvements
 
 Konrad Krzysztof Krasinski <konrad@o5.pl>
