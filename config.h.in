@@ -39,6 +39,7 @@
 #ifdef WINSCP_COMPAT
 #undef PROG_PWD
 #undef PROG_GROUPS
+#undef PROG_ID
 #undef PROG_ECHO
 #endif
 

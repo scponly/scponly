@@ -159,6 +159,7 @@ if test "x$enable_winscp_compat" != "xno"; then
     AC_MSG_NOTICE([enabling WinSCP compatability...])
 	SCPONLY_PATH_PROG_DEFINE([PROG_PWD],    [pwd],    [/bin:/usr/bin:/sbin:/usr/sbin])
 	SCPONLY_PATH_PROG_DEFINE([PROG_GROUPS], [groups], [/bin:/usr/bin:/sbin:/usr/sbin])
+	SCPONLY_PATH_PROG_DEFINE([PROG_ID], 	[id],     [/bin:/usr/bin:/sbin:/usr/sbin])
 	SCPONLY_PATH_PROG_DEFINE([PROG_ECHO],   [echo],   [/bin:/usr/bin:/sbin:/usr/sbin])
 fi
 
