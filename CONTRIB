@@ -60,3 +60,6 @@ Martin Werthmoeller <mw@werthmoeller.de>
 Konrad Krzysztof Krasinski <konrad@o5.pl>
 	- WinSCP3 compat patch and install notes
 	- (http://o5.pl/scponly-stuff/):
+
+Ralf Durkee <rd@rd1.net>
+	- setup_chroot.sh.in changes
