@@ -112,12 +112,17 @@ fi
 @INSTALL@ -d $targetdir/etc
 
 for bin in $BINARIES; do
+	@INSTALL@ -d $targetdir/`dirname $bin`
 	@INSTALL@ $bin $targetdir$bin
 done
 
 LIB_LIST=`@PROG_LDD@ $BINARIES 2> /dev/null | @PROG_CUT@ -f2 -d\> | @PROG_CUT@ -f1 -d\( | @PROG_GREP@ "^ " | @PROG_SORT@ -u`
 
 LDSOFOUND=0
+if [ -f /lib/ld.so ]; then
+	LIB_LIST="$LIB_LIST /lib/ld.so"
+	LDSOFOUND=1
+fi
 if [ -f /usr/libexec/ld.so ]; then
 	LIB_LIST="$LIB_LIST /usr/libexec/ld.so"
 	LDSOFOUND=1
@@ -135,13 +140,14 @@ if [ $LDSOFOUND -eq 0 ]; then
 	fail i cant find your equivalent of ld.so
 fi
 
-/bin/ls /lib/libnss_compat* 2>&1 > /dev/null
+/bin/ls /lib/libnss_compat* > /dev/null 2>&1 
 if [ $? -eq 0 ]; then
-	LIB_LIST="$LIB_LIST /lib/libnss_compat* /lib/ld.so"
+	LIB_LIST="$LIB_LIST /lib/libnss_compat*"
 fi
 
 if [ "x$LIB_LIST" != "x" ]; then
 	for lib in $LIB_LIST; do
+		@INSTALL@ -d $targetdir/`dirname $lib`
 		@INSTALL@ $lib $targetdir/$lib
 	done
 fi
