@@ -1,17 +1,17 @@
 # Autoconfed stuff
 srcdir		 = @srcdir@
-prefix		:= @prefix@
-exec_prefix	:= @exec_prefix@
+prefix		 = @prefix@
+exec_prefix	 = @exec_prefix@
 bindir		 = @bindir@
 sbindir		 = @sbindir@
 mandir		 = @mandir@
 CFLAGS		 = @CFLAGS@ -I$(srcdir) -I.
 INSTALL		 = @INSTALL@
 CC		 = @CC@
-CHROOTED_NAME    = @CHROOTED_NAME@
-CONFDIR         := @sysconfdir@/scponly
-DEBUGFILE       := ${CONFDIR}/debuglevel
-DEFS		:= @DEFS@ -DDEBUGFILE='"${DEBUGFILE}"'
+CHROOTED_NAME   = @CHROOTED_NAME@
+CONFDIR         = @sysconfdir@/scponly
+DEBUGFILE       = ${CONFDIR}/debuglevel
+DEFS		 = @DEFS@ -DDEBUGFILE='"${DEBUGFILE}"'
 LN_S		 = @LN_S@
 VPATH		 = @srcdir@
 
@@ -26,13 +26,13 @@ scponly: scponly.o helper.o
 	${CC} ${CFLAGS} ${DEFS} -o $@ scponly.o helper.o
 
 groups: groups.c
-	${CC} ${CFLAGS} ${DEFS} -o $@ $<
+	${CC} ${CFLAGS} ${DEFS} -o $@ groups.c
 
 scponly.o: scponly.c config.h scponly.h
-	${CC} ${CFLAGS} ${DEFS} -o $@ -c $<
+	${CC} ${CFLAGS} ${DEFS} -o $@ -c scponly.c
 
 helper.o: helper.c config.h scponly.h
-	${CC} ${CFLAGS} ${DEFS} -o $@ -c $<
+	${CC} ${CFLAGS} ${DEFS} -o $@ -c helper.c
 
 install: scponly debuglevel scponly.8
 	${INSTALL} -d ${bindir}

@@ -7,12 +7,12 @@
  *	see CONTRIB for additional credits
  */
  
-#include <stdio.h>	// io
-#include <string.h>	// for str*
-#include <sys/types.h>	// for fork, wait
-#include <sys/wait.h>	// for wait
-#include <unistd.h>	// for exit, fork
-#include <stdlib.h>	// EXIT_*
+#include <stdio.h>	/* io */
+#include <string.h>	/* for str* */
+#include <sys/types.h>	/* for fork, wait */
+#include <sys/wait.h>	/* for wait */
+#include <unistd.h>	/* for exit, fork */
+#include <stdlib.h>	/* EXIT_* */
 #include <errno.h>
 #include <syslog.h>
 #include "scponly.h"
@@ -76,7 +76,9 @@ cmd_t commands[] =
  */
 cmd_arg_t dangerous_args[] =
 {
+#ifdef ENABLE_SCP2
 	{ PROG_SCP, "-S" },
+#endif
 	{ PROG_SFTP_SERVER, "-S" },
 #ifdef UNISON_COMPAT
 	{ PROG_UNISON, "-rshcmd" },
@@ -85,6 +87,7 @@ cmd_arg_t dangerous_args[] =
 #endif
 #ifdef RSYNC_COMPAT
 	{ PROG_RSYNC, "-e" },
+	{ PROG_RSYNC, "-6e" },
 #endif 
 	NULL
 };
@@ -108,7 +111,7 @@ int main (int argc, char **argv)
 		fclose(debugfile);
 	}
 #ifndef UNIX_COMPAT
-	if (debuglevel > 1) // debuglevel 1 will still log to syslog
+	if (debuglevel > 1) /* debuglevel 1 will still log to syslog */
 		logopts |= LOG_PERROR;
 #endif
 
@@ -117,7 +120,7 @@ int main (int argc, char **argv)
 #elif IRIX_COMPAT
         openlog(PACKAGE_NAME, logopts, LOG_AUTH);
 #else
-        if (debuglevel > 1) // debuglevel 1 will still log to syslog
+        if (debuglevel > 1) /* debuglevel 1 will still log to syslog */
                 logopts |= LOG_PERROR;
         openlog(PACKAGE_NAME, logopts, LOG_AUTHPRIV);
 #endif
@@ -138,7 +141,7 @@ int main (int argc, char **argv)
 			syslog(LOG_INFO, "chrooted binary in place, will chroot()");
 		chrooted=1;
 	}
-#endif //CHROOTED_NAME
+#endif /* CHROOTED_NAME */
 
 	if (debuglevel)
 	{
@@ -203,7 +206,7 @@ int main (int argc, char **argv)
 			exit(EXIT_FAILURE);
 		}
 	}
-#endif //CHROOTED_NAME
+#endif /* CHROOTED_NAME */
 
 	if (debuglevel)
 		syslog (LOG_DEBUG, "setting uid to %u", getuid());
@@ -225,7 +228,7 @@ int main (int argc, char **argv)
 		}
 	}
 #else
-	if (0)	{}	// placeholder
+	if (0)	{}	/*  placeholder */
 #endif
 	else if (-1==process_ssh_request(argv[2]))
 	{
@@ -253,9 +256,9 @@ int winscp_transit_request(char *request)
 	new_request=strbeg(request,WINSCP_BOF_REQ);
 	if (NULL == new_request)
 	{
-		return(-1);	 // improper transit cmd
+		return(-1);	 /* improper transit cmd */
 	}
-	printf ("%s\n",WINSCP_BOF); // start transfer
+	printf ("%s\n",WINSCP_BOF); /* start transfer */
 	fflush(stdout);
 	return(winscp_regular_request(new_request));
 }
@@ -281,7 +284,7 @@ int winscp_regular_request(char *request)
 			{
 				printf ("command wasn't terminated with %s, %s or %s\n",
 					WINSCP_EOF_REQ_RETVAL, WINSCP_EOF_REQ_ZERO, WINSCP_EOF_REQ_STATUS);
-				return(-1);	// bogus termination
+				return(-1);	/* bogus termination */
 			}
 		}
 	}
@@ -303,7 +306,7 @@ int winscp_regular_request(char *request)
 	else
 	{
 		retval=process_ssh_request(new_request);
-		if (retzero)		// ignore actual retval if winscp wants us to
+		if (retzero)		/* ignore actual retval if winscp wants us to */
 			retval=0;
 	}
 	free(new_request);
@@ -313,7 +316,7 @@ int winscp_regular_request(char *request)
 int process_winscp_requests(void)
 {
         char    linebuf[MAX_REQUEST];
-	int	count=0;		// num of semicolons in cmd
+	int	count=0;		/* num of semicolons in cmd */
 	int	ack=0;
 
 	winscp_mode=1;
@@ -335,21 +338,21 @@ int process_winscp_requests(void)
 		if (strlen(linebuf)==0)
 			return(-1);
 
-		linebuf[strlen(linebuf)-1]=0;	// drop the trailing CR
+		linebuf[strlen(linebuf)-1]=0;	/* drop the trailing CR */
 		count=cntchr(linebuf,';');
 
-		if (count==1)	// regular cmd
+		if (count==1)	/* regular cmd */
 		{
 			ack=winscp_regular_request(linebuf);
 		}
-		else if (count==2)	 // transit command
+		else if (count==2)	 /* transit command */
 		{
 			ack=winscp_transit_request(linebuf);
 		}
 		else
-			ack=0; 	// winscp always sends 2 or 3 cmds at once
+			ack=0; 	/* winscp always sends 2 or 3 cmds at once */
 
-		printf ("%s%d\n",WINSCP_EOF,ack); // respond to client
+		printf ("%s%d\n",WINSCP_EOF,ack); /* respond to client */
 		fflush(stdout);
 	}
 	return 0;

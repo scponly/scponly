@@ -1,25 +1,25 @@
 /*
  *	helper functions for scponly
  */
-#include <stdio.h>	// io
-#include <string.h>	// for str*
-#include <sys/types.h>	// for stat, getpwuid
-#include <sys/stat.h>	// for stat
-#include <unistd.h>	// for exit, access, getpwuid, execve
-#include <errno.h>	// for debugging
-#include <pwd.h>	// to get username for config parsing
-#include <time.h>	// time
-#include <libgen.h>	// basename
-#include <stdlib.h>	// realloc
+#include <stdio.h>	/* io */
+#include <string.h>	/* for str* */
+#include <sys/types.h>	/* for stat, getpwuid */
+#include <sys/stat.h>	/* for stat */
+#include <unistd.h>	/* for exit, access, getpwuid, execve */
+#include <errno.h>	/* for debugging */
+#include <pwd.h>	/* to get username for config parsing */
+#include <time.h>	/* time */
+#include <libgen.h>	/* basename */
+#include <stdlib.h>	/* realloc */
 #include <syslog.h>
 #include "scponly.h"
 #include "config.h"
 
 #ifdef HAVE_GLOB
-#include <glob.h>	// for glob()
+#include <glob.h>	/* for glob() */
 #else
 #ifdef HAVE_WORDEXP
-#include <wordexp.h>	// for wordexp()
+#include <wordexp.h>	/* for wordexp() */
 #endif
 #endif
 
@@ -178,7 +178,7 @@ char *substitute_known_path(char *request)
 			break;
 		if (exact_match(basename(cmd->name),stripped_req))
 		{
-			free(stripped_req); //discard old pathname
+			free(stripped_req); /* discard old pathname */
 			return (strdup(cmd->name));
 		}
 		cmd++;
@@ -196,7 +196,7 @@ char **build_arg_vector(char *request)
 	char **ap2,**av=(char **)malloc(MAX_ARGC * (sizeof(char *)));
 
 	ap=argv;
-	freeme=inputstring=strdup(request); // make a local copy 
+	freeme=inputstring=strdup(request); /* make a local copy  */
 
         while (ap < &argv[(MAX_ARGC-1)]) 
 	{
@@ -251,7 +251,7 @@ char **expand_wildcards(char **av_old)
 {
 	char		**av_new=(char **)malloc(MAX_ARGC * (sizeof(char *)));
 	glob_t g;
-	int c_old,c_new,c;	// argument counters
+	int c_old,c_new,c;	/* argument counters */
 #ifdef UNIX_COMPAT
 	int flags = GLOB_NOCHECK;
 #else
