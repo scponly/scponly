@@ -19,7 +19,7 @@ Stefan Sami-Soueiha <stefan.sami@gmx.de>
 
 Sven Hoexter <sven@telelev.net>
     - added subversion support
-    - fixed AIX support in configure script
+    - added AIX support in configure script
 	- configure script bugfix and scponly.c bugfix 
 
 François Gouget <fgouget@codeweavers.com>

@@ -320,10 +320,15 @@ int process_winscp_requests(void)
 
 	fflush(stdout);
 
+#ifdef ENABLE_DEFAULT_CHDIR
+	syslog(LOG_INFO, "changing initial directory to %s", DEFAULT_CHDIR);
+	chdir(DEFAULT_CHDIR);
+#endif
+
 	/*
 	 *	now process commands interactively
  	 */
-        while (fgets(&linebuf[0],MAX_REQUEST, stdin) != NULL)
+	while (fgets(&linebuf[0],MAX_REQUEST, stdin) != NULL)
 	{
 		ack=0;
 
@@ -458,6 +463,17 @@ int process_ssh_request(char *request)
 	if (exact_match(av[0],PROG_SCP))
 		av = expand_wildcards(av);
 #endif
+#endif
+
+/*
+ *	check for a compile time chdir configuration
+ */
+#ifdef ENABLE_DEFAULT_CHDIR
+	if (exact_match(av[0],PROG_SFTP_SERVER))
+	{
+		syslog(LOG_INFO, "changing initial directory to %s", DEFAULT_CHDIR);
+		chdir(DEFAULT_CHDIR);
+	}
 #endif
 
 	flat_request = flatten_vector(av);
