@@ -186,9 +186,9 @@ fi
 
 echo
 echo /usr/bin/groups problem solving
-rm -f $tagetdir/usr/bin/groups
+rm -f $targetdir/usr/bin/groups
 gcc groups.c -o groups
-cp groups $tagetdir/usr/bin/groups
+cp groups $targetdir/usr/bin/groups
 
 echo /etc/passwd - important security fix
 targetuid=`id -u $targetuser`
