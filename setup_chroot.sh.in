@@ -57,10 +57,14 @@ BINARIES=`@PROG_GREP@ '#define PROG_' config.h | @PROG_CUT@ -f2 -d\" | @PROG_GRE
 
 # we set the install path in a variable so the presetup script can overwrite it on systems
 # which require it
-INSTALL_PATHNAME=@INSTALL@
+INSTALL_PATHNAME="@INSTALL@"
 
 # attempt a best guess at required libs, we can append things in the presetup script if we need to
 LDSOFOUND=0
+
+# default to useradd, not pw
+USE_PW=0
+
 if [ x@PROG_LDD@ = x ]; then
 	echo "this script requires the program ldd to determine which"
 	fail "shared libraries to copy into your chrooted dir..."
@@ -74,7 +78,7 @@ LDSO_LIST="/lib/ld.so /libexec/ld-elf.so /libexec/ld-elf.so.1 /usr/libexec/ld.so
 for lib in $LDSO_LIST; do
 	if [ -f $lib ]; then
 		LDSOFOUND=1;
-		LIB_LIST="$LIB_LIST $libb"
+		LIB_LIST="$LIB_LIST $lib"
 	fi
 done
 
@@ -137,7 +141,6 @@ if [ -f "$prescript" ]; then
 #
 #	this system has a pre-chroot setup script, lets run it
 #
-	echo executing $prescript
 	. "$prescript"
 fi
 
@@ -151,9 +154,13 @@ fi
 #
 
 # this part shouldnt strictly be requried, but i'll leave it in until i'm sure of it
-$INSTALL_PATHNAME -d $targetdir
+if [ ! -d $targetdir ]; then
+	$INSTALL_PATHNAME -d $targetdir
+fi
 for dir in $CHROOT_SUBDIRS; do
-	$INSTALL_PATHNAME -d $dir
+	if [ ! -d $targetdir/$dir ]; then
+		$INSTALL_PATHNAME -d $targetdir/$dir
+	fi
 done
 
 # add all our binaries
@@ -170,7 +177,7 @@ if [ "x$LIB_LIST" != "x" ]; then
 	done
 fi
 
-if [ $USE_PW -eq 0 ] ; then
+if [ "x$USE_PW" = x0 ] ; then
     @PROG_USERADD@ -d "$targetdir" -s "@prefix@/sbin/@CHROOTED_NAME@" $targetuser
     if [ $? -ne 0 ]; then
          fail "if this user exists, remove it and try again"
@@ -182,26 +189,36 @@ else
     fi
 fi 
 
-chown 0:0 $targetdir 
+#
+#	we must ensure certain directories are root owned.
+#
+@PROG_CHOWN@ 0:0 $targetdir 
 if [ -d $targetdir/.ssh ]; then
-	chown 0.0 $targetdir/.ssh
+	@PROG_CHOWN@ 0:0 $targetdir/.ssh
 fi
 
-if [ ! -d $targetdir/$writeabledir]; then
+if [ ! -d $targetdir/$writeabledir ]; then
 	echo -e "\ncreating  $targetdir/$writeabledir directory for uploading files"
 	$INSTALL_PATHNAME -o $targetuser -d $targetdir/$writeabledir
 fi
+
+#
+#	set the perms on the writeable dir so that the new user owns it
+#
+newuid=`id -u $targetuser`
+newgid=`id -g $targetuser`
+@PROG_CHOWN@ $newuid:$newguid $targetdir/$writeabledir
 
 if [ -f "$postscript" ]; then
 #
 #   this system has a post-chroot setup script, lets run it
 #
-	echo executing $postcript
     . "$postscript"
 else
 #
-#	otherwise, revert to the old "best guess" system, which is fine for the BSD family, it seems
+#	otherwise, revert to the old "best guess" system, which sucks
 #
+	echo
 	echo "Your platform ($osnamever) does not have a platform specific setup script."
 	echo "This install script will attempt a best guess."
 	echo "If you perform customizations, please consider sending me your changes."
@@ -219,7 +236,13 @@ else
 	#
 		@PROG_GREP@ $targetuser /etc/master.passwd > $targetdir/etc/master.passwd
 		@PROG_PWD_MKDB@ -d "$targetdir/etc" $targetdir/etc/master.passwd
-		/bin/rm -rf $targetdir/etc/master.passwd $targetdir/etc/spwd.db
+		@PROG_RM@ -rf $targetdir/etc/master.passwd $targetdir/etc/spwd.db
 	fi
 fi
+
+#
+#   the final step is setting the password
+#
+echo "please set the password for $targetuser:"
+passwd $targetuser
 
