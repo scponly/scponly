@@ -66,27 +66,21 @@ if [ x@PROG_LDD@ = x ]; then
 	fail "shared libraries to copy into your chrooted dir..."
 fi
 LIB_LIST=`@PROG_LDD@ $BINARIES 2> /dev/null | @PROG_CUT@ -f2 -d\> | @PROG_CUT@ -f1 -d\( | @PROG_GREP@ "^ " | @PROG_SORT@ -u`
-if [ -f /lib/ld.so ]; then
-	LIB_LIST="$LIB_LIST /lib/ld.so"
-	LDSOFOUND=1
-fi
-if [ -f /libexec/ld-elf.so ]; then
-    LIB_LIST="$LIB_LIST /libexec/ld-elf.so"
-    LDSOFOUND=1
-fi
-if [ -f /usr/libexec/ld.so ]; then
-	LIB_LIST="$LIB_LIST /usr/libexec/ld.so"
-	LDSOFOUND=1
-fi
-if [ -f /lib/ld-linux.so.2 ]; then 
-	LIB_LIST="$LIB_LIST /lib/ld-linux.so.2"
-	LDSOFOUND=1
-fi
-if [ -f /usr/libexec/ld-elf.so.1 ]; then
-	LIB_LIST="$LIB_LIST /usr/libexec/ld-elf.so.1"
-	LDSOFOUND=1
-fi
 
+#
+#	we also need to add some form of ld.so, here are some good guesses.
+#
+LDSO_LIST="/lib/ld.so /libexec/ld-elf.so /usr/libexec/ld.so /lib/ld-linux.so.2 /usr/libexec/ld-elf.so.1"
+for lib in $LDSO_LIST; do
+	if [ -f $lib ]; then
+		LDSOFOUND=1;
+		LIB_LIST="$LIB_LIST $libb"
+	fi
+done
+
+#
+#	TODO - i've since forgotten which OS this is for, it should be relocated
+#
 /bin/ls /lib/libnss_compat* > /dev/null 2>&1 
 if [ $? -eq 0 ]; then
 	LIB_LIST="$LIB_LIST /lib/libnss_compat*"
@@ -156,16 +150,19 @@ fi
 #	ACTUAL MODIFICATIONS BEGIN HERE
 #
 
+# this part shouldnt strictly be requried, but i'll leave it in until i'm sure of it
 $INSTALL_PATHNAME -d $targetdir
 for dir in $CHROOT_SUBDIRS; do
 	$INSTALL_PATHNAME -d $dir
 done
 
+# add all our binaries
 for bin in $BINARIES; do
 	$INSTALL_PATHNAME -d $targetdir/`dirname $bin`
 	$INSTALL_PATHNAME $bin $targetdir$bin
 done
 
+# and the libs they require
 if [ "x$LIB_LIST" != "x" ]; then
 	for lib in $LIB_LIST; do
 		$INSTALL_PATHNAME -d $targetdir/`dirname $lib`
