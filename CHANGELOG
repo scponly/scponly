@@ -1,4 +1,13 @@
 
+scponly v2.3
+	22 june, 2002
+
+	manpage addition
+		- Ken McGlothlen <mcglk@artlogix.com> sent in a manpage for
+			scponly.
+		- he also sent in a patch to the makefile that improves the
+			portability of the installation process
+
 scponly v2.2
 	11 june, 2002
 

@@ -1,4 +1,7 @@
-Andre Chadwick <andrewc@piffle.org>
+Ken McGlothlen <mcglk@artlogix.com>
+	- manpage and installation makefile improvements
+
+Andrew Chadwick <andrewc@piffle.org>
 	- syslog implementation
 
 dkl at tessellated dot net
