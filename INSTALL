@@ -120,7 +120,4 @@ Step 7. You will need to install some directories, passwd files,
 
 		make jail
 
-	This script generates a LIKELY interpretation of the commands
-	you will need to execute in order to get chroot() working.
-	Chroot directory setup isnt especially portable so good luck.
 

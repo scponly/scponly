@@ -69,7 +69,24 @@ if [ `id -u` != "0" ]; then
 	fail "you must be root to run this script\n"
 fi
 
-echo -n "Install for chroot to what directory? "
+echo
+echo Next we need to set the home directory for this scponly user.
+echo please note that the user\'s home directory MUST NOT be writable
+echo by the scponly user.  this is important so that the scponly user
+echo cannot subvert the .ssh configuration parameters.
+echo
+echo for this reason, an \"incoming\" subdirectory will be created that
+echo the scponly user can write into.  if you want the scponly user to 
+echo automatically change to this incoming subdirectory upon login, you
+echo can specify this when you specify the user\'s home directory as 
+echo follows:
+echo
+echo set the home dir to /chroot_path//incoming
+echo
+echo when scponly chroots, it will only chroot to "chroot_path" and
+echo afterwards, it will chdir to incoming.
+
+echo -n "enter the home directory you wish to set for this user: "
 read targetdir
 if [ "x$targetdir" = "x" ]; then
 	fail "need to specify a target directory"

@@ -42,6 +42,8 @@ for an scponly user to access files.
 
 - gftp compatibilty
 
+- rsync compatibility
+
 - security checks: root login is disallowed (though root
 should never be configured to be using scponly as the default shell.)
 
