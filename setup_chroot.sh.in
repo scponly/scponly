@@ -70,7 +70,7 @@ LIB_LIST=`@PROG_LDD@ $BINARIES 2> /dev/null | @PROG_CUT@ -f2 -d\> | @PROG_CUT@ -
 #
 #	we also need to add some form of ld.so, here are some good guesses.
 #
-LDSO_LIST="/lib/ld.so /libexec/ld-elf.so /usr/libexec/ld.so /lib/ld-linux.so.2 /usr/libexec/ld-elf.so.1"
+LDSO_LIST="/lib/ld.so /libexec/ld-elf.so /libexec/ld-elf.so.1 /usr/libexec/ld.so /lib/ld-linux.so.2 /usr/libexec/ld-elf.so.1"
 for lib in $LDSO_LIST; do
 	if [ -f $lib ]; then
 		LDSOFOUND=1;
