@@ -44,7 +44,7 @@ defaultusername="scponly"
 defaulthomedirprefix="/home"
 defaultwriteabledir="incoming"
 
-osname=`uname -s`
+osname=`uname -s | tr ' ' '_'`
 # pathname to platform/OS specific setup scripts
 prescript="build_extras/arch/$osname.pre.sh"
 postscript="build_extras/arch/$osname.post.sh"
