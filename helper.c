@@ -12,7 +12,10 @@
 #include <time.h>	// time
 #include "scponly.h"
 
+#define MAX(x,y)	( ( x > y ) ? x : y )
+
 extern FILE *log;
+extern int debuglevel;
 extern char username[MAX_USERNAME];
 extern char homedir[FILENAME_MAX];
 
@@ -24,25 +27,18 @@ void log_stamp(void)
 
 	timebuf[strlen(timebuf)-1]='\0';
         fprintf (log,"%s: USER %s (",timebuf,username);
-	if (NULL!=(ipstring=getenv("SSH_CLIENT")))
+	if (NULL!=(ipstring=(char *)getenv("SSH_CLIENT")))
 		fprintf (log,"%s) requesting: ",ipstring);
-	else if (NULL!=(ipstring=getenv("SSH2_CLIENT")))
+	else if (NULL!=(ipstring=(char *)getenv("SSH2_CLIENT")))
 		fprintf (log,"%s) requesting: ",ipstring);
 	else
 		fprintf (log, "no IP?!?!");
 	fflush(log);
 }
 
-void show_usage(void)
-{
-	fprintf (stderr, "\nscponly: incorrect usage\n");
-	fprintf (stderr, "\n\tscp username@whatever.org:/some/path/whatever.zip .\n");
-	fprintf (stderr, "the path must contain no characters other than:\n\t%s\n\n", ALLOWABLE);
-	return;
-}
 /*
  *	if big starts with small, return the char after 
- *	the last char in small from big
+ *	the last char in small from big. ahem.
  */
 inline char *strend (char *big, char *small)
 {
@@ -51,6 +47,35 @@ inline char *strend (char *big, char *small)
 	if (0==strncmp(big,small,strlen(small)))
 		return (big+strlen(small));
 	return NULL;
+}
+
+/* 
+ *	this function removes pathnames from the first
+ *	part of the shell request.
+ *
+ *	we need to find the character after the last 
+ * 	occurance of a forward slash that is also
+ *	before the first whitespace, if it exists
+ */
+char *clean_request (char *request)
+{
+        char *fs,*ws,*tfs;
+        int i=0;
+
+        if (((ws=strchr(request,' '))==NULL) && \
+                ((ws=strchr(request,'\t'))==NULL))
+                        ws=&request[strlen(request)];
+        if (((fs=strchr(request,'/')) == NULL) || (fs > ws))
+                return(request);
+        ++fs;
+        while (fs < ws)
+        {
+                tfs=strchr(fs,'/');
+                if ((tfs == NULL) || (tfs > ws))
+                        break;
+                fs=(tfs+1);
+        }
+        return(fs);
 }
 
 /*
@@ -80,14 +105,19 @@ int get_uservar(void)
 	
 	if (NULL==(userinfo=getpwuid(getuid())))
 	{
-#ifdef DEBUG
-		perror("getpwuid");	
-#endif
 		log_stamp();
 		fprintf (log,"no knowledge of uid %d\n",getuid());
 		fflush(log);
+		if (debuglevel)
+		{
+			fprintf (stderr,"no knowledge of uid %d\n",getuid());
+			perror("getpwuid");	
+		}
 		return 0;
 	}
+	if (debuglevel)
+		fprintf (stderr,"retrieved home directory of \"%s\" for user \"%s\"\n",
+			userinfo->pw_dir,userinfo->pw_name);
 	strncpy(username,userinfo->pw_name,MAX_USERNAME);
 	strncpy(homedir,userinfo->pw_dir,FILENAME_MAX);
 	return 1;

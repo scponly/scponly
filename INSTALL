@@ -1,21 +1,21 @@
-scponly v1.0 Installation Instructions:
+scponly v1.3 Installation Instructions:
 
 http://sublimation.org/scponly
-rumblefish@escapeartist.com
+joe@sublimation.org
 
 Installing scponly is not difficult.  It is not trivial either so I
 advise reading the instructions carefully.  Keep in mind, you CAN
 use scponly as a setuid binary, which should warrant caution.
 
-Step 1.  Decide if you want to compile in chroot() functionality.  
+Step 1.  Decide if you want to use chroot() functionality.  
+
 	If you dont know what this step means, consult "man chroot".  
 	If you still dont understand this question, you should not
-	compile with chroot() functionality.  Go to step 2.  
+	use chroot() functionality.  Go to step 2.  
 
 	Otherwise, consider the following:
-  - If you do compile with chroot(), your binary will need to be
-	setuid.  This should make any security conscious
-	administrator wary.  
+  - If you do use chroot(), your binary will need to be setuid. This
+	should make any security conscious administrator wary.
   - Also consider that scponly will only execute AFTER sshd has
 	authenticated the remote user.  Given this, you should be
 	able to rest a little easier knowing that utilizing scponly
@@ -35,14 +35,10 @@ Step 1.  Decide if you want to compile in chroot() functionality.
 	Step 10 below.)  I have provided a simple script to assist
 	in this department.  You can simplify this aspect of the 
 	installation if you can generate statically linked binaries
-	for ls, scp, and sftp-server.
+	for ls, rm, mv, mkdir, rmdir, chown, ln chmod, scp, and 
+	sftp-server.
 
-Step 2.  build the binary.  if you want a chroot-enabled binary,
-	do the following:
-
-		make scponly_chroot
-
-	otherwise:
+Step 2.  build the binary.  
 
 		make scponly
 
@@ -50,7 +46,6 @@ Step 2.  build the binary.  if you want a chroot-enabled binary,
 	am unaware of any unix systems it wont compile on.  The code
 	doesnt utilize anything platform-dependant that I am aware
 	of.  (Other than a non-POSIX strsep() call however.)
-
 
 Step 3. Read the makefile, edit it if you aren't comfortable with
 	the installation parameters.  The defaults should be fine.
@@ -60,34 +55,24 @@ Step 4. Become root and:
 		make install
 
 	This will create your logfile and install your scponly binary.
+	It will also create a softlink from scponlyc to scponly.  If
+	you wish to use scponly with chroot(), set the shell for a given
+	user to "scponlyc" instead of "scponly".  
 
-Step 5. Add scponly to your /etc/shells file, if you have one.  Use
-	the full pathname.
-
-		echo /usr/local/sbin/scponly >> "/etc/shells"
-
-Step 6. If you decided on chroot functionality, make your binary
-	setuid:
-
-		chmod u+s /usr/local/sbin/scponly
-
-	Ensure the binary is root owned and unwritable by anyone
-	else.
-
-Step 7. Create a directory that you want to share all your files
+Step 5. Create a directory that you want to share all your files
 	from. (For the remainder of the examples I will use /pub.)
 
-Step 8. Create a user intended for scponly use.  I will make an
+Step 6. Create a user intended for scponly use.  I will make an
 	example of the user "scpdemo".
 
 	Use your system's "adduser" command to create the user.
 
 	Set the default shell to the full pathname of your scponly
-	binary.
+	binary.  If you want chroot functionality, the name of the
+	shell is "scponlyc", otherwise it is "scponly".
 
-	Set the home directory to the path decided upon in Step 7,
-	which by the way, could be a regular default home directory
-	if you want.
+	Set the home directory to the path decided upon in Step 7.
+	This could be a regular default home directory if you want.
 
 	This could look like:
 
@@ -95,10 +80,9 @@ Step 8. Create a user intended for scponly use.  I will make an
 
 	Lastly, set the password for this user.
 
-ADDITIONAL STEPS FOR CHROOT-ENABLED BINARIES ONLY:
+ADDITIONAL STEPS FOR CHROOT-ENABLED INSTALLATIONS ONLY:
 
-
-Step 9. You will need to install some directories, passwd files,
+Step 7. You will need to install some directories, passwd files,
 	libraries and binaries in your chroot path so that scponly has
 	something to invoke when it comes time to execute the remote
 	request.

@@ -1,4 +1,27 @@
 
+scponly v1.3
+
+feb 6 2002:
+	pretty significant code changes to accomplish the following:
+		- total overhaul of install scripts.  They are now rather
+			BSD centric.  this might cause pain in the linux and
+			solaris realms, which I would be happy to try to accomodate
+			for.  
+		- added clean_request() function to remove some unwanted
+			leading path information from shell commands. This
+			was in hopes of resolving the openssh client's habit 
+			of specifying the full pathname of the sftp-server.
+		- added debugging information that can be turned on at run
+			time instead of compile time.  see INSTALL for notes
+		- chroot() functionality is now established at run time instead
+			of compile time as well.  depending on the NAME of the
+			scponly binary (scponly/scponlyc), scponly will try to
+			chroot.  this allows an admin to configure chroot functionality
+			on a per user basis, instead of per host installation.
+		- increased the list of acceptable commands for compatibility with
+			sftp clients that do stuff like chmod and chown
+
+
 scponly v1.2
 
 jan 10th 2002:
