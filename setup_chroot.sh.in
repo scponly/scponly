@@ -125,7 +125,7 @@ echo
 
 targetuser=`getwd "Username to install" "$defaultusername"`
 username_collision=`id $targetuser > /dev/null 2> /dev/null; echo $?`
-if [ $username_collision -eq 1 ] ; then
+if [ $username_collision -eq 0 ] ; then
 	fail "the user $targetuser already exists.  please remove this user and their home directory and try again."
 fi 
 targetdir=`getwd "home directory you wish to set for this user" "$defaulthomedirprefix/$targetuser"`
