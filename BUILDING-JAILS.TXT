@@ -1,0 +1,175 @@
+Building scponly jail configurations manually.
+    Paul Hyder
+    NOAA Forecast Systems Lab
+    Boulder, CO 
+    DRAFT of March 2005
+    paul.hyder@noaa.gov
+
+Building a jail is almost always >site< specific.  There isn't really
+an easy answer, even if you ignore the OS differences.
+
+Hence, as you've probably found, building jails is actually not very
+easily automated.
+
+At the very least you have to have an idea of the chrooted directory
+structure that you want for your site.  (We use a chrooted multi-user
+topology with a single central set of NFS mounts.  Other sites have
+individual chrooted environments for each user so that no one sees
+anyone else.  The default script builds individual environments.)
+
+If someone does provide a script make sure it does what you want.
+If you don't get something specific that you like it isn't too hard
+to extract the topology from the default script and build a jail to
+meet your needs.
+
+A. Build scponly with your site specific options.  Figure out where your
+   specific ssh/scp/rsync/sftp (and other) binaries are.  You will also
+   need to know exactly how your sshd is configured, i.e. find the
+   relevant sshd_config file and look at it.
+
+   If you use dsa or rsa keys you should change the sshd_config and put
+   them in an isolated directory that is NOT in the chrooted environment.
+   You are likely to be happier and safer if you move them out of
+   $HOME/.ssh!
+
+   Ssh authentication, keys or passwords, is handled by the top level
+   sshd and the associated sshd_config file.  You authenticate normally
+   and then are chrooted into the scponly tree.
+
+   NOTE: Even if you set it up that way, scponly WILL NOT permit root
+   owned sessions, i.e. any session with UID=0
+
+1. Determine your chrooted topology, user visabilty, and file system
+   mounts.  Basically you need to know what >you< want the final
+   chrooted environment to be.
+	a. Choose a location for your alternate root.
+	   (We use /altroot/scponly.  Users will see a small subset
+	   of a normal / configuration after the chroot.)
+   	b. Determine the file system mount topology (often NFS) in the
+	   chrooted location.
+   	c. Decide whether users can see each others files.
+
+2. Create the chrooted directory location.
+	mkdir /{altroot}
+	      /{altroot}
+              /{altroot}/home
+              /{altroot}/home/{username}
+              /{altroot}/bin
+              /{altroot}/etc
+              /{altroot}/lib
+              /{altroot}/usr
+              /{altroot}/usr/bin
+              /{altroot}/usr/lib
+              /{altroot}/usr/libexec
+              /{altroot}/usr/libexec/openssh
+
+	      Where "altroot" is either a single shared location OR
+	      multiple single user locations.  In the single user
+	      topology each user has their own isolated set of
+	      all binary files.
+
+	      Unless you are !absolutely! sure of your sshd configuration
+	      the users home directory, /{altroot}/home/{username} above,
+	      should be empty and owned by root and not writeable by the
+	      user.
+
+              Synopsis: home directories are empty, root (0.0) owned,
+	      and user readable.  (after chroot are just /home/{username})
+
+3. Install the subset of commands and libraries.  This means you copy them
+   from the equivalent top level directory.  This is of course where
+   operating system differences and local utility locations introduce
+   problems.  Sadly there isn't a single set, just guidelines.  The
+   information below is based on my setup with RedHat Linux.
+   
+   See additional notes embedded below.
+
+	/{altroot}/bin
+		chgrp  chmod  chown  ln  ls  mkdir  mv  rm  rmdir
+
+	This provides the EXPLICIT set of basic commands that work from
+	ssh.  Not any more dangerous than leaving sftp.  IMPORTANT: $PATH
+	doesn't impact these commands, their location is hard coded in
+	scponly making it is difficult or impossible for a user to
+	add commands.  There isn't a shell, hence no real $PATH.
+	
+	IMPORTANT: If your standard binaries are in another directory you
+	should put them in the right location in the /{altroot} tree
+	instead of /{altroot}/bin.  You have to check.
+
+	/{altroot}/etc
+		ld.so.cache  ld.so.conf  passwd  group
+
+	The passwd file is a subset of the /etc/passwd file.  The only
+	thing you need is the first part of the line, e.g. an entry in
+	the chrooted passwd file can be edited to look like:
+		auser:x:3444:3000:::
+
+	The passwd file will either have a stripped set of passwd entries
+	for multiple users OR a single line for the single isolated user.
+
+	The group file is only needed in an open multi-user environment.
+
+	The ld.so.cache and/or ld.so.conf may need to be elsewhere
+	depending on the operating system.  Look in places like /var/ld.
+
+        /{altroot}/usr/bin
+		rsync  scp
+
+	Copy your current rsync and scp binaries if you configured scponly
+	to support them.
+	
+	IMPORTANT: If your standard binaries are in another directory you
+	should put them them in the right location in the /{altroot} tree
+	instead of /{altroot}/usr/bin.  A common one for scp is
+	/usr/local/bin.  Again you have to check.
+
+        /{altroot}/usr/libexec/openssh
+		sftp-server
+
+	Copy your current sftp-server binary if you configured scponly to
+	support sftp.
+
+	IMPORTANT: If your system sftp-server is not in /usr/libexec put
+	it in the right location in the /{altroot} tree.
+
+	/{altroot}/lib
+		d-linux.so.2  libc.so.6  libdl.so.2  libnsl.so.1
+		libnss_compat-2.2.5.so libnss_compat.so.1
+		libnss_compat.so.2 libtermcap.so.2  libutil.so.1
+
+	/{altroot}/usr/lib
+		libcrypto.so.1  libz.so.1
+
+	Ok, libraries are the truly nasty part.  The set of libraries
+	depends on your specific operating system and the scponly
+	supported utilities.  The above set works with RedHat Linux.
+
+	For other operating systems you probably need to run ldd on the
+	binaries you copy into bin, usr/bin, usr/libexec, etc.  You may
+	also need to run ldd on the libraries to determine a complete
+	set of libraries and their required location in the chrooted
+	environment.
+
+	If things don't work suspect incomplete library selection or that
+	a library is in the wrong location.
+
+4. Modify the top level /etc/password file. (See above for the format of
+   the chrooted etc/password file.)
+     
+   The top level /etc/password file is modified for each scponly user,
+   you insert the chrooted path in front of the existing path (With
+   a // at the chroot point) and the shell set to your scponlyc location.
+
+   Original /etc/passwd line
+     auser:x:3444:3000:A user:/home/auser:/bin/csh
+   Modified /etc/passwd line
+     auser:x:3444:3000:A user:/{altroot}//home/EmptyHomeDir:/sbin/scponlyc
+
+     Where {altroot} is your chosen chroot point for this user,
+     EmptyHomeDir is the chrooted home directory name, and scponlyc is
+     the path your installed version.
+
+   The two slashes ('//') are used by scponlyc to determine the chroot
+   point.  Everything in front of them is used as the new root location
+   in the chroot call.
