@@ -15,7 +15,7 @@ DEFS		:= @DEFS@ -DDEBUGFILE='"${DEBUGFILE}"'
 LN_S		 = @LN_S@
 VPATH		 = @srcdir@
 
-all: scponly
+all: scponly groups
 
 clean:
 	rm -f *.o scponly *~ debuglevel ${CHROOTED_NAME}
@@ -24,6 +24,9 @@ love: clean all
 
 scponly: scponly.o helper.o
 	${CC} ${CFLAGS} ${DEFS} -o $@ scponly.o helper.o
+
+groups: groups.c
+	${CC} ${CFLAGS} ${DEFS} -o $@ $<
 
 scponly.o: scponly.c config.h scponly.h
 	${CC} ${CFLAGS} ${DEFS} -o $@ -c $<

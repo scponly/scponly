@@ -49,9 +49,6 @@ osnamever=`uname -sr`
 prescript="build_extras/arch/$osnamever.pre.sh"
 postscript="build_extras/arch/$osnamever.post.sh"
 
-# some directories to install
-CHROOT_SUBDIRS="usr usr/bin usr/sbin usr/local usr/local/lib usr/local/bin lib usr/lib libexec usr/libexec usr/libexec/openssh bin etc"
-
 # the following is a list of binaries that will be staged in the target dir
 BINARIES=`@PROG_GREP@ '#define PROG_' config.h | @PROG_CUT@ -f2 -d\" | @PROG_GREP@ -v ^cd$`
 
@@ -83,7 +80,7 @@ for lib in $LDSO_LIST; do
 done
 
 #
-#	TODO - i've since forgotten which OS this is for, it should be relocated
+#	TODO - i've since forgotten which OS this is for, it should be relocated to a presetup script
 #
 /bin/ls /lib/libnss_compat* > /dev/null 2>&1 
 if [ $? -eq 0 ]; then
@@ -112,7 +109,7 @@ if [ x@PROG_USERADD@ = x ]; then
 fi
 
 # we need to be root
-if [ `id -u` != "0" ]; then
+if [ `@PROG_ID@ -u` != "0" ]; then
 	fail "you must be root to run this script\n"
 fi
 
@@ -129,9 +126,6 @@ echo
 targetuser=`getwd "Username to install" "$defaultusername"`
 targetdir=`getwd "home directory you wish to set for this user" "$defaulthomedirprefix/$targetuser"`
 writeabledir=`getwd "name of the writeable subdirectory" "$defaultwriteabledir"`
-
-# append this to the list of subdirectories to create
-CHROOT_SUBDIRS="$CHROOT_SUBDIRS $writeabledir"
 
 #
 #	if you would like to overwrite/extend any of the variables above, do so in the system specific
@@ -157,22 +151,17 @@ fi
 if [ ! -d $targetdir ]; then
 	$INSTALL_PATHNAME -d $targetdir
 fi
-for dir in $CHROOT_SUBDIRS; do
-	if [ ! -d $targetdir/$dir ]; then
-		$INSTALL_PATHNAME -d $targetdir/$dir
-	fi
-done
 
 # add all our binaries
 for bin in $BINARIES; do
-	$INSTALL_PATHNAME -d $targetdir/`dirname $bin`
+	$INSTALL_PATHNAME -d $targetdir/`@PROG_DIRNAME@ $bin`
 	$INSTALL_PATHNAME $bin $targetdir$bin
 done
 
 # and the libs they require
 if [ "x$LIB_LIST" != "x" ]; then
 	for lib in $LIB_LIST; do
-		$INSTALL_PATHNAME -d $targetdir/`dirname $lib`
+		$INSTALL_PATHNAME -d $targetdir/`@PROG_DIRNAME@ $lib`
 		$INSTALL_PATHNAME $lib $targetdir/$lib
 	done
 fi
@@ -205,8 +194,8 @@ fi
 #
 #	set the perms on the writeable dir so that the new user owns it
 #
-newuid=`id -u $targetuser`
-newgid=`id -g $targetuser`
+newuid=`@PROG_ID@ -u $targetuser`
+newgid=`@PROG_ID@ -g $targetuser`
 @PROG_CHOWN@ $newuid:$newguid $targetdir/$writeabledir
 
 if [ -f "$postscript" ]; then
@@ -246,3 +235,6 @@ fi
 echo "please set the password for $targetuser:"
 passwd $targetuser
 
+echo "if you experience a warning with winscp regarding groups, please install"
+echo "the provided hacked out fake groups program into your chroot, like so:"
+echo "cp groups $targetdir/bin/groups" 
