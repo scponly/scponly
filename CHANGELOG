@@ -1,7 +1,6 @@
 
 scponly v3.6 - 07 mar 2003,
 	fixed the rsync compatibility configure options
-	added cvs compatibility options
 	repaired freebsd configure and setup_chroot problems
 	added cool /chrootdir//homedir home directory interpretation
 		- thanks to Stefan Sami-Soueiha <stefan.sami@gmx.de> for his patch
