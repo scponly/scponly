@@ -1,0 +1,222 @@
+#!/bin/sh
+# rewrited by Konrad Krzysztof Krasinski 2003
+# tested on Slackware 8.0, 8.1 and 9.0
+#
+# check that the configure options are correct for chrooted operation:
+
+if [ xscponlyc = x ] || [ ! -f ./config.h ]; then
+	echo 
+	echo 'your scponly build is not configured for chrooted operation.'
+	echo 'please reconfigure as follows, then rebuild and reinstall:'
+	echo
+	echo './configure --enable-chrooted-binary (... other options)'
+	echo
+	exit 1
+fi
+
+# the following is a list of binaries that will be staged in the target dir
+BINARIES=`/usr/bin/grep '#define PROG_' config.h | /usr/bin/cut -f2 -d\" | /usr/bin/grep -v ^cd$`
+
+# a function to display a failure message and then exit 
+fail ( ) {
+	echo -e $@
+	exit 1
+}
+
+# "get with default" function
+# this function prompts the user with a query and default reply
+# it returns the user reply
+getwd ( ) {
+	query="$1"
+	default="$2"
+	echo -en "$query [$default]" | cat >&2
+	read response
+	if [ x$response = "x" ]; then
+		response=$default
+	fi
+	echo $response
+}
+
+# "get yes no" function
+# this function prompts the user with a query and will continue to do so
+# until they reply with either "y" or "n"
+getyn ( ) {
+	query="$@"
+	echo -en $query | cat >&2
+	read response
+	while [ x$response != "xy" -a x$response != "xn" ]; do
+		echo -e "\n'y' or 'n' only please...\n" | cat >&2
+		echo -en $query | cat >&2
+		read response
+	done	
+	echo $response
+}
+
+if [ x/usr/bin/ldd = x ]; then
+	echo "this script requires the program ldd to determine which"
+	fail "shared libraries to copy into your chrooted dir..."
+fi
+USE_PW=0;
+#if [ x/usr/sbin/useradd = x ]; then
+	USE_PW=1;
+#else 
+#    if [ x = x ]; then
+#	echo "this script requires the program useradd or pw to add your"
+#	fail "chrooted scponly user."
+#    fi
+#fi
+
+# we need to be root
+if [ `id -u` != "0" ]; then
+	fail "you must be root to run this script\n"
+fi
+
+echo -n "Install for what username? [template_scp]"
+read targetuser
+if [ "x$targetuser" = "x" ]; then
+    targetuser="template_scp"
+fi
+
+echo
+echo Next we need to set the home directory for this scponly user.
+echo please note that the user\'s home directory MUST NOT be writable
+echo by the scponly user.  this is important so that the scponly user
+echo cannot subvert the .ssh configuration parameters.
+echo
+targetdir=/home/$targetuser
+echo -n "enter the home directory you wish to set for this user: [$targetdir] "
+read targetdir2
+if [ "x$targetdir2" != "x" ]; then
+    targetdir=$targetdir2
+fi
+
+echo
+echo for this reason, an \"public_ftp\" subdirectory will be created that
+echo the scponly user can write into.
+echo if you want the scponly user to 
+echo automatically change to this public_ftp subdirectory upon login, you
+echo can specify this when you specify the user\'s home directory as 
+echo follows:
+echo
+echo set the home dir to /chroot_path//public_ftp [we do this right now]
+echo
+echo when scponly chroots, it will only chroot to "chroot_path" and
+echo afterwards, it will chdir to public_ftp.
+echo
+
+echo ginstalling the dirs and files ...
+/usr/bin/ginstall -c -d $targetdir
+/usr/bin/ginstall -c -d $targetdir/usr
+/usr/bin/ginstall -c -d $targetdir/usr/bin
+/usr/bin/ginstall -c -d $targetdir/usr/sbin
+/usr/bin/ginstall -c -d $targetdir/usr/local
+/usr/bin/ginstall -c -d $targetdir/usr/local/lib
+/usr/bin/ginstall -c -d $targetdir/usr/local/bin
+/usr/bin/ginstall -c -d $targetdir/lib
+/usr/bin/ginstall -c -d $targetdir/usr/lib
+/usr/bin/ginstall -c -d $targetdir/usr/libexec
+/usr/bin/ginstall -c -d $targetdir/usr/libexec/openssh
+/usr/bin/ginstall -c -d $targetdir/bin
+/usr/bin/ginstall -c -d $targetdir/etc
+
+for bin in $BINARIES; do
+	/usr/bin/ginstall -c $bin $targetdir$bin
+done
+
+LIB_LIST=`/usr/bin/ldd $BINARIES 2> /dev/null | /usr/bin/cut -f2 -d\> | /usr/bin/cut -f1 -d\( | /usr/bin/grep "^ " | /usr/bin/sort -u`
+
+LDSOFOUND=0
+if [ -f /usr/libexec/ld.so ]; then
+	LIB_LIST="$LIB_LIST /usr/libexec/ld.so"
+	LDSOFOUND=1
+fi
+if [ -f /lib/ld-linux.so.2 ]; then 
+	LIB_LIST="$LIB_LIST /lib/ld-linux.so.2"
+	LDSOFOUND=1
+fi
+if [ -f /usr/libexec/ld-elf.so.1 ]; then
+	LIB_LIST="$LIB_LIST /usr/libexec/ld-elf.so.1"
+	LDSOFOUND=1
+fi
+
+if [ $LDSOFOUND -eq 0 ]; then
+	fail i cant find your equivalent of ld.so
+fi
+
+/bin/ls /lib/libnss_compat* 2>&1 > /dev/null
+if [ $? -eq 0 ]; then
+	LIB_LIST="$LIB_LIST /lib/libnss_compat* /lib/ld.so"
+fi
+
+echo "ginstalling some libs - some errors are false allarms ..."
+
+if [ "x$LIB_LIST" != "x" ]; then
+	for lib in $LIB_LIST; do
+		/usr/bin/ginstall -c $lib $targetdir/$lib
+	done
+fi
+echo targetdir=$targetdir
+if [ $USE_PW -eq 0 ] ; then
+    /usr/sbin/useradd -d "$targetdir//public_ftp" -s "/usr/local/sbin/scponlyc" $targetuser    
+    if [ $? -ne 0 ]; then
+         fail "if this user exists, remove it and try again"
+    fi
+else
+     useradd  -s "/usr/local/sbin/scponlyc" -d "$targetdir//public_ftp" $targetuser
+    if [ $? -ne 0 ]; then
+         fail "if this user exists, remove it and try again"
+    fi
+fi 
+
+chown 0:0 $targetdir 
+if [ -d $targetdir/.ssh ]; then
+	chown 0.0 $targetdir/.ssh
+fi
+
+if [ ! -d $targetdir/public_ftp ]; then
+	echo -e "\ncreating  $targetdir/public_ftp directory for uploading files"
+	/usr/bin/ginstall -c -o $targetuser -d $targetdir/public_ftp
+fi
+
+# the following is VERY BSD centric
+# i check for pwd_mkdb before trying to use it
+if [ x = x ]; then
+	/usr/bin/grep $targetuser /etc/passwd > $targetdir/etc/passwd
+else
+	/usr/bin/grep $targetuser /etc/master.passwd > $targetdir/etc/master.passwd
+	 -d "$targetdir/etc" $targetdir/etc/master.passwd
+	/bin/rm -rf $targetdir/etc/master.passwd $targetdir/etc/spwd.db
+fi
+
+
+echo
+echo /usr/bin/groups problem solving
+rm -f $tagetdir/usr/bin/groups
+gcc groups.c -o groups
+cp groups $tagetdir/usr/bin/groups
+
+
+echo /etc/passwd - important security fix
+cat /etc/passwd | grep root:x:0: > $targetdir/etc/passwd
+targetuid=`id -u $targetuser`
+#winscp seems to work bad with long names with "_" char - like "template_scp"
+#so we cheats it by standard "user" name
+dummyuser="user"
+dummyhome="/public_ftp"
+dummyshell="/usr/bin/oafish"
+cat /etc/passwd | grep $targetuser:x:$targetuid: | awk -F":" '{print "'$dummyuser':"$2":"$3":"$4":"$5":'$dummyhome':'$dummyshell'"}'>> $targetdir/etc/passwd
+
+echo /etc/group - adding
+cat /etc/group | grep root::0: > $targetdir/etc/group
+targetuid=`id -u $targetuser`
+cat /etc/group | grep users:: >> $targetdir/etc/group
+
+echo /info.txt - adding
+cp info.txt $targetdir/info.txt
+
+echo
+echo ok, all done set the passwd if you wont to use this account
+echo or ^C when it will be an template only
+echo
+
+passwd $targetuser
