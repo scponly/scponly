@@ -18,7 +18,7 @@ VPATH		 = @srcdir@
 all: scponly groups
 
 clean:
-	rm -f *.o scponly *~ debuglevel ${CHROOTED_NAME}
+	rm -f *.o scponly *~ debuglevel ${CHROOTED_NAME} groups
 
 love: clean all
 
