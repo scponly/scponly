@@ -1,0 +1,6 @@
+
+this directory contains some OS specific installation files.
+
+for the time being, some hacked up setup_chroot.sh scripts are located here.
+
+however, setup_chroot.sh has been modified to support pre and post setup scripts, which are in the arch sudirectory.
