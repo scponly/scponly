@@ -120,4 +120,21 @@ Step 7. You will need to install some directories, passwd files,
 
 		make jail
 
+	
+That's it, you're done!
+
+
+Additional Installation notes:
+
+	- Some operating systems (notably redhat 9), use a shell script for
+the "groups" command.  Though "groups" is an allowable command, the 
+"#!/bin/sh" interpreter specification at the beginning of this script 
+will attempt to load /bin/sh, which is not available in the chrooted
+jail.  This is only a problem when you are also using WinSCP compatibiliy,
+because WinSCP will attempt to run "groups" upon connection initialization.
+
+You can either put /bin/sh in your jail, which is a security problem 
+just waiting to happen, or you can deselect "lookup user groups" in the
+WinSCP configuration.  I recommend the latter.
+
 
