@@ -1,6 +1,56 @@
+THIS DIRECTORY CONTAINS ADDITIONAL SCRIPTS IN CASE THE MAIN
+setup_chroot.sh HAS FAILED YOU.
 
-this directory contains some OS specific installation files.
 
-for the time being, some hacked up setup_chroot.sh scripts are located here.
+for the time being, some hacked up setup_chroot.sh scripts are located
+here. ultimately, these hacked up scripts in this directory will be
+removed.  the rationale is simply that maintaining individual scripts for
+each OS will be a maintenance nightmare.
 
-however, setup_chroot.sh has been modified to support pre and post setup scripts, which are in the arch sudirectory.
+however, setup_chroot.sh has been modified to support pre and post setup
+scripts, which are in the arch sudirectory. it is my hope to isolate OS 
+specific commands into small easily managed files.
+
+
+here are some notes regarding the new architecture:
+
+well, as many of you know, setup_chroot.sh and setup_chroot.sh.in has been
+one of the most problematic aspects of scponly installation.  a generic
+script to create chrooted jails just isnt as easy as one might hope.  
+i've done some initial overhauling, and as per Sven's suggestion, come up
+with a framework for a more extensible installation script.
+
+the first part of the setup_chroot script is intended just to figure
+things out, without making any changes. it looks like this:
+
+ - probe the filesystem for the locations of binaries
+ - probe the filesystem for the locations of libraries required by the
+	binaries
+ - ask the user a couple of questions about their preferences
+ - check for the existence of an OS specific presetup script in the
+	build_extras/arch directory
+
+the idea here is that the generic case (setup_chroot.sh) will take a best
+guess approach, but any customizations required for the various platforms
+can be located in a seperate file.
+
+the pathname of this file will be "build_extras/arch/`uname -sr`.pre.sh"
+
+the second part of the installation script actually makes the changes, as
+follows:
+ - install directories
+ - install binaries
+ - install libraries
+ - check for the existence of a postsetup script in the build_extras/arch
+	directory
+
+the pathname of this file will be "build_extras/arch/`uname -sr`.post.sh"
+
+so for example, additional things required for redhat, debian, irix,
+solaris, etc etc ad nauseum can be located in seperate files.
+
+it is my hope that people will contribute these presetup and postsetup
+scripts to me via email, so that i can add them to the arch directory.
+
+let me know if you see any problems with this idea.  incidentally, i think
+it initially came from Roland Lammel.
