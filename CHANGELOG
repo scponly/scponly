@@ -6,9 +6,9 @@ scponly v3.9 - 17 nov 2003,
 		Thomas Wana <thomas@wana.at>
 		Martin Werthmoeller <mw@werthmoeller.de>
 	WinSCP3 compat patch (http://o5.pl/scponly-stuff/):
-		Konrad Krzysztof Krasi?ski <konrad@o5.pl>
+		Konrad Krzysztof Krasinski <konrad@o5.pl>
 	hand-written build scripts for debian and RH9:
- 		Konrad Krzysztof Krasi?ski <konrad@o5.pl>
+ 		Konrad Krzysztof Krasinski <konrad@o5.pl>
 
 scponly v3.8 - 17 mar 2003,
 	added chgrp to acceptable binaries

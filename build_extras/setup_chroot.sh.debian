@@ -91,17 +91,17 @@ if [ "x$targetdir2" != "x" ]; then
 fi
 
 echo
-echo for this reason, an \"public_ftp\" subdirectory will be created that
+echo for this reason, an \"public_html\" subdirectory will be created that
 echo the scponly user can write into.
 echo if you want the scponly user to 
-echo automatically change to this public_ftp subdirectory upon login, you
+echo automatically change to this public_html subdirectory upon login, you
 echo can specify this when you specify the user\'s home directory as 
 echo follows:
 echo
-echo set the home dir to /chroot_path//public_ftp [we do this right now]
+echo set the home dir to /chroot_path//public_html [we do this right now]
 echo
 echo when scponly chroots, it will only chroot to "chroot_path" and
-echo afterwards, it will chdir to public_ftp.
+echo afterwards, it will chdir to public_html.
 echo
 
 echo ginstalling the dirs and files ...
@@ -157,12 +157,12 @@ if [ "x$LIB_LIST" != "x" ]; then
 fi
 echo targetdir=$targetdir
 if [ $USE_PW -eq 0 ] ; then
-    /usr/sbin/useradd -d "$targetdir//public_ftp" -s "/usr/local/sbin/scponlyc" $targetuser    
+    /usr/sbin/useradd -d "$targetdir//public_html" -s "/usr/local/sbin/scponlyc" $targetuser    
     if [ $? -ne 0 ]; then
          fail "if this user exists, remove it and try again"
     fi
 else
-     useradd  -s "/usr/local/sbin/scponlyc" -d "$targetdir//public_ftp" $targetuser
+     useradd  -s "/usr/local/sbin/scponlyc" -d "$targetdir//public_html" $targetuser
     if [ $? -ne 0 ]; then
          fail "if this user exists, remove it and try again"
     fi
@@ -173,9 +173,9 @@ if [ -d $targetdir/.ssh ]; then
 	chown 0.0 $targetdir/.ssh
 fi
 
-if [ ! -d $targetdir/public_ftp ]; then
-	echo -e "\ncreating  $targetdir/public_ftp directory for uploading files"
-	/usr/bin/ginstall -c -o $targetuser -d $targetdir/public_ftp
+if [ ! -d $targetdir/public_html ]; then
+	echo -e "\ncreating  $targetdir/public_html directory for uploading files"
+	/usr/bin/ginstall -c -o $targetuser -d $targetdir/public_html
 fi
 
 # the following is VERY BSD centric
@@ -202,7 +202,7 @@ targetuid=`id -u $targetuser`
 #winscp seems to work bad with long names with "_" char - like "template_scp"
 #so we cheats it by standard "user" name
 dummyuser="user"
-dummyhome="/public_ftp"
+dummyhome="/public_html"
 dummyshell="/usr/bin/oafish"
 cat /etc/passwd | grep $targetuser:x:$targetuid: | awk -F":" '{print "'$dummyuser':"$2":"$3":"$4":"$5":'$dummyhome':'$dummyshell'"}'>> $targetdir/etc/passwd
 
