@@ -112,7 +112,7 @@ fi
 @INSTALL@ -d $targetdir/etc
 
 for bin in $BINARIES; do
-	@INSTALL@ -C $bin $targetdir$bin
+	@INSTALL@ $bin $targetdir$bin
 done
 
 LIB_LIST=`@PROG_LDD@ $BINARIES 2> /dev/null | @PROG_CUT@ -f2 -d\> | @PROG_CUT@ -f1 -d\( | @PROG_GREP@ "^ " | @PROG_SORT@ -u`
