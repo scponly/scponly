@@ -1,4 +1,25 @@
 
+scponly v4.1 - 17 mar 2005
+	follow up fix for additional executable rsync argument "-6e" (see v4.0)
+		Jason Wies <jason@xc.net>
+
+	building jails document
+		Paul Hyder <Paul.Hyder@noaa.gov>     
+	
+	chdir/chroot patch
+		David Ramsden <david@hexstream.eu.org> 
+
+	dangerous args ifdef macro for scp -S flag (fixes debian bug 289861)
+		Hideyuki KURASHINA <rushani@bl.mmtr.or.jp>  
+
+	DESTDIR support for chroot creation
+		Markus Kolb <markus-122004@tower-net.de>                     
+
+	numerous fixes
+		Kaleb Pederson <kpederson@mail.ewu.edu>   
+
+
+
 scponly v4.0 - 27 nov 2004
 	SERIOUS VULNERABILITY FIX: scp/sftp-server/unison/rsync all support the command line
 		specification of "ssh dropins" for alternate crypto tunnels (similar to the way ssh can

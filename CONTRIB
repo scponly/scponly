@@ -1,5 +1,14 @@
-Hideyuki KURASHINA <rushani@bl.mmtr.or.jp>   
-	- tons of proofreading and testing
+Markus Kolb <markus-122004@tower-net.de>                     
+	- DESTDIR support for chroot creation
+
+Kaleb Pederson <kpederson@mail.ewu.edu>   
+	- numerous fixes
+
+Paul Hyder <Paul.Hyder@noaa.gov>     
+	- building jails document
+
+David Ramsden <david@hexstream.eu.org> 
+	- chdir/chroot patch
 
 Daniel Lorch <ml-daniel@lorch.cc>       
 	- compile time configuration of default chdir
@@ -13,6 +22,8 @@ Jason Wies <jason@xc.net>
 Hideyuki KURASHINA <rushani@bl.mmtr.or.jp>
 	- missing PROG_RM bug report
 	- UNISON support bug
+	- tons of proofreading and testing
+	- dangerous args ifdef macro for scp -S flag (fixes debian bug 289861)
 
 Raimund Specht <raimund@spemaus.de>                                                                                    
 	- UNISON support patches
