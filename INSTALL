@@ -55,7 +55,7 @@ Step 2.  Configure your installation.
 	and not "sftp", which handles its own wildcards.  By default,
 	wildcards are enabled.
 
-	--disable-scp 
+	--disable-scp-compat
 	--disable-sftp
 	--disable-winscp-compat
 
