@@ -442,9 +442,9 @@ int process_ssh_request(char *request)
 			(-1 == asprintf( &env[0], "HOME=%s", homedir)))
 		{
 			syslog(LOG_ERR, "could not set HOME environment variable(%s))", logstamp());
-			exit(EXIT_FAIL);
+			exit(EXIT_FAILURE);
 		}
-		if (debug)
+		if (debuglevel)
 			syslog(LOG_DEBUG, "set HOME environment variable to %s (%s))", env[0], logstamp());
 #endif 
 
