@@ -1,4 +1,4 @@
-scponly v3.10 - 21 mar 2004,
+scponly v3.11 - 21 mar 2004,
 	added UNISON compatibility (http://www.cis.upenn.edu/~bcpierce/unison/):
 		Raimund Specht <raimund@spemaus.de>
 	bugfix to home dir default permissions:
