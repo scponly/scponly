@@ -1,4 +1,7 @@
 
+scponly v3.8 - 17 mar 2003,
+	added chgrp to acceptable binaries
+
 scponly v3.7 - 17 mar 2003,
 	rerepaired freebsd 4.7 configure and setup_chroot problems
 

@@ -29,6 +29,7 @@
 #undef PROG_MV
 #undef PROG_CHMOD
 #undef PROG_CHOWN
+#undef PROG_CHGRP
 #undef PROG_MKDIR
 #undef PROG_RMDIR
 #define PROG_CD "cd"

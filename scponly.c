@@ -32,6 +32,7 @@ cmd_t commands[] =
 	{ PROG_LS, 1 }, 
 	{ PROG_CHMOD, 1 },
 	{ PROG_CHOWN, 1 },
+	{ PROG_CHGRP, 1 },
 	{ PROG_MKDIR, 1 },
 	{ PROG_RMDIR, 1 },
 	{ PROG_SCP, 1 },

@@ -14,7 +14,7 @@ PACKAGE=scponly
 AC_DEFINE(PACKAGE)
 PACKAGE_NAME=scponly
 AC_DEFINE(PACKAGE_NAME)
-PACKAGE_VERSION=3.5
+PACKAGE_VERSION=3.8
 AC_DEFINE(PACKAGE_VERSION)
 PACKAGE_BUGREPORT=joe@sublimation.org
 AC_DEFINE(PACKAGE_BUGREPORT)
@@ -148,6 +148,7 @@ if test "x$scponly_scp_compat" != "x"; then
 	SCPONLY_PATH_PROG_DEFINE([PROG_MV],    [mv],    [/bin:/usr/bin:/sbin:/usr/sbin])
 	SCPONLY_PATH_PROG_DEFINE([PROG_CHMOD], [chmod], [/bin:/usr/bin:/sbin:/usr/sbin])
 	SCPONLY_PATH_PROG_DEFINE([PROG_CHOWN], [chown], [/bin:/usr/bin:/sbin:/usr/sbin])
+	SCPONLY_PATH_PROG_DEFINE([PROG_CHGRP], [chgrp], [/bin:/usr/bin:/sbin:/usr/sbin])
 	SCPONLY_PATH_PROG_DEFINE([PROG_MKDIR], [mkdir], [/bin:/usr/bin:/sbin:/usr/sbin])
 	SCPONLY_PATH_PROG_DEFINE([PROG_RMDIR], [rmdir], [/bin:/usr/bin:/sbin:/usr/sbin])
 fi
