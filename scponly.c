@@ -183,12 +183,15 @@ int main (int argc, char **argv)
 	if (chrooted)
 	{
 		char *root_dir = chrootdir;
+		char chdir_path[FILENAME_MAX];
 
 		strcpy(chrootdir, homedir);
+		strcpy(chdir_path, "/");
 		while((root_dir = strchr(root_dir, '/')) != NULL) 
 		{
 			if (strncmp(root_dir, "//", 2) == 0) 
 			{
+				snprintf(chdir_path, FILENAME_MAX, "%s", root_dir + 1);
 				*root_dir = '\0';
 				break;
 			}
@@ -204,6 +207,20 @@ int main (int argc, char **argv)
 			}
 			syslog (LOG_ERR, "couldn't chroot to %s [%s]", chrootdir, logstamp());
 			exit(EXIT_FAILURE);
+		}
+	    if (debuglevel)                                                                                                
+		{                                                                                                              
+			syslog (LOG_DEBUG, "chdiring to dir: \"%s\"", chdir_path);                                             
+		}                                                                                                              
+		if (-1==(chdir(chdir_path)))                                                                                   
+		{                                                                                                              
+			if (debuglevel)                                                                                        
+			{                                                                                                      
+				syslog (LOG_ERR, "chdir: %m");                                                                 
+			}                                                                                                      
+			syslog (LOG_ERR, "couldn't chdir to %s [%s]", chdir, logstamp());                                      
+			exit(EXIT_FAILURE);     
+			}
 		}
 	}
 #endif /* CHROOTED_NAME */

@@ -35,17 +35,17 @@ helper.o: helper.c config.h scponly.h
 	${CC} ${CFLAGS} ${DEFS} -o $@ -c helper.c
 
 install: scponly debuglevel scponly.8
-	${INSTALL} -d ${bindir}
-	${INSTALL} -d ${mandir}/man8
-	${INSTALL} -d ${CONFDIR}
-	${INSTALL} -o 0 -g 0 scponly ${bindir}/scponly
-	${INSTALL} -o 0 -g 0 -m 0644 scponly.8 ${mandir}/man8/scponly.8
-	${INSTALL} -o 0 -g 0 -m 0644 debuglevel ${DEBUGFILE}
+	${INSTALL} -d ${DESTDIR}${bindir}
+	${INSTALL} -d ${DESTDIR}${mandir}/man8
+	${INSTALL} -d ${DESTDIR}${CONFDIR}
+	${INSTALL} -o 0 -g 0 scponly ${DESTDIR}${bindir}/scponly
+	${INSTALL} -o 0 -g 0 -m 0644 scponly.8 ${DESTDIR}${mandir}/man8/scponly.8
+	${INSTALL} -o 0 -g 0 -m 0644 debuglevel ${DESTDIR}${DEBUGFILE}
 	if test "x${CHROOTED_NAME}" != "x"; then			\
-		${INSTALL} -d ${sbindir};				\
-		rm -f ${sbindir}/${CHROOTED_NAME};			\
+		${INSTALL} -d ${DESTDIR}${sbindir};				\
+		rm -f ${DESTDIR}${sbindir}/${CHROOTED_NAME};			\
 		cp scponly ${CHROOTED_NAME};				\
-		${INSTALL} -o 0 -g 0 -m 4755 ${CHROOTED_NAME} ${sbindir}/${CHROOTED_NAME};	\
+		${INSTALL} -o 0 -g 0 -m 4755 ${CHROOTED_NAME} ${DESTDIR}${sbindir}/${CHROOTED_NAME};	\
 	fi
 
 debuglevel:
