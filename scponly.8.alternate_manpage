@@ -8,7 +8,7 @@
 \fBscponly\fP
 is an alternative "shell" (of sorts) for system administrators who would like
 to provide access to remote users to both read and write local files without
-providing any remote execution priviledges.  Functionally, it is best described
+providing any remote execution privileges.  Functionally, it is best described
 as a wrapper to the trusted suite of ssh applications.
 
 A typical usage of
@@ -21,7 +21,7 @@ traverse public networks in a plaintext format.
 
 Instead of just a single anonymous user,
 \fBscponly\fP
-supports configuring potentially many users, each of which could could be set
+supports configuring potentially many users, each of which could be set
 up to provide access to distinct directory trees.  Aside from the installation
 details, each of these users would have their default shell in /etc/passwd set
 to "/usr/local/bin/scponly" (or wherever you choose to install it).  This
@@ -32,7 +32,7 @@ usual Unixish file permissions.
 .IP \(bu
 Logging:
 \fBscponly\fP
-logs time, client IP, username, and the actual request to syslog.
+logs time, client IP address, username, and the actual request to syslog.
 .IP \(bu
 chroot:
 \fBscponly\fP
@@ -45,7 +45,7 @@ is fully compatible with sftp.
 .IP \(bu
 Security checks:  root login is disallowed, seteuid after chroot.
 .IP \(bu
-WinSCP compatibility.
+WinSCP compatibility:
 \fBscponly\fP
 can be compiled in WinSCP compatibility mode (it will by default) that will
 permit a "semi-interactive" shell that WinSCP can use.
@@ -89,6 +89,7 @@ The default location for the chrooted version.
 .B /etc/shells
 To be a proper shell, it has to be included here.
 .SH SEE ALSO
+\fBchroot\fP(2),
 \fBssh\fP(1),
 \fBscp\fP(1),
 \fBsftp\fP(1),

@@ -11,7 +11,7 @@
 .Nm
 is an alternative "shell" (of sorts) for system administrators who would like
 to provide access to remote users to both read and write local files without
-providing any remote execution priviledges.  Functionally, it is best described
+providing any remote execution privileges.  Functionally, it is best described
 as a wrapper to the trusted suite of ssh applications.
 .Pp
 A typical usage of
@@ -24,7 +24,7 @@ traverse public networks in a plaintext format.
 .Pp
 Instead of just a single anonymous user,
 .Nm
-supports configuring potentially many users, each of which could could be set
+supports configuring potentially many users, each of which could be set
 up to provide access to distinct directory trees.  Aside from the installation
 details, each of these users would have their default shell in /etc/passwd set
 to "/usr/local/bin/scponly" (or wherever you choose to install it).  This
@@ -36,7 +36,7 @@ usual Unixish file permissions.
 .It
 Logging:
 .Nm
-logs time, client IP, username, and the actual request to syslog.
+logs time, client IP address, username, and the actual request to syslog.
 .It
 chroot:
 .Nm
@@ -54,7 +54,7 @@ configured to be using
 .Nm
 as the default shell.)
 .It
-WinSCP 2.0 compatibility.
+WinSCP 2.0 compatibility:
 .Nm
 can be compiled in WinSCP compatibility mode (it will by default) that will
 permit a "semi-interactive" shell that WinSCP can use.
@@ -102,6 +102,7 @@ The default location for the chrooted version of
 To be a proper shell, it has to be included here.
 .El
 .Sh SEE ALSO
+.Xr chroot 2 ,
 .Xr ssh 1 ,
 .Xr scp 1 ,
 .Xr sftp 1 ,

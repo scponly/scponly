@@ -24,8 +24,8 @@ Step 1.  Decide if you want to use chroot() functionality.
   - If you are still unsure, read the code.  There is a seteuid
 	that ensures that the execution of any commands is
 	never done with an effective uid of 0.
-  - Lastly, I make no gaurantees this code is unexploitable.  Any
-	system administrator utilizing scponly bears the full
+  - Lastly, I make no guarantees that this code is unexploitable.  
+	Any system administrator utilizing scponly bears the full
 	responsibility for maintaining a secure system. (see 18/08/02
 	CHANGELOG!)
   - Without chroot() functionality, scponly still functions just
