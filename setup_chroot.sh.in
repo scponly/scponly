@@ -117,18 +117,23 @@ for bin in $BINARIES; do
 done
 
 LIB_LIST=`@PROG_LDD@ $BINARIES 2> /dev/null | @PROG_CUT@ -f2 -d\> | @PROG_CUT@ -f1 -d\( | @PROG_GREP@ "^ " | @PROG_SORT@ -u`
+
+LDSOFOUND=0
 if [ -f /usr/libexec/ld.so ]; then
 	LIB_LIST="$LIB_LIST /usr/libexec/ld.so"
-else 
-	if [ -f /lib/ld-linux.so.2 ]; then 
-		LIB_LIST="$LIB_LIST /lib/ld-linux.so.2"
-	else 
-		if [ -f /usr/libexec/ld-elf.so.1 ]; then
-			LIB_LIST="$LIB_LIST /usr/libexec/ld-elf.so.1"
-		else
-			fail i cant find your equivalent of ld.so
-		fi
-	fi
+	LDSOFOUND=1
+fi
+if [ -f /lib/ld-linux.so.2 ]; then 
+	LIB_LIST="$LIB_LIST /lib/ld-linux.so.2"
+	LDSOFOUND=1
+fi
+if [ -f /usr/libexec/ld-elf.so.1 ]; then
+	LIB_LIST="$LIB_LIST /usr/libexec/ld-elf.so.1"
+	LDSOFOUND=1
+fi
+
+if [ $LDSOFOUND -eq 0 ]; then
+	fail i cant find your equivalent of ld.so
 fi
 
 /bin/ls /lib/libnss_compat* 2>&1 > /dev/null
