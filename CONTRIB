@@ -1,4 +1,22 @@
-Ian W. D. Langworth <bass@ccs.neu.edu>
+François Gouget <fgouget@codeweavers.com>
+	- found his solaris strsep on the web
+
+David N. Blank-Edelman 
+	- mailing list configuration
+
+Martin Werthmoeller <mw@werthmoeller.de>
+	- linux libnss_compat* fix
+
+Olaf Menkens <Olaf.Menkens@IMK.Fraunhofer.DE>
+	- IRIX compatibility notes
+
+Andrew Ruthven <puck@connections.net.nz>
+	- realloc() bugfix
+
+Fabian Ruff <fabian@progra.de>
+	- linux compatible notes for setup_chroot.sh
+
+Ian W. D. Langworth <www.logicallemon.com>
 	- another Solaris compile time fix
 
 Michael <ysothoth@wsia.csi.cuny.edu>
@@ -17,7 +35,7 @@ Ken McGlothlen <mcglk@artlogix.com>
 
 Andrew Chadwick <andrewc@piffle.org>
 	- syslog implementation
-	- autoconf work
+	- practically all of the autoconf work
 
 dkl at tessellated dot net
 	- compatibility notes and patch

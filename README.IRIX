@@ -1,0 +1,109 @@
+From Olaf.Menkens@IMK.Fraunhofer.DE Sat Oct 26 16:16:47 2002
+Date: Wed, 09 Oct 2002 20:58:39 +0200
+To: joe@sublimation.org
+Subject: using scponly under IRIX
+
+Hi Joe,
+
+Thank you for developing scponly !
+This is the solution to avoid anonymous ftp uploads, which I was looking 
+for quite a while.
+
+Finally I managed to get scponly to work on SGI - IRIX in a chroot'ed 
+environment !
+
+I had to do some minor changes:
+
+ - to compile, I needed to run "env CC=gcc gmake install-chroot",
+   (gmake is GNU-make from /usr/freeware)
+
+ - in the sources I needed to change the call to openlog(), as 
+"LOG_AUTHPRIV" is unknown in IRIX. I used "LOG_AUTH" instead. (the only 
+source patch necessary !)  *** SOURCE CHANGE MADE IN SCPONLY-3.2 ***
+
+- the manual page is formatted in a way IRIX can't understand. As I'm no 
+expert in this, I decided to format it under Linux "man scponly > 
+scponly.8.out". This can be installed after compression on IRIX as a 
+"preformatted" man page into /usr/share/catman/local/cat8 as scponly.Z.
+
+ - setting up a chrooted environment under IRIX is quite different to 
+what is done by setup_chroot: Below I appended a list of all files, I 
+needed to install/copy.
+
+Notes to the chroot environment:
+ - IRIX supports three ABIs (o32, n32, n64), but most binaries use n32 
+today, so support for n32 should be sufficient (check with `file bin/*`)
+ - /lib32/rld is the runtime linker, which opens /dev/zero for some 
+unknown reason
+ - system(3) calls /sbin/sh, thus the link from /sbin to /bin
+ - "ldd bin/*", as done by setup_chroot doesn't work, as it fails for 
+the static binaries.
+
+Olaf
+
+P.S.: In case other users try to install scponly under IRIX, you might 
+decide to add this mail as "README.IRIX" to the source distribution. I 
+could also try to develop a patch to add IRIX compatibility, but this is 
+a rather difficult task, as some software (gcc, gmake, scp, libcrypto, 
+...) are nonstandard tools under IRIX and might be installed to 
+different places than on my machine.
+
+
+[server->home/scpguest] 172> ls -lR
+total 8
+drwxr-xr-x    2 root     sys         4096 Oct  9 20:06 bin/
+drwxr-xr-x    2 root     sys           17 Oct  9 18:43 dev/
+drwxr-xr-x    2 root     sys           31 Oct  9 19:33 etc/
+drwxr-xr-x    2 scpguest scponly       22 Oct  9 20:33 incoming/
+drwxr-xr-x    2 root     sys           83 Oct  9 18:50 lib32/
+lrwxr-xr-x    1 root     sys            3 Oct  9 20:00 sbin -> bin/
+drwxr-xr-x    3 root     sys           18 Oct  9 20:36 usr/
+
+./bin:
+total 2432
+-rwx--x--x    1 root     sys        14060 Oct  9 15:13 chmod*
+-rwx--x--x    1 root     sys        14104 Oct  9 15:14 chown*
+-rwx--x--x    1 root     sys        13824 Oct  9 15:14 groups*
+-rwx--x--x    1 root     sys        22200 Oct  9 18:51 ldd*
+-rwx--x--x    1 root     sys       316588 Oct  9 15:14 ln*
+-rwx--x--x    1 root     sys        39620 Oct  9 19:25 ls*
+-rwx--x--x    1 root     sys        13992 Oct  9 15:13 mkdir*
+lrwxr-xr-x    1 root     sys            2 Oct  9 18:46 mv -> ln*
+-rwx--x--x    1 root     sys         9568 Oct  9 15:14 pwd*
+-rwx--x--x    1 root     sys        18224 Oct  9 15:13 rm*
+-rwx--x--x    1 root     sys        13792 Oct  9 15:13 rmdir*
+-rwx--x--x    1 root     sys        64904 Oct  9 15:13 scp*
+-rwx--x--x    1 root     sys        68424 Oct  9 15:13 sftp-server*
+-rwx--x--x    1 root     sys       606532 Oct  9 15:13 sh*
+
+./dev:
+total 0
+crw-rw-rw-    1 root     sys        37,  0 Oct  9 20:29 zero
+
+./etc:
+total 16
+-rw-r--r--    1 root     sys           56 Oct  9 19:34 group
+-rw-r--r--    1 root     sys          194 Oct  9 19:32 passwd
+
+./incoming:
+total 0
+
+./lib32:
+total 10664
+-r-xr-xr-t    1 root     sys       2684664 Oct  9 18:42 libc.so.1*
+-rw-r--r--    1 root     sys       2053348 Oct  9 18:50 libcrypto.so.0
+-r--r--r--    1 root     sys         88132 Oct  9 18:47 libgen.so
+-rwxr-xr-x    1 root     sys        132724 Oct  9 18:50 libz.so*
+-rwxr-xr-x    1 root     sys        490256 Oct  9 18:40 rld*
+
+./usr:
+total 0
+drwxr-xr-x    2 root     sys           38 Oct  9 20:33 lib32/
+
+./usr/lib32:
+total 0
+lrwxr-xr-x    1 root     sys           21 Oct  9 20:33 libc.so.1 -> 
+../../lib32/libc.so.1*
+lrwxr-xr-x    1 root     sys           21 Oct  9 18:55 libgen.so -> 
+../../lib32/libgen.so
+

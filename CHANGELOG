@@ -1,3 +1,27 @@
+scponly v3.2
+	27 oct, 2002
+
+	realloc() fix
+	change exit values for hygeine and portability
+	TODO file added
+	numerous portability fixes to setup_chroot.sh.in
+	Solaris compatibility improvements
+	Irix compatibility improvements
+	added some chrooted Irix install notes in README.IRIX
+	some winscp2 fixes to reduce annoying popup errors
+	added a strsep clone for solaris
+
+scponly v3.1
+	10 sep, 2002
+
+	additional linux compatibility checks for setup_chroot.sh.in
+
+	configure script changes to fix moronic problem of not
+		being able to find /bin
+
+	added rsync compile time option.  this is a very untested
+		feature.
+
 scponly v3.0
 	04 sep, 2002
 

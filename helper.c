@@ -30,6 +30,29 @@ extern char username[MAX_USERNAME];
 extern char homedir[FILENAME_MAX];
 extern cmd_t commands[];
 
+#ifdef SOLARIS_COMPAT
+char* solaris_needs_strsep(char** str, char* delims)
+{
+    char* tmpstr;
+
+    if (*str==NULL) {
+        return NULL;
+    }
+
+    tmpstr=*str;
+    while (**str!='\0') {
+        if (strchr(delims,**str)!=NULL) {
+            **str='\0';
+            (*str)++;
+            return tmpstr;
+        }
+        (*str)++;
+    }
+    *str=NULL;
+    return tmpstr;
+}
+#endif
+
 void discard_vector(char **av)
 {
 	char **tmpptr=av;	
@@ -42,11 +65,16 @@ char *flatten_vector(char **av)
 {
 	char **tmpptr=av;	
 	char *temp=NULL;
+	char *crptr=NULL;
 	char *outbuf=NULL;
 	int len=0,newlen=0;
 
 	while (*tmpptr!=NULL)
 	{
+		if (NULL != (crptr=strchr(*tmpptr, '\n')))
+		{
+			*crptr=NULL;
+		}
 		if (outbuf!=NULL)
 		{
 			len = strlen(outbuf);
@@ -57,12 +85,12 @@ char *flatten_vector(char **av)
 			len = 0;
 			newlen=strlen(*tmpptr);
 		}
-		if (NULL == (temp = realloc (outbuf, newlen)))
+		if (NULL == (temp = realloc (outbuf, newlen + 1)))
 		{
 			perror("realloc");
 			if (outbuf)
 				free(outbuf);
-			exit(-1);
+			exit(EXIT_FAILURE);
 		}
 		outbuf=temp;
 		temp=NULL;
@@ -139,7 +167,11 @@ char **build_arg_vector(char *request)
 				*tmpstring++=NULL;
 				*ap=(inputstring+1);
 				
+#ifdef SOLARIS_COMPAT
+				if (solaris_needs_strsep(&tmpstring, WHITE) == NULL)
+#else
 				if (strsep(&tmpstring, WHITE) == NULL)
+#endif
 					break;
 				inputstring=tmpstring;
 		
@@ -149,7 +181,11 @@ char **build_arg_vector(char *request)
 			}
 		}
 		
+#ifdef SOLARIS_COMPAT
+        	if ((*ap = solaris_needs_strsep(&inputstring, WHITE)) == NULL)
+#else
         	if ((*ap = strsep(&inputstring, WHITE)) == NULL)
+#endif
 			break;
 		
                 if (**ap != '\0')
@@ -176,7 +212,11 @@ char **expand_wildcards(char **av_old)
 	char		**av_new=(char **)malloc(MAX_ARGC * (sizeof(char *)));
 	glob_t g;
 	int c_old,c_new,c;	// argument counters
+#ifdef SOLARIS_COMPAT
+	int flags = GLOB_NOCHECK;
+#else
 	int flags = GLOB_NOCHECK | GLOB_TILDE;
+#endif
 
 	g.gl_offs = c_new = c_old = 0;
 
@@ -250,7 +290,7 @@ inline char *strend (char *big, char *small)
 		if (tempbuf==NULL)
 		{
 			perror("malloc");
-			exit(-1);
+			exit(EXIT_FAILURE);
 		}
 		bzero(tempbuf,(blen-slen+1));
 		strncpy(tempbuf, big, blen-slen);

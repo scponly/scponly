@@ -11,6 +11,7 @@
 
 #define WINSCP_EOF_REQ_RETVAL	" ; echo \"WinSCP: this is end-of-file:$?\""
 #define WINSCP_EOF_REQ_ZERO	" ; echo \"WinSCP: this is end-of-file:0\""
+#define WINSCP_EOF_REQ_STATUS " ; echo \"WinSCP: this is end-of-file:$status\""
 #define WINSCP_BOF_REQ		"echo \"WinSCP: this is begin-of-file\" ; "
 
 #define WINSCP_EOF      "WinSCP: this is end-of-file:"

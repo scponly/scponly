@@ -86,6 +86,7 @@ fi
 @INSTALL@ -d $targetdir/lib
 @INSTALL@ -d $targetdir/usr/lib
 @INSTALL@ -d $targetdir/usr/libexec
+@INSTALL@ -d $targetdir/usr/libexec/openssh
 @INSTALL@ -d $targetdir/bin
 @INSTALL@ -d $targetdir/etc
 
@@ -94,7 +95,20 @@ for bin in $BINARIES; do
 done
 
 LIB_LIST=`@PROG_LDD@ $BINARIES 2> /dev/null | @PROG_CUT@ -f2 -d\> | @PROG_CUT@ -f1 -d\( | @PROG_GREP@ "^ " | @PROG_SORT@ -u`
-LIB_LIST="$LIB_LIST /usr/libexec/ld.so"
+if [ -f /usr/libexec/ld.so ]; then
+	LIB_LIST="$LIB_LIST /usr/libexec/ld.so"
+else if [ -f /lib/ld-linux.so.2 ]; then 
+		LIB_LIST="$LIB_LIST /lib/ld-linux.so.2"
+	else
+		fail i cant find your equivalent of ld.so
+	fi
+fi
+
+@PROG_LS@ /lib/libnss_compat*
+if [ $? -eq 0 ]; then
+	LIB_LIST="$LIB_LIST /lib/libnss_compat* /lib/ld.so"
+fi
+
 if [ "x$LIB_LIST" != "x" ]; then
 	for lib in $LIB_LIST; do
 		@INSTALL@ $lib $targetdir/$lib
@@ -120,12 +134,11 @@ fi
 # the following is VERY BSD centric
 # i check for pwd_mkdb before trying to use it
 if [ x@PROG_PWD_MKDB@ = x ]; then
-	echo "this script requires pwd_mkdb to stage a partial password database in your new chrooted dir"
-	echo "depending on your UNIX flavor, the following may be a sufficient substitute:"
-	echo -e "\n\tgrep $targetuser /etc/passwd > $targetdir/etc/passwd"
-	fail "please email joe@sublimation.org with the steps you used if you succeed on a platform this script will not run on and i will update the script"
+	@PROG_GREP@ $targetuser /etc/passwd > $targetdir/etc/passwd
+else
+	@PROG_GREP@ $targetuser /etc/master.passwd > $targetdir/etc/master.passwd
+	@PROG_PWD_MKDB@ -d "$targetdir/etc" $targetdir/etc/master.passwd
+	@PROG_RM@ -rf $targetdir/etc/master.passwd $targetdir/etc/spwd.db
 fi
-@PROG_GREP@ $targetuser /etc/master.passwd > $targetdir/etc/master.passwd
-pwd_mkdb -d "$targetdir/etc" $targetdir/etc/master.passwd
-rm -rf $targetdir/etc/master.passwd $targetdir/etc/spwd.db
+
 

@@ -10,6 +10,7 @@
 #include <sys/types.h>	// for fork, wait
 #include <sys/wait.h>	// for wait
 #include <unistd.h>	// for exit, fork
+#include <stdlib.h>	// EXIT_*
 #include <errno.h>
 #include <syslog.h>
 #include "scponly.h"
@@ -20,29 +21,37 @@ int chrooted=0;
 char username[MAX_USERNAME];
 char homedir[FILENAME_MAX];
 
-cmd_t commands[] = { 
+cmd_t commands[] =
+{ 
 #ifdef ENABLE_SFTP
 	{ PROG_SFTP_SERVER, 0 },
-#endif
-#ifdef ENABLE_SCP
+#endif /*ENABLE_SFTP*/
+
+#ifdef ENABLE_SCP2
 	{ PROG_LS, 1 }, 
 	{ PROG_CHMOD, 1 },
 	{ PROG_CHOWN, 1 },
 	{ PROG_MKDIR, 1 },
 	{ PROG_RMDIR, 1 },
 	{ PROG_SCP, 1 },
-	{ PROG_CHMOD, 1 },
 	{ PROG_LN, 1 },
 	{ PROG_MV, 1 },
 	{ PROG_RM, 1 },
+	{ PROG_CD, 1 },
+#endif /*ENABLE_SCP2*/
+
 #ifdef WINSCP_COMPAT
 	{ PROG_GROUPS, 0 },
 	{ PROG_PWD, 0 },
 	{ PROG_ECHO, 1 },
-#endif
-	{ PROG_CD, 1 },
-#endif
-	NULL };
+#endif /*WINSCP_COMPAT*/
+
+#ifdef ENABLE_RSYNC
+	{ PROG_RSYNC, 1 },
+#endif /*ENABLE_RSYNC*/
+
+	NULL
+};
 
 int process_ssh_request(char *request);
 int winscp_regular_request(char *request);
@@ -62,10 +71,14 @@ int main (int argc, char **argv)
 		fscanf(debugfile,"%u",&debuglevel);
 		fclose(debugfile);
 	}
+#ifndef SOLARIS_COMPAT
 	if (debuglevel > 1) // debuglevel 1 will still log to syslog
 		logopts |= LOG_PERROR;
+#endif
 
 #ifdef SOLARIS_COMPAT 
+        openlog(PACKAGE_NAME, logopts, LOG_AUTH);
+#elseif IRIX_COMPAT
         openlog(PACKAGE_NAME, logopts, LOG_AUTH);
 #else
         if (debuglevel > 1) // debuglevel 1 will still log to syslog
@@ -108,7 +121,7 @@ int main (int argc, char **argv)
 	if (getuid()==0)
 	{	
 		syslog(LOG_ERR, "root login denied [%s]", logstamp());
-		exit(-1);
+		exit(EXIT_FAILURE);
 	}
 
 #ifdef WINSCP_COMPAT
@@ -119,12 +132,12 @@ int main (int argc, char **argv)
 	{
 		if (debuglevel)
 			syslog (LOG_ERR, "incorrect number of args");
-		exit(-1);
+		exit(EXIT_FAILURE);
 	}
 	if (!get_uservar())
 	{
 		syslog (LOG_ERR, "%s is misconfigured. contact sysadmin.", argv[0]);
-		exit (-1);
+		exit (EXIT_FAILURE);
 	}
 
 #ifdef CHROOTED_NAME
@@ -139,7 +152,7 @@ int main (int argc, char **argv)
 				syslog (LOG_ERR, "chroot: %m");
 			}
 			syslog (LOG_ERR, "couldn't chroot to %s [%s]", homedir, logstamp());
-			exit(-1);
+			exit(EXIT_FAILURE);
 		}
 	}
 #endif //CHROOTED_NAME
@@ -149,7 +162,7 @@ int main (int argc, char **argv)
 	if (-1==(seteuid(getuid())))
 	{
 		syslog (LOG_ERR, "couldn't revert to my real uid. seteuid: %m");
-		exit(-1);
+		exit(EXIT_FAILURE);
 	}
 
 #ifdef WINSCP_COMPAT
@@ -160,7 +173,7 @@ int main (int argc, char **argv)
 		if (-1==process_winscp_requests())
 		{
 			syslog(LOG_ERR, "failed WinSCP compatibility mode [%s]", logstamp());
-			exit(-1);
+			exit(EXIT_FAILURE);
 		}
 	}
 #else
@@ -169,11 +182,11 @@ int main (int argc, char **argv)
 	else if (-1==process_ssh_request(argv[2]))
 	{
 		syslog(LOG_ERR, "bad request: %s [%s]", argv[2], logstamp());
-		exit(-1);
+		exit(EXIT_FAILURE);
 	}
 	if (debuglevel)
 		syslog(LOG_DEBUG, "scponly completed");
-	exit(0);
+	exit(EXIT_SUCCESS);
 }
 
 #ifdef WINSCP_COMPAT
@@ -212,18 +225,38 @@ int winscp_regular_request(char *request)
 	if (NULL == new_request)
 	{
 		retzero=0;
-		new_request=strend(request, WINSCP_EOF_REQ_RETVAL);
+		new_request=strend(request, WINSCP_EOF_REQ_STATUS);
 		if (NULL == new_request)
 		{
-			printf ("command wasn't terminated with %s or %s\n",
-				WINSCP_EOF_REQ_RETVAL, WINSCP_EOF_REQ_ZERO);
-			return(-1);	// bogus termination
+			new_request=strend(request, WINSCP_EOF_REQ_RETVAL);
+			if (NULL == new_request)
+			{
+				printf ("command wasn't terminated with %s, %s or %s\n",
+					WINSCP_EOF_REQ_RETVAL, WINSCP_EOF_REQ_ZERO, WINSCP_EOF_REQ_STATUS);
+				return(-1);	// bogus termination
+			}
 		}
 	}
 	/*
+	 *	here is where we fool winscp clients into believing we are a real shell
+	 */
+	if ((exact_match(new_request, "echo \"$status\"")) ||
+		(exact_match(new_request, "echo \"$?\"")))
+	{
+		printf ("0\n");
+		fflush(stdout);
+	}
+#if 0
+	else if (exact_match(new_request, "groups"))
+	{
+		printf("joe wheel php\n");
+		fflush(stdout);
+	}
+#endif
+	/*
 	 *  ignore unalias and unset commands
 	 */
-	if ((NULL!=strbeg(new_request,"unset ")) ||
+	else if ((NULL!=strbeg(new_request,"unset ")) ||
 		(NULL!=strbeg(new_request,"unalias ")))
 		retval=0;
 	else
@@ -313,7 +346,7 @@ int process_ssh_request(char *request)
                 if (destdir == NULL)
                 {
                         perror("malloc");
-                        exit(-1);
+                        exit(EXIT_FAILURE);
                 }
 
                 /*
@@ -351,8 +384,10 @@ int process_ssh_request(char *request)
 	 * we only process wildcards for scp commands
 	 */
 #ifdef ENABLE_WILDCARDS
+#ifdef ENABLE_SCP2
 	if (exact_match(av[0],PROG_SCP))
 		av = expand_wildcards(av);
+#endif
 #endif
 
 	flat_request = flatten_vector(av);
@@ -412,6 +447,6 @@ int process_ssh_request(char *request)
 	}
 	else
 #endif 
-		exit(-1);
+		exit(EXIT_FAILURE);
 }
 

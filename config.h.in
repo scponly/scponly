@@ -4,17 +4,24 @@
 
 /* Features */
 #undef SOLARIS_COMPAT
+#undef IRIX_COMPAT
 #undef WINSCP_COMPAT
 #undef GFTP_COMPAT
-#undef ENABLE_SCP
+#undef ENABLE_SCP2
 #undef ENABLE_SFTP
+#undef ENABLE_RSYNC
 #undef ENABLE_WILDCARDS
 #undef CHROOTED_NAME
 #undef HAVE_WORDEXP
 #undef HAVE_GLOB
 
-/* Binaries which are launched by core scponly */
+/* Binaries launched in sftp compat mode */
+#ifdef ENABLE_SFTP
 #undef PROG_SFTP_SERVER
+#endif
+
+/* Binaries launched by vanilla- and win-SCP modes */
+#ifdef ENABLE_SCP2
 #undef PROG_LS
 #undef PROG_SCP
 #undef PROG_RM
@@ -25,11 +32,17 @@
 #undef PROG_MKDIR
 #undef PROG_RMDIR
 #define PROG_CD "cd"
+#endif /*ENABLE_SCP2*/
 
 /* Binaries launched in WinSCP compatibility mode */
 #ifdef WINSCP_COMPAT
 #undef PROG_PWD
 #undef PROG_GROUPS
 #undef PROG_ECHO
+#endif
+
+/* Rsync compatability mode */
+#ifdef RSYNC_COMPAT
+#undef PROG_RSYNC
 #endif
 
