@@ -1207,7 +1207,7 @@ cat >>confdefs.h <<\_ACEOF
 #define PACKAGE_NAME 1
 _ACEOF
 
-PACKAGE_VERSION=3.8
+PACKAGE_VERSION=3.9
 cat >>confdefs.h <<\_ACEOF
 #define PACKAGE_VERSION 1
 _ACEOF
