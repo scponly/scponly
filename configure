@@ -830,7 +830,6 @@ Optional Features:
   --disable-gftp-compat   disable gftp compatibility
   --disable-winscp-compat disable WinSCP compatibility mode
   --disable-scp-compat    disable vanilla scp compatibility too!
-  --enable-cvs-compat     enable cvs compatibility
   --enable-rsync-compat   enable rsync compatibility
   --enable-chrooted-binary
                           install chrooted binary 'scponlyc'
@@ -1199,6 +1198,10 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 PACKAGE=scponly
+cat >>confdefs.h <<\_ACEOF
+#define PACKAGE 1
+_ACEOF
+
 PACKAGE_NAME=scponly
 cat >>confdefs.h <<\_ACEOF
 #define PACKAGE_NAME 1
@@ -2556,22 +2559,6 @@ _ACEOF
 
 fi;
 
-# Check whether --enable-cvs-compat or --disable-cvs-compat was given.
-if test "${enable_cvs_compat+set}" = set; then
-  enableval="$enable_cvs_compat"
-
-              if test "x$enableval" != "xno"; then
-                      cat >>confdefs.h <<\_ACEOF
-#define CVS_COMPAT 1
-_ACEOF
-
-              fi
-
-else
-
-              echo -n
-fi;
-
 # Check whether --enable-rsync-compat or --disable-rsync-compat was given.
 if test "${enable_rsync_compat+set}" = set; then
   enableval="$enable_rsync_compat"
@@ -3184,56 +3171,6 @@ fi
 	  test -z $scponly_PROG_ECHO && echo "Can't find path to 'echo'" && exit 1
 	  cat >>confdefs.h <<_ACEOF
 #define PROG_ECHO "$scponly_PROG_ECHO"
-_ACEOF
-
-fi
-
-# cvs-compat conditionals:
-if test "x$enable_cvs_compat" != "x" && test "x$enable_cvs_compat" != "xno"; then
-        { echo "$as_me:$LINENO: enabling cvs compatability..." >&5
-echo "$as_me: enabling cvs compatability..." >&6;}
-	# Extract the first word of "cvs", so it can be a program name with args.
-set dummy cvs; ac_word=$2
-echo "$as_me:$LINENO: checking for $ac_word" >&5
-echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6
-if test "${ac_cv_path_scponly_PROG_CVS+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  case $scponly_PROG_CVS in
-  [\\/]* | ?:[\\/]*)
-  ac_cv_path_scponly_PROG_CVS="$scponly_PROG_CVS" # Let the user override the test with a path.
-  ;;
-  *)
-  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
-for as_dir in `echo "$PATH:/bin:/usr/bin:/sbin:/usr/sbin" | sed -e 's/:/ /'`
-do
-  IFS=$as_save_IFS
-  test -z "$as_dir" && as_dir=.
-  for ac_exec_ext in '' $ac_executable_extensions; do
-  if $as_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
-    ac_cv_path_scponly_PROG_CVS="$as_dir/$ac_word$ac_exec_ext"
-    echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
-    break 2
-  fi
-done
-done
-
-  ;;
-esac
-fi
-scponly_PROG_CVS=$ac_cv_path_scponly_PROG_CVS
-
-if test -n "$scponly_PROG_CVS"; then
-  echo "$as_me:$LINENO: result: $scponly_PROG_CVS" >&5
-echo "${ECHO_T}$scponly_PROG_CVS" >&6
-else
-  echo "$as_me:$LINENO: result: no" >&5
-echo "${ECHO_T}no" >&6
-fi
-
-	  test -z $scponly_PROG_CVS && echo "Can't find path to 'cvs'" && exit 1
-	  cat >>confdefs.h <<_ACEOF
-#define PROG_CVS "$scponly_PROG_CVS"
 _ACEOF
 
 fi
@@ -5104,7 +5041,6 @@ s,@scponly_PROG_RMDIR@,$scponly_PROG_RMDIR,;t t
 s,@scponly_PROG_PWD@,$scponly_PROG_PWD,;t t
 s,@scponly_PROG_GROUPS@,$scponly_PROG_GROUPS,;t t
 s,@scponly_PROG_ECHO@,$scponly_PROG_ECHO,;t t
-s,@scponly_PROG_CVS@,$scponly_PROG_CVS,;t t
 s,@scponly_PROG_RSYNC@,$scponly_PROG_RSYNC,;t t
 s,@CPP@,$CPP,;t t
 s,@ALLOCA@,$ALLOCA,;t t

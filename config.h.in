@@ -7,7 +7,6 @@
 #undef IRIX_COMPAT
 #undef WINSCP_COMPAT
 #undef GFTP_COMPAT
-#undef CVS_COMPAT
 #undef RSYNC_COMPAT
 #undef ENABLE_SCP2
 #undef ENABLE_SFTP
@@ -40,11 +39,6 @@
 #undef PROG_PWD
 #undef PROG_GROUPS
 #undef PROG_ECHO
-#endif
-
-/* CVS compatability mode */
-#ifdef CVS_COMPAT 
-#undef PROG_CVS
 #endif
 
 /* Rsync compatability mode */

@@ -11,6 +11,7 @@ dnl
 dnl Say what we are:
 AC_INIT([scponly.c])
 PACKAGE=scponly
+AC_DEFINE(PACKAGE)
 PACKAGE_NAME=scponly
 AC_DEFINE(PACKAGE_NAME)
 PACKAGE_VERSION=3.5
@@ -117,16 +118,6 @@ AC_ARG_ENABLE([scp-compat],
               AC_DEFINE([ENABLE_SCP2])
       ])
 
-AC_ARG_ENABLE([cvs-compat],
-      AC_HELP_STRING([--enable-cvs-compat], [enable cvs compatibility]),
-      [
-              if test "x$enableval" != "xno"; then
-                      AC_DEFINE([CVS_COMPAT])
-              fi
-      ],[
-              echo -n      dnl  Defaults to off, must be turned on explicitly
-      ])
-
 AC_ARG_ENABLE([rsync-compat],
       AC_HELP_STRING([--enable-rsync-compat], [enable rsync compatibility]),
       [
@@ -169,12 +160,6 @@ if test "x$enable_winscp_compat" != "xno"; then
 	SCPONLY_PATH_PROG_DEFINE([PROG_GROUPS], [groups], [/bin:/usr/bin:/sbin:/usr/sbin])
 	SCPONLY_PATH_PROG_DEFINE([PROG_ECHO],   [echo],   [/bin:/usr/bin:/sbin:/usr/sbin])
 fi
-
-# cvs-compat conditionals:
-if test "x$enable_cvs_compat" != "x" && test "x$enable_cvs_compat" != "xno"; then
-        AC_MSG_NOTICE([enabling cvs compatability...])
-	SCPONLY_PATH_PROG_DEFINE([PROG_CVS],   [cvs], [/bin:/usr/bin:/sbin:/usr/sbin])
-fi	
 
 # rsync-compat conditionals:
 if test "x$enable_rsync_compat" != "x" && test "x$enable_rsync_compat" != "xno"; then

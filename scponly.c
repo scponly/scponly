@@ -47,10 +47,6 @@ cmd_t commands[] =
 	{ PROG_ECHO, 1 },
 #endif /*WINSCP_COMPAT*/
 
-#ifdef CVS_COMPAT
-	{ PROG_CVS, 1 },
-#endif /*ENABLE_CVS */
-
 #ifdef RSYNC_COMPAT
 	{ PROG_RSYNC, 1 },
 #endif /*ENABLE_RSYNC*/
