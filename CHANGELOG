@@ -1,10 +1,10 @@
 
 scponly v3.7 - 17 mar 2003,
-	rerepaired freebsd configure and setup_chroot problems
+	rerepaired freebsd 4.7 configure and setup_chroot problems
 
 scponly v3.6 - 07 mar 2003,
 	fixed the rsync compatibility configure options
-	repaired freebsd configure and setup_chroot problems
+	repaired freebsd 4.7 configure and setup_chroot problems
 	added cool /chrootdir//homedir home directory interpretation
 		- thanks to Stefan Sami-Soueiha <stefan.sami@gmx.de> for his patch
 
