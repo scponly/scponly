@@ -1,0 +1,23 @@
+
+scponly v1.2
+
+jan 10th 2002:
+	applied a patch submitted by dkl at tessellated dot net.
+
+	increases compatibility with wintendo style sftp/scp clients by also
+	allowing things like chmod, pwd, etc
+
+
+scponly v1.1
+
+feb 23rd - 8:36pm EST:
+
+	I've discovered a rather glaring problem with the original release.
+	It seems that while implementing chroot() functionality, I completely
+	broke the wildcard matching.  This is because "/bin/sh" is required
+	to expand wildcards.  
+
+	Though it is undesirable to have ANY command interpretter in the chroot
+	path, it should not be possible to invoke sh interactively or remotely.
+
+	This fix vastly increases the usability of scponly.	

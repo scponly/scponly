@@ -1,0 +1,77 @@
+
+http://sublimation.org/scponly
+
+"scponly" is an alternative 'shell' (of sorts) for system
+administrators who would like to provide access to remote users to
+both read and write local files without providing any remote
+execution priviledges.  Functionally, it is best described as a
+wrapper to the "tried and true" ssh suite of applications.
+
+NOTE - About a week after writing this, a potential vulnerability
+	was discovered in SSH1.  If you're going to use ssh1 
+	with scponly, patch it.
+
+A typical usage of scponly is in creating a semi-public account not
+unlike the concept of anonymous login for ftp.  This allows an
+administrator to share files in the same way an anon ftp setup
+would, only employing all the protection that ssh provides.  This is
+especially significant if you consider that ftp authentications
+traverse public networks in a plaintext format.
+
+Instead of just a single anon user, scponly supports configuring
+potentially many users, each of which could could be set up to provide
+access to distinct directory trees.  Aside from the installation details
+(see INSTALL), each of these users would have their default shell in
+/etc/passwd set to "/usr/local/sbin/scponly" (or wherever you choose
+to install it).  This would mean users with this shell can neither
+login interactively or execute commands remotely.  They can however,
+scp files in and out, governed by the usual unix file permissions.
+
+Some Features:
+==============
+
+- logging:  scponly logs time, client IP, username, and the actual
+request to the scponly.log file (by default located in /var/logs)
+
+- chroot: if compiled with this functionality (see INSTALL), scponly
+can chroot to the user's home directory, disallowing access to the rest
+of the filesystem.  
+
+- sftp compatibility.  my testing of sftp against an acponly user 
+worked great.  this is probably the cleanest and most usable way 
+for an scponly user to access files.  (of course, sftp is not ssh1 
+compatible.)
+
+- file listing: aside from just scp, scponly allows "ls" commands to
+be executed remotely.  this allows remote users to explore the
+directory structure remotely.  
+
+- security checks: root login is disallowed (though root
+should never be configured to be using scponly as the default shell.)
+
+How it works: 
+============= 
+If you were to examine the arguments passed to a shell by sshd upon
+opening a remote connection, the structure of the argument vector
+invariably looks like this:
+
+<shell name> -c <remote command>
+
+scponly validates remote requests by examining the third argument.  
+The only commands allowed are "scp" (for ssh1), "sftp-server" (for
+ssh2") and "ls".  Arguments to these commands are passed along
+unmolested.  scponly also verfies the request by disallowing what a
+shell would interpret as "special characters".  This prevents
+someone from piggybacking additional commands onto a valid scp
+request.  It may seem that using scponly would prevent using scp to
+copy files that really do contain special characters.  However,
+copying files with special characters in their names can be
+accomplished by using wildcards (which are allowable characters) to
+match the filenames.
+
+scponly doesnt do anything to manage read/write permissions.  The
+ssh applications already do that just fine.  If you use scponly, be
+aware that good old unix file permissions are still doing the work
+of protecting your files.
+
+3debe8e4f1c654a658b48dfdc5c2cf9d
