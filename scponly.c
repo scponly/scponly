@@ -107,12 +107,12 @@ int main (int argc, char **argv)
 		fscanf(debugfile,"%u",&debuglevel);
 		fclose(debugfile);
 	}
-#ifndef SOLARIS_COMPAT
+#ifndef UNIX_COMPAT
 	if (debuglevel > 1) // debuglevel 1 will still log to syslog
 		logopts |= LOG_PERROR;
 #endif
 
-#ifdef SOLARIS_COMPAT 
+#ifdef UNIX_COMPAT 
         openlog(PACKAGE_NAME, logopts, LOG_AUTH);
 #elif IRIX_COMPAT
         openlog(PACKAGE_NAME, logopts, LOG_AUTH);
@@ -148,7 +148,7 @@ int main (int argc, char **argv)
 			syslog(LOG_DEBUG, "\targ %u is %s", i, argv[i]);
 	}
         if (debuglevel)
-#ifdef SOLARIS_COMPAT
+#ifdef UNIX_COMPAT
                 syslog(LOG_DEBUG, "opened log at LOG_AUTH, opts 0x%08x", logopts);
 #else
                 syslog(LOG_DEBUG, "opened log at LOG_AUTHPRIV, opts 0x%08x", logopts);

@@ -31,7 +31,7 @@ extern char homedir[FILENAME_MAX];
 extern cmd_t commands[];
 extern cmd_arg_t dangerous_args[];
 
-#ifdef SOLARIS_COMPAT
+#ifdef UNIX_COMPAT
 char* solaris_needs_strsep(char** str, char* delims)
 {
     char* tmpstr;
@@ -207,7 +207,7 @@ char **build_arg_vector(char *request)
 				*tmpstring++='\0';
 				*ap=(inputstring+1);
 				
-#ifdef SOLARIS_COMPAT
+#ifdef UNIX_COMPAT
 				if (solaris_needs_strsep(&tmpstring, WHITE) == NULL)
 #else
 				if (strsep(&tmpstring, WHITE) == NULL)
@@ -221,7 +221,7 @@ char **build_arg_vector(char *request)
 			}
 		}
 		
-#ifdef SOLARIS_COMPAT
+#ifdef UNIX_COMPAT
         	if ((*ap = solaris_needs_strsep(&inputstring, WHITE)) == NULL)
 #else
         	if ((*ap = strsep(&inputstring, WHITE)) == NULL)
@@ -252,7 +252,7 @@ char **expand_wildcards(char **av_old)
 	char		**av_new=(char **)malloc(MAX_ARGC * (sizeof(char *)));
 	glob_t g;
 	int c_old,c_new,c;	// argument counters
-#ifdef SOLARIS_COMPAT
+#ifdef UNIX_COMPAT
 	int flags = GLOB_NOCHECK;
 #else
 	int flags = GLOB_NOCHECK | GLOB_TILDE;

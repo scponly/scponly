@@ -3,7 +3,7 @@
 #undef PACKAGE_BUGREPORT
 
 /* Features */
-#undef SOLARIS_COMPAT
+#undef UNIX_COMPAT
 #undef IRIX_COMPAT
 #undef WINSCP_COMPAT
 #undef GFTP_COMPAT
