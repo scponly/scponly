@@ -127,7 +127,7 @@ AC_ARG_ENABLE([winscp-compat],
 
 
 AC_ARG_WITH([default-chdir],
-	AC_HELP_STRING([--with-default-chdir=DIR], [cd to this directory after authentication (only for non-interactive logins)]),
+	AC_HELP_STRING([--with-default-chdir=DIR], [cd to this directory after authentication (only for interactive logins)]),
 		[
 			AC_DEFINE([ENABLE_DEFAULT_CHDIR])
 			AC_DEFINE_UNQUOTED([DEFAULT_CHDIR], ["$withval"]) 

@@ -864,7 +864,7 @@ Optional Packages:
                           defaults, to, on+guessed
   --with-default-chdir=DIR
                           cd to this directory after authentication (only for
-                          non-interactive logins)
+                          interactive logins)
 
 Some influential environment variables:
   CC          C compiler command
