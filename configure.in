@@ -44,6 +44,7 @@ AC_PATH_PROG(PROG_GREP, grep)
 AC_PATH_PROG(PROG_SORT, sort)
 AC_PATH_PROG(PROG_LDD, ldd)
 AC_PATH_PROG(PROG_USERADD, useradd)
+AC_PATH_PROG(PROG_PW, pw)
 AC_PATH_PROG(PROG_PWD_MKDB, pwd_mkdb)
 
 dnl Features wanted for this installation:
@@ -116,11 +117,21 @@ AC_ARG_ENABLE([scp-compat],
               AC_DEFINE([ENABLE_SCP2])
       ])
 
+AC_ARG_ENABLE([cvs-compat],
+      AC_HELP_STRING([--enable-cvs-compat], [enable cvs compatibility]),
+      [
+              if test "x$enableval" != "xno"; then
+                      AC_DEFINE([CVS_COMPAT])
+              fi
+      ],[
+              echo -n      dnl  Defaults to off, must be turned on explicitly
+      ])
+
 AC_ARG_ENABLE([rsync-compat],
       AC_HELP_STRING([--enable-rsync-compat], [enable rsync compatibility]),
       [
               if test "x$enableval" != "xno"; then
-                      AC_DEFINE([ENABLE_RSYNC])
+                      AC_DEFINE([RSYNC_COMPAT])
               fi
       ],[
               echo -n      dnl  Defaults to off, must be turned on explicitly
@@ -158,6 +169,12 @@ if test "x$enable_winscp_compat" != "xno"; then
 	SCPONLY_PATH_PROG_DEFINE([PROG_GROUPS], [groups], [/bin:/usr/bin:/sbin:/usr/sbin])
 	SCPONLY_PATH_PROG_DEFINE([PROG_ECHO],   [echo],   [/bin:/usr/bin:/sbin:/usr/sbin])
 fi
+
+# cvs-compat conditionals:
+if test "x$enable_cvs_compat" != "x" && test "x$enable_cvs_compat" != "xno"; then
+        AC_MSG_NOTICE([enabling cvs compatability...])
+	SCPONLY_PATH_PROG_DEFINE([PROG_CVS],   [cvs], [/bin:/usr/bin:/sbin:/usr/sbin])
+fi	
 
 # rsync-compat conditionals:
 if test "x$enable_rsync_compat" != "x" && test "x$enable_rsync_compat" != "xno"; then

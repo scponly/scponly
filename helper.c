@@ -73,7 +73,7 @@ char *flatten_vector(char **av)
 	{
 		if (NULL != (crptr=strchr(*tmpptr, '\n')))
 		{
-			*crptr=NULL;
+			*crptr='\0';
 		}
 		if (outbuf!=NULL)
 		{
@@ -164,7 +164,7 @@ char **build_arg_vector(char *request)
 		{
 			if (NULL != (tmpstring=strchr((inputstring+1),'"')))
 			{
-				*tmpstring++=NULL;
+				*tmpstring++='\0';
 				*ap=(inputstring+1);
 				
 #ifdef SOLARIS_COMPAT

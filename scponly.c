@@ -20,6 +20,7 @@ int winscp_mode=0;
 int chrooted=0;
 char username[MAX_USERNAME];
 char homedir[FILENAME_MAX];
+char chrootdir[FILENAME_MAX];
 
 cmd_t commands[] =
 { 
@@ -46,7 +47,11 @@ cmd_t commands[] =
 	{ PROG_ECHO, 1 },
 #endif /*WINSCP_COMPAT*/
 
-#ifdef ENABLE_RSYNC
+#ifdef CVS_COMPAT
+	{ PROG_CVS, 1 },
+#endif /*ENABLE_CVS */
+
+#ifdef RSYNC_COMPAT
 	{ PROG_RSYNC, 1 },
 #endif /*ENABLE_RSYNC*/
 
@@ -143,15 +148,27 @@ int main (int argc, char **argv)
 #ifdef CHROOTED_NAME
 	if (chrooted)
 	{
+		char *root_dir = chrootdir;
+
+		strcpy(chrootdir, homedir);
+		while((root_dir = strchr(root_dir, '/')) != NULL) 
+		{
+			if (strncmp(root_dir, "//", 2) == 0) 
+			{
+				*root_dir = '\0';
+				break;
+			}
+			root_dir++;
+		}
 		if (debuglevel)
-			syslog (LOG_DEBUG, "chrooting to dir: \"%s\"", homedir);
-		if (-1==(chroot(homedir)))
+			syslog (LOG_DEBUG, "chrooting to dir: \"%s\"", chrootdir);
+		if (-1==(chroot(chrootdir)))
 		{
 			if (debuglevel)
 			{
 				syslog (LOG_ERR, "chroot: %m");
 			}
-			syslog (LOG_ERR, "couldn't chroot to %s [%s]", homedir, logstamp());
+			syslog (LOG_ERR, "couldn't chroot to %s [%s]", chrootdir, logstamp());
 			exit(EXIT_FAILURE);
 		}
 	}
