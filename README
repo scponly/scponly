@@ -38,7 +38,7 @@ to the rest of the filesystem.
 worked great.  this is probably the cleanest and most usable way 
 for an scponly user to access files.
 
-- WinSCP 2.0 compatibility.
+- WinSCP 2.0/3.0 compatibility.
 
 - gftp compatibilty
 

@@ -120,6 +120,10 @@ Step 7. You will need to install some directories, passwd files,
 
 		make jail
 
+	Please be aware that chroot installation varies WIDELY from 
+	system to system.  check in the build_extras directory if
+	make jail has failed you.
+
 	
 That's it, you're done!
 
@@ -136,7 +140,8 @@ because WinSCP will attempt to run "groups" upon connection initialization.
 You have three choices:
  - you can either put /bin/sh in your jail, which is a security problem 
  - you can deselect "lookup user groups" in the WinSCP configuration
- - you can "make groups" using the provided groups.c 
+ - you can "make groups" using the provided groups.c and move the fake
+	groups program into your chroot.
 
 - There are additional notes and scripts in the "build_extras" directory
 	for specific platforms 
