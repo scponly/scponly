@@ -134,8 +134,10 @@ jail.  This is only a problem when you are also using WinSCP compatibiliy,
 because WinSCP will attempt to run "groups" upon connection initialization.
 
 You have three choices:
-	- you can either put /bin/sh in your jail, which is a security problem 
-	- you can deselect "lookup user groups" in the WinSCP configuration
-	- you can "make groups" using the provided groups.c 
+ - you can either put /bin/sh in your jail, which is a security problem 
+ - you can deselect "lookup user groups" in the WinSCP configuration
+ - you can "make groups" using the provided groups.c 
 
-
+- There are additional notes and scripts in the "build_extras" directory
+	for specific platforms 
+	
