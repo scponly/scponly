@@ -50,6 +50,10 @@ cmd_t commands[] =
 	{ PROG_ECHO, 1 },
 #endif /*WINSCP_COMPAT*/
 
+#ifdef UNISON_COMPAT
+	{ PROG_UNISON, 1 },
+#endif /*ENABLE_UNISON*/
+
 #ifdef RSYNC_COMPAT
 	{ PROG_RSYNC, 1 },
 #endif /*ENABLE_RSYNC*/
@@ -326,7 +330,8 @@ int process_ssh_request(char *request)
 	char *flat_request,*tmpstring, *tmprequest;
 	char bad_winscp3str[] = "test -x /usr/lib/sftp-server && exec /usr/lib/sftp-server test -x /usr/local/lib/sftp-server && exec /usr/local/lib/sftp-server exec sftp-server";
 	int retval;
-        int reqlen=strlen(request);
+	int reqlen=strlen(request);
+	char *env[2] = { NULL, NULL };
 
 	if (debuglevel)
 		syslog(LOG_DEBUG, "processing request: \"%s\"\n", request);
@@ -363,6 +368,7 @@ int process_ssh_request(char *request)
 	}
 #endif
 
+#ifdef RESTRICTIVE_FILENAMES
 	/*
 	 * we flat out reject special chars
 	 */
@@ -371,6 +377,7 @@ int process_ssh_request(char *request)
 		free(tmprequest);
 		return(-1);
 	}
+#endif
 
 #ifdef WINSCP_COMPAT
         if (strbeg(tmprequest,PROG_CD))
@@ -429,13 +436,25 @@ int process_ssh_request(char *request)
 
 	if (valid_arg_vector(av))
 	{
+
+#ifdef UNISON_COMPAT
+		if (((strlen(homedir) + 6 ) > FILENAME_MAX) ||
+			(-1 == asprintf( &env[0], "HOME=%s", homedir)))
+		{
+			syslog(LOG_ERR, "could not set HOME environment variable(%s))", logstamp());
+			exit(EXIT_FAIL);
+		}
+		if (debug)
+			syslog(LOG_DEBUG, "set HOME environment variable to %s (%s))", env[0], logstamp());
+#endif 
+
 		syslog(LOG_INFO, "running: %s (%s)", flat_request, logstamp());
 #ifdef WINSCP_COMPAT
 		if (winscp_mode)
 		{
 			int status=0;
 			if (fork() == 0)
-				retval=execve(av[0],av,NULL);
+				retval=execve(av[0],av,env);
 			else
 			{
 				wait(&status);

@@ -826,10 +826,13 @@ if test -n "$ac_init_help"; then
 Optional Features:
   --disable-FEATURE       do not include FEATURE (same as --enable-FEATURE=no)
   --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
+  --disable-restrictive-names
+                          disable restrictive filename checks
   --disable-wildcards     disable wildcard processing
   --disable-gftp-compat   disable gftp compatibility
   --disable-winscp-compat disable WinSCP compatibility mode
   --disable-scp-compat    disable vanilla scp compatibility too!
+  --enable-unison-compat  enable unison compatibility
   --enable-rsync-compat   enable rsync compatibility
   --enable-chrooted-binary
                           install chrooted binary 'scponlyc'
@@ -1207,7 +1210,7 @@ cat >>confdefs.h <<\_ACEOF
 #define PACKAGE_NAME 1
 _ACEOF
 
-PACKAGE_VERSION=3.9
+PACKAGE_VERSION=3.10
 cat >>confdefs.h <<\_ACEOF
 #define PACKAGE_VERSION 1
 _ACEOF
@@ -2558,6 +2561,45 @@ else
 echo "${ECHO_T}no" >&6
 fi
 
+# Extract the first word of "rm", so it can be a program name with args.
+set dummy rm; ac_word=$2
+echo "$as_me:$LINENO: checking for $ac_word" >&5
+echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6
+if test "${ac_cv_path_PROG_RM+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  case $PROG_RM in
+  [\\/]* | ?:[\\/]*)
+  ac_cv_path_PROG_RM="$PROG_RM" # Let the user override the test with a path.
+  ;;
+  *)
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+  for ac_exec_ext in '' $ac_executable_extensions; do
+  if $as_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
+    ac_cv_path_PROG_RM="$as_dir/$ac_word$ac_exec_ext"
+    echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+done
+
+  ;;
+esac
+fi
+PROG_RM=$ac_cv_path_PROG_RM
+
+if test -n "$PROG_RM"; then
+  echo "$as_me:$LINENO: result: $PROG_RM" >&5
+echo "${ECHO_T}$PROG_RM" >&6
+else
+  echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6
+fi
+
 # Extract the first word of "pwd_mkdb", so it can be a program name with args.
 set dummy pwd_mkdb; ac_word=$2
 echo "$as_me:$LINENO: checking for $ac_word" >&5
@@ -2598,6 +2640,26 @@ echo "${ECHO_T}no" >&6
 fi
 
 
+
+# Check whether --enable-restrictive-names or --disable-restrictive-names was given.
+if test "${enable_restrictive_names+set}" = set; then
+  enableval="$enable_restrictive_names"
+
+              if test "x$enableval" != "xno"; then
+                      cat >>confdefs.h <<\_ACEOF
+#define RESTRICTIVE_FILENAMES 1
+_ACEOF
+
+              fi
+
+else
+
+              cat >>confdefs.h <<\_ACEOF
+#define RESTRICTIVE_FILENAMES 1
+_ACEOF
+
+
+fi;
 
 # Check whether --enable-wildcards or --disable-wildcards was given.
 if test "${enable_wildcards+set}" = set; then
@@ -2713,6 +2775,22 @@ else
 _ACEOF
 
 
+fi;
+
+# Check whether --enable-unison-compat or --disable-unison-compat was given.
+if test "${enable_unison_compat+set}" = set; then
+  enableval="$enable_unison_compat"
+
+              if test "x$enableval" != "xno"; then
+                      cat >>confdefs.h <<\_ACEOF
+#define UNISON_COMPAT 1
+_ACEOF
+
+              fi
+
+else
+
+              echo -n
 fi;
 
 # Check whether --enable-rsync-compat or --disable-rsync-compat was given.
@@ -3415,6 +3493,56 @@ fi
 	  test -z $scponly_PROG_ECHO && echo "Can't find path to 'echo'" && exit 1
 	  cat >>confdefs.h <<_ACEOF
 #define PROG_ECHO "$scponly_PROG_ECHO"
+_ACEOF
+
+fi
+
+# unison-compat conditionals:
+if test "x$enable_unison_compat" != "x" && test "x$enable_unison_compat" != "xno"; then
+        { echo "$as_me:$LINENO: enabling unison compatability..." >&5
+echo "$as_me: enabling unison compatability..." >&6;}
+	# Extract the first word of "unison", so it can be a program name with args.
+set dummy unison; ac_word=$2
+echo "$as_me:$LINENO: checking for $ac_word" >&5
+echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6
+if test "${ac_cv_path_scponly_PROG_UNISON+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  case $scponly_PROG_UNISON in
+  [\\/]* | ?:[\\/]*)
+  ac_cv_path_scponly_PROG_UNISON="$scponly_PROG_UNISON" # Let the user override the test with a path.
+  ;;
+  *)
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in `echo "$PATH:/bin:/usr/bin:/sbin:/usr/sbin" | sed -e 's/:/ /'`
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+  for ac_exec_ext in '' $ac_executable_extensions; do
+  if $as_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
+    ac_cv_path_scponly_PROG_UNISON="$as_dir/$ac_word$ac_exec_ext"
+    echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+done
+
+  ;;
+esac
+fi
+scponly_PROG_UNISON=$ac_cv_path_scponly_PROG_UNISON
+
+if test -n "$scponly_PROG_UNISON"; then
+  echo "$as_me:$LINENO: result: $scponly_PROG_UNISON" >&5
+echo "${ECHO_T}$scponly_PROG_UNISON" >&6
+else
+  echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6
+fi
+
+	  test -z $scponly_PROG_UNISON && echo "Can't find path to 'unison'" && exit 1
+	  cat >>confdefs.h <<_ACEOF
+#define PROG_UNISON "$scponly_PROG_UNISON"
 _ACEOF
 
 fi
@@ -5274,6 +5402,7 @@ s,@PROG_CHMOD@,$PROG_CHMOD,;t t
 s,@PROG_DIRNAME@,$PROG_DIRNAME,;t t
 s,@PROG_ID@,$PROG_ID,;t t
 s,@PROG_PW@,$PROG_PW,;t t
+s,@PROG_RM@,$PROG_RM,;t t
 s,@PROG_PWD_MKDB@,$PROG_PWD_MKDB,;t t
 s,@CHROOTED_NAME@,$CHROOTED_NAME,;t t
 s,@scponly_PROG_SFTP_SERVER@,$scponly_PROG_SFTP_SERVER,;t t
@@ -5291,6 +5420,7 @@ s,@scponly_PROG_PWD@,$scponly_PROG_PWD,;t t
 s,@scponly_PROG_GROUPS@,$scponly_PROG_GROUPS,;t t
 s,@scponly_PROG_ID@,$scponly_PROG_ID,;t t
 s,@scponly_PROG_ECHO@,$scponly_PROG_ECHO,;t t
+s,@scponly_PROG_UNISON@,$scponly_PROG_UNISON,;t t
 s,@scponly_PROG_RSYNC@,$scponly_PROG_RSYNC,;t t
 s,@CPP@,$CPP,;t t
 s,@ALLOCA@,$ALLOCA,;t t

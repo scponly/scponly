@@ -1,3 +1,13 @@
+scponly v3.10 - 21 mar 2004,
+	added UNISON compatibility (http://www.cis.upenn.edu/~bcpierce/unison/):
+		Raimund Specht <raimund@spemaus.de>
+	bugfix to home dir default permissions:
+		James Valente <jvalente@ofoto.com> 
+	configure option to disable paranoid filename checking, thus allowing all characters in input
+	added a new config.sub 
+	fixed missing PROG_RM declaration:
+		Hideyuki KURASHINA <rushani@bl.mmtr.or.jp>       
+
 scponly v3.9 - 17 nov 2003,
 	makefile improvements: 
 		Bjrn Eriksson <bjorn@bjornen.nu>

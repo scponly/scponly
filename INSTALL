@@ -68,6 +68,14 @@ Step 2.  Configure your installation.
 	do not like the interactive nature of a WinSCP session.
 	By default, WinSCP 2.0 compatibility is compiled in.
 
+	--disable-restrictive-names
+
+	Turning off filename checks will disable checking of the 
+	scp arguments.  Historically, these arguments were checked for
+	shell metacharacters, but these checks are no longer
+	required.  (However, I leave to option to disable turned off
+	by default until a later release.)
+
 	Other options can be seen using "./configure --help"
 
 

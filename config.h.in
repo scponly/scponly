@@ -8,9 +8,11 @@
 #undef WINSCP_COMPAT
 #undef GFTP_COMPAT
 #undef RSYNC_COMPAT
+#undef UNISON_COMPAT 
 #undef ENABLE_SCP2
 #undef ENABLE_SFTP
 #undef ENABLE_WILDCARDS
+#undef RESTRICTIVE_FILENAMES
 #undef CHROOTED_NAME
 #undef HAVE_WORDEXP
 #undef HAVE_GLOB
@@ -47,4 +49,10 @@
 #ifdef RSYNC_COMPAT
 #undef PROG_RSYNC
 #endif
+
+/* Unison compatability mode */
+#ifdef UNISON_COMPAT
+#undef PROG_UNISON
+#endif
+
 

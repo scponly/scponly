@@ -1,5 +1,14 @@
+Hideyuki KURASHINA <rushani@bl.mmtr.or.jp>
+	- missing PROG_RM bug report
+
+Raimund Specht <raimund@spemaus.de>                                                                                    
+	- UNISON support patches
+
+James Valente <jvalente@ofoto.com> 
+	- bugfix to home dir default permissions
+
 Stefan Sami-Soueiha <stefan.sami@gmx.de> 
-        - added cool /chrootdir//homedir home directory interpretation
+	- added cool /chrootdir//homedir home directory interpretation
 
 Sven Hoexter <sven@telelev.net>
 	- configure script bugfix and scponly.c bugfix 

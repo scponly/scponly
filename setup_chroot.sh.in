@@ -124,6 +124,10 @@ echo the scponly user can write into.
 echo
 
 targetuser=`getwd "Username to install" "$defaultusername"`
+username_collision=`id $targetuser > /dev/null 2> /dev/null; echo $?`
+if [ $username_collision -eq 1 ] ; then
+	fail "the user $targetuser already exists.  please remove this user and their home directory and try again."
+fi 
 targetdir=`getwd "home directory you wish to set for this user" "$defaulthomedirprefix/$targetuser"`
 writeabledir=`getwd "name of the writeable subdirectory" "$defaultwriteabledir"`
 
@@ -150,6 +154,7 @@ fi
 # this part shouldnt strictly be requried, but i'll leave it in until i'm sure of it
 if [ ! -d $targetdir ]; then
 	$INSTALL_PATHNAME -d $targetdir
+	@PROG_CHMOD@ 755 $targetdir
 fi
 
 if [ ! -d $targetdir/etc ]; then
