@@ -1,7 +1,9 @@
 
-scponly v3.4 and v3.3
-	28 oct, 2002 - 02i nov 2002
+scponly v3.5 - 16 dec 2002,
+	v3.4 - 02 nov 2002,
+	v3.3 - 28 oct 2002:
 	stupid bugfixes from 3.2 in configure.in
+	thanks to Sven Hoexter <sven@telelev.net>
 
 scponly v3.2
 	27 oct, 2002

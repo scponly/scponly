@@ -78,7 +78,7 @@ int main (int argc, char **argv)
 
 #ifdef SOLARIS_COMPAT 
         openlog(PACKAGE_NAME, logopts, LOG_AUTH);
-#elseif IRIX_COMPAT
+#elif IRIX_COMPAT
         openlog(PACKAGE_NAME, logopts, LOG_AUTH);
 #else
         if (debuglevel > 1) // debuglevel 1 will still log to syslog

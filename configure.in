@@ -5,6 +5,7 @@ dnl if this breaks your configure, delete it
 dnl all it does is append the first dir to the end
 dnl first_part=`echo $PATH | cut -f1 -d\:`
 dnl export PATH=$PATH:$first_part
+PATH="$PATH:/usr/local/bin"
 
 dnl
 dnl Say what we are:
@@ -12,7 +13,7 @@ AC_INIT([scponly.c])
 PACKAGE=scponly
 PACKAGE_NAME=scponly
 AC_DEFINE(PACKAGE_NAME)
-PACKAGE_VERSION=3.4
+PACKAGE_VERSION=3.5
 AC_DEFINE(PACKAGE_VERSION)
 PACKAGE_BUGREPORT=joe@sublimation.org
 AC_DEFINE(PACKAGE_BUGREPORT)
@@ -23,7 +24,7 @@ AC_CANONICAL_HOST
 
 # this temp_os is a brutal hack until i look into the proper way to do this. ie- rtfm
 temp_os=`echo $host_os | cut -c-7`
-if test "$host_os" = solaris; then
+if test "$temp_os" = solaris; then
 	AC_DEFINE(SOLARIS_COMPAT)
 fi
 temp_os=`echo $host_os | cut -c-4`
@@ -137,7 +138,7 @@ AC_ARG_ENABLE([chrooted-binary],
       ])
 if test "x$scponly_scp_compat" != "x"; then
 	AC_MSG_NOTICE([enabling core WinSCP and Vanilla SCP binaries...])
-	SCPONLY_PATH_PROG_DEFINE([PROG_SFTP_SERVER], [sftp-server],[/usr/lib:/usr/libexec:/usr/libexec/openssh:/usr/lib/ssh])
+	SCPONLY_PATH_PROG_DEFINE([PROG_SFTP_SERVER], [sftp-server],[/usr/lib:/usr/libexec:/usr/libexec/openssh:/usr/lib/ssh:/usr/local/libexec])
 	SCPONLY_PATH_PROG_DEFINE([PROG_LS],    [ls],    [/bin:/usr/bin:/sbin:/usr/sbin])
 	SCPONLY_PATH_PROG_DEFINE([PROG_SCP],   [scp],   [/bin:/usr/bin:/sbin:/usr/sbin])
 	SCPONLY_PATH_PROG_DEFINE([PROG_RM],    [rm],    [/bin:/usr/bin:/sbin:/usr/sbin])

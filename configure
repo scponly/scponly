@@ -1203,7 +1203,7 @@ cat >>confdefs.h <<\_ACEOF
 #define PACKAGE_NAME 1
 _ACEOF
 
-PACKAGE_VERSION=3.4
+PACKAGE_VERSION=3.5
 cat >>confdefs.h <<\_ACEOF
 #define PACKAGE_VERSION 1
 _ACEOF
@@ -1298,7 +1298,7 @@ host_os=`echo $ac_cv_host | sed 's/^\([^-]*\)-\([^-]*\)-\(.*\)$/\3/'`
 
 # this temp_os is a brutal hack until i look into the proper way to do this. ie- rtfm
 temp_os=`echo $host_os | cut -c-7`
-if test "$host_os" = solaris; then
+if test "$temp_os" = solaris; then
 	cat >>confdefs.h <<\_ACEOF
 #define SOLARIS_COMPAT 1
 _ACEOF
@@ -2566,7 +2566,7 @@ else
   ;;
   *)
   as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
-for as_dir in `echo "$PATH:/usr/lib:/usr/libexec:/usr/libexec/openssh:/usr/lib/ssh" | sed -e 's/:/ /'`
+for as_dir in `echo "$PATH:/usr/lib:/usr/libexec:/usr/libexec/openssh:/usr/lib/ssh:/usr/local/libexec" | sed -e 's/:/ /'`
 do
   IFS=$as_save_IFS
   test -z "$as_dir" && as_dir=.

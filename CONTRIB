@@ -1,3 +1,6 @@
+Sven Hoexter <sven@telelev.net>
+	- configure script bugfix and scponly.c bugfix 
+
 François Gouget <fgouget@codeweavers.com>
 	- found his solaris strsep on the web
 
