@@ -170,7 +170,6 @@ AC_ARG_ENABLE([passwd],
       [
               if test "x$enableval" != "xno"; then
                       AC_DEFINE([PASSWD_ENABLE])
-                      SCPONLY_PATH_PROG_DEFINE([PROG_PASSWD],   [passwd],   [/bin:/usr/bin:/sbin:/usr/sbin])
               fi
       ],[
               echo -n      dnl  Defaults to off, must be turned on explicitly
@@ -203,15 +202,20 @@ fi
 
 # unison-compat conditionals:
 if test "x$enable_unison_compat" != "x" && test "x$enable_unison_compat" != "xno"; then
-        AC_MSG_NOTICE([enabling unison compatability...])
+	AC_MSG_NOTICE([enabling unison compatability...])
 	SCPONLY_PATH_PROG_DEFINE([PROG_UNISON],   [unison], [/bin:/usr/bin:/sbin:/usr/sbin])
 fi	
 
 # rsync-compat conditionals:
 if test "x$enable_rsync_compat" != "x" && test "x$enable_rsync_compat" != "xno"; then
-        AC_MSG_NOTICE([enabling rsync compatability...])
+	AC_MSG_NOTICE([enabling rsync compatability...])
 	SCPONLY_PATH_PROG_DEFINE([PROG_RSYNC],   [rsync], [/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin])
 fi	
+
+if test "x$enable_passwd_compat" != "x" && test "x$enable_passwd_compat" != "xno"; then
+	AC_MSG_NOTICE([enabling passwd compatability...])
+	SCPONLY_PATH_PROG_DEFINE([PROG_PASSWD],   [passwd],   [/bin:/usr/bin:/sbin:/usr/sbin])
+fi
 
 dnl with-sftp-server conditionals:
 if test "x$scponly_sftp_compat" != "x"; then
