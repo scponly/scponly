@@ -309,7 +309,7 @@ ac_includes_default="\
 # include <unistd.h>
 #endif"
 
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA LN_S PROG_CUT PROG_GREP PROG_SORT PROG_LDD PROG_USERADD PROG_CHOWN PROG_CHMOD PROG_DIRNAME PROG_ID PROG_PW PROG_RM PROG_PWD_MKDB CHROOTED_NAME scponly_PROG_SFTP_SERVER scponly_PROG_LS scponly_PROG_SCP scponly_PROG_RM scponly_PROG_LN scponly_PROG_MV scponly_PROG_CHMOD scponly_PROG_CHOWN scponly_PROG_CHGRP scponly_PROG_MKDIR scponly_PROG_RMDIR scponly_PROG_PWD scponly_PROG_GROUPS scponly_PROG_ID scponly_PROG_ECHO scponly_PROG_SVNSERV scponly_PROG_UNISON scponly_PROG_RSYNC scponly_PROG_SVN scponly_PROG_PASSWD CPP EGREP ALLOCA LIBOBJS LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA LN_S PROG_CUT PROG_GREP PROG_SORT PROG_LDD PROG_USERADD PROG_CHOWN PROG_CHMOD PROG_DIRNAME PROG_ID PROG_PW PROG_RM PROG_PWD_MKDB CHROOTED_NAME scponly_PROG_SFTP_SERVER scponly_PROG_LS scponly_PROG_SCP scponly_PROG_RM scponly_PROG_LN scponly_PROG_MV scponly_PROG_CHMOD scponly_PROG_CHOWN scponly_PROG_CHGRP scponly_PROG_MKDIR scponly_PROG_RMDIR scponly_PROG_PWD scponly_PROG_GROUPS scponly_PROG_ID scponly_PROG_ECHO scponly_PROG_UNISON scponly_PROG_RSYNC scponly_PROG_SVNSERV scponly_PROG_SVN scponly_PROG_PASSWD CPP EGREP ALLOCA LIBOBJS LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -3875,56 +3875,6 @@ _ACEOF
 
 fi
 
-if test "x$enable_svnserv_compat" != "xno"; then
-	{ echo "$as_me:$LINENO: enabling svnserv compatibility..." >&5
-echo "$as_me: enabling svnserv compatibility..." >&6;}
-	# Extract the first word of "svnserve", so it can be a program name with args.
-set dummy svnserve; ac_word=$2
-echo "$as_me:$LINENO: checking for $ac_word" >&5
-echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6
-if test "${ac_cv_path_scponly_PROG_SVNSERV+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  case $scponly_PROG_SVNSERV in
-  [\\/]* | ?:[\\/]*)
-  ac_cv_path_scponly_PROG_SVNSERV="$scponly_PROG_SVNSERV" # Let the user override the test with a path.
-  ;;
-  *)
-  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
-as_dummy="`echo "$PATH:/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin" | sed -e 's/:/ /'`"
-for as_dir in $as_dummy
-do
-  IFS=$as_save_IFS
-  test -z "$as_dir" && as_dir=.
-  for ac_exec_ext in '' $ac_executable_extensions; do
-  if $as_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
-    ac_cv_path_scponly_PROG_SVNSERV="$as_dir/$ac_word$ac_exec_ext"
-    echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
-    break 2
-  fi
-done
-done
-
-  ;;
-esac
-fi
-scponly_PROG_SVNSERV=$ac_cv_path_scponly_PROG_SVNSERV
-
-if test -n "$scponly_PROG_SVNSERV"; then
-  echo "$as_me:$LINENO: result: $scponly_PROG_SVNSERV" >&5
-echo "${ECHO_T}$scponly_PROG_SVNSERV" >&6
-else
-  echo "$as_me:$LINENO: result: no" >&5
-echo "${ECHO_T}no" >&6
-fi
-
-	  test -z $scponly_PROG_SVNSERV && echo "Can't find path to 'svnserve'" && exit 1
-	  cat >>confdefs.h <<_ACEOF
-#define PROG_SVNSERV "$scponly_PROG_SVNSERV"
-_ACEOF
-
-fi
-
 # unison-compat conditionals:
 if test "x$enable_unison_compat" != "x" && test "x$enable_unison_compat" != "xno"; then
 	{ echo "$as_me:$LINENO: enabling unison compatability..." >&5
@@ -4023,6 +3973,56 @@ fi
 	  test -z $scponly_PROG_RSYNC && echo "Can't find path to 'rsync'" && exit 1
 	  cat >>confdefs.h <<_ACEOF
 #define PROG_RSYNC "$scponly_PROG_RSYNC"
+_ACEOF
+
+fi
+
+if test "x$enable_svnserv_compat" != "x" && test "x$enable_svnserv_compat" != "xno"; then
+	{ echo "$as_me:$LINENO: enabling svnserv compatibility..." >&5
+echo "$as_me: enabling svnserv compatibility..." >&6;}
+	# Extract the first word of "svnserve", so it can be a program name with args.
+set dummy svnserve; ac_word=$2
+echo "$as_me:$LINENO: checking for $ac_word" >&5
+echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6
+if test "${ac_cv_path_scponly_PROG_SVNSERV+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  case $scponly_PROG_SVNSERV in
+  [\\/]* | ?:[\\/]*)
+  ac_cv_path_scponly_PROG_SVNSERV="$scponly_PROG_SVNSERV" # Let the user override the test with a path.
+  ;;
+  *)
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+as_dummy="`echo "$PATH:/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin" | sed -e 's/:/ /'`"
+for as_dir in $as_dummy
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+  for ac_exec_ext in '' $ac_executable_extensions; do
+  if $as_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
+    ac_cv_path_scponly_PROG_SVNSERV="$as_dir/$ac_word$ac_exec_ext"
+    echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+done
+
+  ;;
+esac
+fi
+scponly_PROG_SVNSERV=$ac_cv_path_scponly_PROG_SVNSERV
+
+if test -n "$scponly_PROG_SVNSERV"; then
+  echo "$as_me:$LINENO: result: $scponly_PROG_SVNSERV" >&5
+echo "${ECHO_T}$scponly_PROG_SVNSERV" >&6
+else
+  echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6
+fi
+
+	  test -z $scponly_PROG_SVNSERV && echo "Can't find path to 'svnserve'" && exit 1
+	  cat >>confdefs.h <<_ACEOF
+#define PROG_SVNSERV "$scponly_PROG_SVNSERV"
 _ACEOF
 
 fi
@@ -6141,9 +6141,9 @@ s,@scponly_PROG_PWD@,$scponly_PROG_PWD,;t t
 s,@scponly_PROG_GROUPS@,$scponly_PROG_GROUPS,;t t
 s,@scponly_PROG_ID@,$scponly_PROG_ID,;t t
 s,@scponly_PROG_ECHO@,$scponly_PROG_ECHO,;t t
-s,@scponly_PROG_SVNSERV@,$scponly_PROG_SVNSERV,;t t
 s,@scponly_PROG_UNISON@,$scponly_PROG_UNISON,;t t
 s,@scponly_PROG_RSYNC@,$scponly_PROG_RSYNC,;t t
+s,@scponly_PROG_SVNSERV@,$scponly_PROG_SVNSERV,;t t
 s,@scponly_PROG_SVN@,$scponly_PROG_SVN,;t t
 s,@scponly_PROG_PASSWD@,$scponly_PROG_PASSWD,;t t
 s,@CPP@,$CPP,;t t
