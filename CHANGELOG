@@ -17,8 +17,7 @@ scponly v4.1 - 17 mar 2005
 
 	numerous fixes
 		Kaleb Pederson <kpederson@mail.ewu.edu>   
-
-
+		Dimitri Papadopoulos <papadopo@shfj.cea.fr>
 
 scponly v4.0 - 27 nov 2004
 	SERIOUS VULNERABILITY FIX: scp/sftp-server/unison/rsync all support the command line

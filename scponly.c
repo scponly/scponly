@@ -29,7 +29,6 @@ cmd_t commands[] =
 #ifdef ENABLE_SFTP
 	{ PROG_SFTP_SERVER, 0 },
 #endif /*ENABLE_SFTP*/
-
 #ifdef ENABLE_SCP2
 	{ PROG_LS, 1 }, 
 	{ PROG_CHMOD, 1 },
@@ -66,6 +65,10 @@ cmd_t commands[] =
 	{ PROG_SVN, 1 },
 #endif /*ENABLE_SVN*/
 
+#ifdef SVNSERV_COMPAT
+	{ PROG_SVNSERV, 1 },
+#endif /*ENABLE_SVNSERV*/
+	
 	NULL
 };
 

@@ -179,10 +179,20 @@ AC_ARG_ENABLE([chrooted-binary],
       ])
 
 AC_ARG_ENABLE([svn-compat],
-      AC_HELP_STRING([--enable-svn-compat], [enable subversion SCS compatibility]),
+      AC_HELP_STRING([--enable-svn-compat], [enable subversion SCS cli compatibility]),
       [
               if test "x$enableval" != "xno"; then
                       AC_DEFINE([SVN_COMPAT])
+              fi
+      ],[
+              echo -n      dnl  Defaults to off, must be turned on explicitly
+      ])
+
+AC_ARG_ENABLE([svnserv-compat],
+      AC_HELP_STRING([--enable-svnserv-compat], [enable subversion SCS svnserve compatibility]),
+      [
+              if test "x$enableval" != "xno"; then
+                      AC_DEFINE([SVNSERV_COMPAT])
               fi
       ],[
               echo -n      dnl  Defaults to off, must be turned on explicitly
@@ -223,10 +233,16 @@ if test "x$enable_winscp_compat" != "xno"; then
 	SCPONLY_PATH_PROG_DEFINE([PROG_ECHO],   [echo],   [/bin:/usr/bin:/sbin:/usr/sbin])
 fi
 
+dnl Find the svnserve binary
+if test "x$enable_svnserv_compat" != "xno"; then
+	AC_MSG_NOTICE([enabling svnserv compatibility...])
+	SCPONLY_PATH_PROG_DEFINE([PROG_SVNSERV], [svnserve], [/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin])
+fi
+
 # unison-compat conditionals:
 if test "x$enable_unison_compat" != "x" && test "x$enable_unison_compat" != "xno"; then
 	AC_MSG_NOTICE([enabling unison compatability...])
-	SCPONLY_PATH_PROG_DEFINE([PROG_UNISON],   [unison], [/bin:/usr/bin:/sbin:/usr/sbin])
+	SCPONLY_PATH_PROG_DEFINE([PROG_UNISON],   [unison], [/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin])
 fi	
 
 # rsync-compat conditionals:
@@ -237,7 +253,7 @@ fi
 
 if test "x$enable_svn_compat" != "x" && test "x$enable_svn_compat" != "xno"; then
 	AC_MSG_NOTICE([enabling subversion compatability...])
-	SCPONLY_PATH_PROG_DEFINE([PROG_SVN],   [svn],   [/bin:/usr/bin:/usr/local/bin])
+	SCPONLY_PATH_PROG_DEFINE([PROG_SVN],   [svn],   [/bin:/usr/bin:/usr/local/bin:/usr/local/bin])
 fi
 
 if test "x$enable_passwd_compat" != "x" && test "x$enable_passwd_compat" != "xno"; then

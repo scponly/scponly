@@ -7,10 +7,12 @@
 #undef IRIX_COMPAT
 #undef WINSCP_COMPAT
 #undef GFTP_COMPAT
+#undef SVN_COMPAT
 #undef RSYNC_COMPAT
 #undef UNISON_COMPAT 
 #undef ENABLE_SCP2
 #undef ENABLE_SFTP
+#undef SVNSERV_COMPAT
 #undef ENABLE_WILDCARDS
 #undef RESTRICTIVE_FILENAMES
 #undef CHROOTED_NAME
@@ -61,9 +63,14 @@
 #undef PROG_UNISON
 #endif
 
-/* subversion compatibility */
+/* subversion cli compatibility */
 #ifdef SVN_COMPAT 
 #undef PROG_SVN
+#endif
+
+/* subversion svnserv compatibility */
+#ifdef SVNSERV_COMPAT
+#undef PROG_SVNSERV
 #endif
 
 /* passwd compatibility */

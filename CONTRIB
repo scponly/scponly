@@ -1,3 +1,6 @@
+Dimitri Papadopoulos <papadopo@shfj.cea.fr>
+	- numerous corrections and patches
+
 Markus Kolb <markus-122004@tower-net.de>                     
 	- DESTDIR support for chroot creation
 
