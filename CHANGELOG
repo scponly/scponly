@@ -1,5 +1,5 @@
 
-scponly v4.1 - 17 mar 2005
+scponly v4.1 - 12 apr 2005
 	follow up fix for additional executable rsync argument "-6e" (see v4.0)
 		Jason Wies <jason@xc.net>
 
