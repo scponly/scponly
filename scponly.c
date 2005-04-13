@@ -223,7 +223,6 @@ int main (int argc, char **argv)
 			}                                                                                                      
 			syslog (LOG_ERR, "couldn't chdir to %s [%s]", chdir, logstamp());                                      
 			exit(EXIT_FAILURE);     
-			}
 		}
 	}
 #endif /* CHROOTED_NAME */
