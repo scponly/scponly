@@ -9,7 +9,8 @@
  
 #include <stdio.h>	/* io */
 #include <string.h>	/* for str* */
-#include <sys/types.h>	/* for fork, wait */
+#include <sys/types.h>	/* for fork, wait, stat */
+#include <sys/stat.h> /* for stat */
 #include <sys/wait.h>	/* for wait */
 #include <unistd.h>	/* for exit, fork */
 #include <stdlib.h>	/* EXIT_* */
@@ -104,6 +105,7 @@ int main (int argc, char **argv)
 {
 	FILE *debugfile;
 	int logopts = LOG_PID|LOG_NDELAY;
+	struct stat	homedirstat;
 	
 	/*
 	 * set debuglevel.  any nonzero number will result in debugging info to log
@@ -200,6 +202,28 @@ int main (int argc, char **argv)
 			}
 			root_dir++;
 		}
+#ifdef CHROOT_CHECKDIR
+		if (-1 == stat(chrootdir, &homedirstat))
+		{
+			syslog (LOG_ERR, "couldnt stat chroot dir: %s with errno %u", chrootdir, errno);
+			exit(EXIT_FAILURE);
+		}
+		if (0 == (homedirstat.st_mode | S_IFDIR))
+		{
+			syslog (LOG_ERR, "chroot dir is not a directory: %s", chrootdir);
+			exit(EXIT_FAILURE);
+		}
+		if (homedirstat.st_uid != 0)
+		{
+			syslog (LOG_ERR, "chroot dir not owned by root: %s", chrootdir);
+			exit(EXIT_FAILURE);
+		}
+		if (0 != (homedirstat.st_mode | (S_IWOTH & S_IWGRP)))
+		{
+			syslog (LOG_ERR, "chroot dir writable by group/other: %s", chrootdir);
+			exit(EXIT_FAILURE);
+		}
+#endif
 		if (debuglevel)
 			syslog (LOG_DEBUG, "chrooting to dir: \"%s\"", chrootdir);
 		if (-1==(chroot(chrootdir)))

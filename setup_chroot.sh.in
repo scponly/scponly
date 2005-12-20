@@ -66,7 +66,15 @@ if [ x@PROG_LDD@ = x ]; then
 	echo "this script requires the program ldd to determine which"
 	fail "shared libraries to copy into your chrooted dir..."
 fi
-LIB_LIST=`@PROG_LDD@ $BINARIES 2> /dev/null | @PROG_CUT@ -f2 -d\> | @PROG_CUT@ -f1 -d\( | @PROG_GREP@ "^ " | @PROG_SORT@ -u`
+
+if [ `uname -s` == "OpenBSD" ]; then
+	for bin in $BINARIES; do
+		GREP_LIST="$GREP_LIST -e $bin"
+	done
+	LIB_LIST=`/usr/bin/ldd $BINARIES 2> /dev/null | /usr/bin/tr -s " " | /usr/bin/cut -f5 -d" " | /usr/bin/grep -v "^Name" | /usr/bin/grep -v $GREP_LIST | /usr/bin/sort -u`
+elif
+	LIB_LIST=`@PROG_LDD@ $BINARIES 2> /dev/null | @PROG_CUT@ -f2 -d\> | @PROG_CUT@ -f1 -d\( | @PROG_GREP@ "^ " | @PROG_SORT@ -u`
+fi
 
 #
 #	we also need to add some form of ld.so, here are some good guesses.

@@ -101,3 +101,6 @@ Konrad Krzysztof Krasinski <konrad@o5.pl>
 
 Ralf Durkee <rd@rd1.net>
 	- setup_chroot.sh.in changes
+
+G 0kita <goo13c@gmail.com>
+	- patch for openbsd ldd output

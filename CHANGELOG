@@ -1,4 +1,10 @@
 
+scponly v4.2 - 20 dec 2005
+	fix for openbsd ldd in setup_chroot
+		G 0kita <goo13c@gmail.com>
+
+
+
 scponly v4.1 - 12 apr 2005
 	follow up fix for additional executable rsync argument "-6e" (see v4.0)
 		Jason Wies <jason@xc.net>

@@ -844,6 +844,8 @@ if test -n "$ac_init_help"; then
 Optional Features:
   --disable-FEATURE       do not include FEATURE (same as --enable-FEATURE=no)
   --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
+  --disable-chroot-checkdir
+                          disable checking chroot dir ownership
   --disable-restrictive-names
                           disable restrictive filename checks
   --disable-wildcards     disable wildcard processing
@@ -2935,6 +2937,26 @@ fi
 
 
 
+# Check whether --enable-chroot-checkdir or --disable-chroot-checkdir was given.
+if test "${enable_chroot_checkdir+set}" = set; then
+  enableval="$enable_chroot_checkdir"
+
+              if test "x$enableval" != "xno"; then
+                      cat >>confdefs.h <<\_ACEOF
+#define CHROOT_CHECKDIR 1
+_ACEOF
+
+              fi
+
+else
+
+              cat >>confdefs.h <<\_ACEOF
+#define CHROOT_CHECKDIR 1
+_ACEOF
+
+
+fi;
+
 # Check whether --enable-restrictive-names or --disable-restrictive-names was given.
 if test "${enable_restrictive_names+set}" = set; then
   enableval="$enable_restrictive_names"
@@ -3048,7 +3070,6 @@ _ACEOF
 
 
 fi;
-
 
 
 # Check whether --with-default-chdir or --without-default-chdir was given.
