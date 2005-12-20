@@ -10,6 +10,7 @@
 #undef SVN_COMPAT
 #undef RSYNC_COMPAT
 #undef UNISON_COMPAT 
+#undef PASSWD_COMPAT 
 #undef ENABLE_SCP2
 #undef ENABLE_SFTP
 #undef SVNSERV_COMPAT
@@ -85,7 +86,7 @@
 #endif
 
 /* passwd compatibility */
-#ifdef ENABLE_PASSWD
+#ifdef PASSWD_COMPAT
 #undef PROG_PASSWD
 #endif
 
