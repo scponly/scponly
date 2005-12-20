@@ -190,4 +190,6 @@ A. Build scponly with your site specific options.  Figure out where your
 
    The two slashes ('//') are used by scponlyc to determine the chroot
    point.  Everything in front of them is used as the new root location
-   in the chroot call.
+   in the chroot call.  Everything after the double slash designates the 
+   directory to chdir() into AFTER chrooting.  This is so users can be
+   dropped into a writable directory inside the chroot.

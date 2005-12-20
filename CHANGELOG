@@ -1,7 +1,9 @@
 scponly v4.2 - 20 dec 2005
 
 	added CHROOT_CHECKDIR directive
-		issue reported by Max Vozeler <max@decl.org> 
+		issue reported by Max Vozeler <max@decl.org> wherein non-scponly users
+		on some platforms (debian linux tested) could invoke the scponlyc binary
+		against a specially crafted home directory to achieve priveledge escalation.
 
 	fix for openbsd ldd in setup_chroot
 		G 0kita <goo13c@gmail.com>
