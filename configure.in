@@ -9,7 +9,7 @@ PATH="$PATH:/usr/local/bin"
 
 dnl
 dnl Say what we are:
-AC_INIT([scponly.c])
+AC_INIT(scponly, 4.2, joe@sublimation.org)                                                                      
 PACKAGE=scponly
 AC_DEFINE(PACKAGE)
 PACKAGE_NAME=scponly
