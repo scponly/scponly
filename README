@@ -38,6 +38,9 @@ to the rest of the filesystem.
 worked great.  this is probably the cleanest and most usable way 
 for an scponly user to access files.
 
+- sftp logging: if the ./configure directive "--enable-sftp-logging" 
+is used, scponly will support sftp logging
+
 - WinSCP 2.0/3.0 compatibility.
 
 - gftp compatibility
@@ -46,6 +49,8 @@ for an scponly user to access files.
 
 - security checks: root login is disallowed (though root
 should never be configured to be using scponly as the default shell.)
+scponly also checks the ownership of directories before chroot-ing
+into them.
 
 How it works: 
 ============= 
@@ -86,6 +91,10 @@ NOV 2003 ADDENDUM:
 disallowing interactive login.  
 
 NOV 2004 ADDENDUM:
+	OpenSSH still doesnt support configurable chrooting for users OR
+disallowing interactive login.  
+
+DEC 2005 ADDENDUM:
 	OpenSSH still doesnt support configurable chrooting for users OR
 disallowing interactive login.  
 

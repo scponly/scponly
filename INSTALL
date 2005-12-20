@@ -24,6 +24,10 @@ Step 1.  Decide if you want to use chroot() functionality.
   - If you are still unsure, read the code.  There is a seteuid
 	that ensures that the execution of any commands is
 	never done with an effective uid of 0.
+  - scponly will check the permissions of the directory it is 
+    about to chroot into unless --disable-chroot-checkdir is used
+    at confiuration time.  This is to prevent chroot-ing into a
+    user writable directory.
   - Lastly, I make no guarantees that this code is unexploitable.  
 	Any system administrator utilizing scponly bears the full
 	responsibility for maintaining a secure system. (see 18/08/02
