@@ -852,6 +852,8 @@ Optional Features:
   --disable-gftp-compat   disable gftp compatibility
   --disable-winscp-compat disable WinSCP compatibility mode
   --disable-scp-compat    disable vanilla scp compatibility too!
+  --enable-sftp-logging-compat
+                          Enable SFTP logging compatibility
   --enable-unison-compat  enable unison compatibility
   --enable-rsync-compat   enable rsync compatibility
   --enable-chrooted-binary
@@ -3110,6 +3112,23 @@ else
 _ACEOF
 
 
+fi;
+
+# Check whether --enable-sftp-logging-compat or --disable-sftp-logging-compat was given.
+if test "${enable_sftp_logging_compat+set}" = set; then
+  enableval="$enable_sftp_logging_compat"
+
+              if test "x$enableval" != "xno"; then
+                      scponly_sftp_logging_compat=1
+                      cat >>confdefs.h <<\_ACEOF
+#define SFTP_LOGGING 1
+_ACEOF
+
+              fi
+
+else
+
+              echo -n
 fi;
 
 # Check whether --enable-unison-compat or --disable-unison-compat was given.

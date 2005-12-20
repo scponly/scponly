@@ -24,12 +24,15 @@
 #endif
 
 #define MAX(x,y)	( ( x > y ) ? x : y )
+#define MIN(x,y)	( ( x < y ) ? x : y )
 
 extern int debuglevel;
 extern char username[MAX_USERNAME];
 extern char homedir[FILENAME_MAX];
 extern cmd_t commands[];
 extern cmd_arg_t dangerous_args[];
+extern char * allowed_env_vars[];
+extern char * safeenv[MAX_ENV];
 
 #ifdef UNIX_COMPAT
 char* solaris_needs_strsep(char** str, char* delims)
@@ -392,5 +395,49 @@ int get_uservar(void)
 	strncpy(username,userinfo->pw_name,MAX_USERNAME);
 	strncpy(homedir,userinfo->pw_dir,FILENAME_MAX);
 	return 1;
+}
+
+int mysetenv(const char *name, const char *value) {
+	/* from: http://www.onlamp.com/pub/a/onlamp/excerpt/PUIS3_chap16/index3.html */
+	static char count = 0;
+	char buff[255];
+	
+	if (count == 0)
+		/* in case nothing ever gets put in here... */
+		safeenv[0] = NULL;
+	if (count == MAX_ENV)
+			return 0;
+	if (!name || !value)
+			return 0;
+	if (snprintf(buff, sizeof(buff), "%s=%s", name, value) < 0)
+			return 0;
+	if (safeenv[count] = strdup(buff)) {
+		safeenv[++count] = NULL;
+		return 1;
+	}
+	return 0;
+}
+
+
+void filter_allowed_env_vars() {
+	
+	int slen = 0;
+	char *p_env, *p_str;
+	char **p_valid = allowed_env_vars;
+	
+	/* check each allowed variable */
+	while (NULL != *p_valid) {
+		
+		p_env = (char*)getenv(*p_valid);
+		if (NULL != p_env) {
+			if (debuglevel)
+				syslog(LOG_DEBUG, "Found \"%s\" and setting it to \"%s\"", *p_valid, p_env);
+			if (!mysetenv(*p_valid, p_env))
+				syslog(LOG_ERR, "Unable to set environment var \"%s\" to \"%s\"", *p_valid, p_env);
+		} else if (debuglevel) {
+			syslog(LOG_DEBUG, "Unable to find \"%s\" in the environment", *p_valid);
+		}
+		p_valid++;
+	}
 }
 

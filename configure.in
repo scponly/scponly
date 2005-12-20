@@ -157,6 +157,17 @@ AC_ARG_ENABLE([scp-compat],
               AC_DEFINE([ENABLE_SCP2])
       ])
 
+AC_ARG_ENABLE([sftp-logging-compat],
+      AC_HELP_STRING([--enable-sftp-logging-compat], [Enable SFTP logging compatibility]),
+      [
+              if test "x$enableval" != "xno"; then
+                      scponly_sftp_logging_compat=1
+                      AC_DEFINE([SFTP_LOGGING])
+              fi
+      ],[
+              echo -n      dnl  Defaults to off, must be turned on explicitly
+      ])
+
 AC_ARG_ENABLE([unison-compat],
       AC_HELP_STRING([--enable-unison-compat], [enable unison compatibility]),
       [

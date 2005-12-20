@@ -4,6 +4,7 @@
 #define MAX_USERNAME 32
 #define MAX_REQUEST (1024)		/* any request exceeding this is truncated */
 #define MAX_ARGC 100			/* be reasonable */
+#define MAX_ENV 50				/* be reasonable */
 #define ALLOWABLE "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890 ./-*\\_\'\":?()"
 #define WHITE " \t"			/* whitespace */
 #define exact_match(x,y) (0==strcmp(x,y))	/* we dont want strncpy for this */

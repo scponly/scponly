@@ -24,6 +24,7 @@ int chrooted=0;
 char username[MAX_USERNAME];
 char homedir[FILENAME_MAX];
 char chrootdir[FILENAME_MAX];
+char *safeenv[MAX_ENV];
 
 cmd_t commands[] =
 { 
@@ -93,6 +94,35 @@ cmd_arg_t dangerous_args[] =
 	{ PROG_RSYNC, "-e" },
 	{ PROG_RSYNC, "-6e" },
 #endif 
+	NULL
+};
+
+/*
+ *	SFTP logging requires that the following environment variables be
+ *	defined in order to work:
+ *
+ *	LOG_SFTP
+ *	USER
+ *	SFTP_UMASK
+ *	SFTP_PERMIT_CHMOD
+ *	SFTP_PERMIT_CHOWN
+ *	SFTP_LOG_LEVEL
+ *	SFTP_LOG_FACILITY
+ */
+char * allowed_env_vars[] =
+{
+#ifdef SFTP_LOGGING
+	"LOG_SFTP",
+	"USER",
+	"SFTP_UMASK",
+	"SFTP_PERMIT_CHMOD",
+	"SFTP_PERMIT_CHOWN",
+	"SFTP_LOG_LEVEL",
+	"SFTP_LOG_FACILITY",
+#endif
+#ifdef UNISON_COMPAT
+	"HOME",
+#endif
 	NULL
 };
 
@@ -405,7 +435,7 @@ int process_winscp_requests(void)
 
 int process_ssh_request(char *request)
 {
-	char **av;
+	char **av, **tenv;
 	char *flat_request,*tmpstring, *tmprequest;
 	char bad_winscp3str[] = "test -x /usr/lib/sftp-server && exec /usr/lib/sftp-server test -x /usr/local/lib/sftp-server && exec /usr/local/lib/sftp-server exec sftp-server";
 	int retval;
@@ -534,30 +564,45 @@ int process_ssh_request(char *request)
 	if (valid_arg_vector(av))
 	{
 
+#ifdef USE_SAFE_ENVIRONMENT
+		safeenv[0] = NULL;
+		filter_allowed_env_vars();
+		tenv = safeenv;
+		if (debuglevel) {
+			while (NULL != *tenv) {
+				syslog(LOG_DEBUG, "Environment contains \"%s\"", *tenv++);
+			}
+		}
+#endif
+
 #ifdef UNISON_COMPAT
-		if (((strlen(homedir) + 6 ) > FILENAME_MAX) ||
-			(-1 == asprintf( &env[0], "HOME=%s", homedir)))
+		if (((strlen(homedir) + 6 ) > FILENAME_MAX) || !mysetenv("HOME",homedir))
 		{
 			syslog(LOG_ERR, "could not set HOME environment variable(%s))", logstamp());
 			exit(EXIT_FAILURE);
 		}
 		if (debuglevel)
-			syslog(LOG_DEBUG, "set HOME environment variable to %s (%s))", env[0], logstamp());
+			syslog(LOG_DEBUG, "set HOME environment variable to %s (%s))", homedir, logstamp());
 #endif 
-
 		syslog(LOG_INFO, "running: %s (%s)", flat_request, logstamp());
+
 #ifdef WINSCP_COMPAT
 		if (winscp_mode)
 		{
 			int status=0;
 			if (fork() == 0)
-				retval=execve(av[0],av,env);
+#ifdef USE_SAFE_ENVIRONMENT
+				retval=execve(av[0],av,safeenv);
+#else
+				retval=execve(av[0],av,NULL);
+#endif
 			else
 			{
 				wait(&status);
 				fflush(stdout);
 				fflush(stderr);
 				discard_vector(av);
+				discard_vector(safeenv);
 				free(flat_request);
 				free(tmprequest);
 				return(WEXITSTATUS(status));
@@ -566,11 +611,16 @@ int process_ssh_request(char *request)
 		else
 #endif
 		{
+#ifdef USE_SAFE_ENVIRONMENT
+			retval=execve(av[0],av,safeenv);
+#else
 			retval=execve(av[0],av,NULL);
+#endif
 		}
 		syslog(LOG_ERR, "failed: %s with error %s(%u) (%s)", flat_request, strerror(errno), errno, logstamp());
 		free(flat_request);
 		discard_vector(av);
+		discard_vector(safeenv);
 #ifdef WINSCP_COMPAT
 		if (winscp_mode)
 		{
