@@ -6,10 +6,10 @@ scponly v4.2 - 20 dec 2005
 	fix for openbsd ldd in setup_chroot
 		G 0kita <goo13c@gmail.com>
 
-     sftp-logging compatibility patch
+	sftp-logging compatibility patch
 		Kaleb Pederson <kpederson@mail.ewu.edu>
 
-    fix for autoconf AC_INIT macro
+	fix for autoconf AC_INIT macro
 		Paul Hyder <Paul.Hyder@noaa.gov>
 	
 	patch for command line args to setup_chroot invocation
