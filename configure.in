@@ -61,17 +61,6 @@ dnl Command-line args to ./configure
 dnl Call options "--disable-foo" if they default to on,
 dnl call them "--enable-foo" otherwise.
 
-AC_ARG_ENABLE([chroot-checkdir],
-      AC_HELP_STRING([--disable-chroot-checkdir], [disable checking chroot dir ownership]),
-      [
-              if test "x$enableval" != "xno"; then
-                      AC_DEFINE([CHROOT_CHECKDIR])
-              fi
-      ],[
-dnl           Default clause. This one defaults to on.
-              AC_DEFINE([CHROOT_CHECKDIR])
-      ])
-
 AC_ARG_ENABLE([restrictive-names],
       AC_HELP_STRING([--disable-restrictive-names], [disable restrictive filename checks]),
       [
@@ -197,6 +186,17 @@ AC_ARG_ENABLE([chrooted-binary],
               fi
       ],[
               echo -n
+      ])
+
+AC_ARG_ENABLE([chroot-checkdir],
+      AC_HELP_STRING([--disable-chroot-checkdir], [disable checking chroot dir ownership]),
+      [
+              if test "x$enableval" != "xno"; then
+                      AC_DEFINE([CHROOT_CHECKDIR])
+              fi
+      ],[
+dnl           Default clause. This one defaults to on.
+              AC_DEFINE([CHROOT_CHECKDIR])
       ])
 
 AC_ARG_ENABLE([svn-compat],

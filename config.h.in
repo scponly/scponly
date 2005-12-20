@@ -9,6 +9,7 @@
 #undef GFTP_COMPAT
 #undef SVN_COMPAT
 #undef RSYNC_COMPAT
+#undef QUOTA_COMPAT
 #undef UNISON_COMPAT 
 #undef PASSWD_COMPAT 
 #undef ENABLE_SCP2

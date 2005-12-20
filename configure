@@ -310,7 +310,7 @@ ac_includes_default="\
 # include <unistd.h>
 #endif"
 
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA LN_S PROG_CUT PROG_GREP PROG_SORT PROG_LDD PROG_USERADD PROG_CHOWN PROG_CHMOD PROG_DIRNAME PROG_ID PROG_PW PROG_RM PROG_PWD_MKDB CHROOTED_NAME scponly_PROG_SFTP_SERVER scponly_PROG_LS scponly_PROG_SCP scponly_PROG_RM scponly_PROG_LN scponly_PROG_MV scponly_PROG_CHMOD scponly_PROG_CHOWN scponly_PROG_CHGRP scponly_PROG_MKDIR scponly_PROG_RMDIR scponly_PROG_PWD scponly_PROG_GROUPS scponly_PROG_ID scponly_PROG_ECHO scponly_PROG_UNISON scponly_PROG_RSYNC scponly_PROG_SVNSERV scponly_PROG_SVN scponly_PROG_PASSWD CPP EGREP ALLOCA LIBOBJS LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA LN_S PROG_CUT PROG_GREP PROG_SORT PROG_LDD PROG_USERADD PROG_CHOWN PROG_CHMOD PROG_DIRNAME PROG_ID PROG_PW PROG_RM PROG_PWD_MKDB CHROOTED_NAME scponly_PROG_SFTP_SERVER scponly_PROG_LS scponly_PROG_SCP scponly_PROG_RM scponly_PROG_LN scponly_PROG_MV scponly_PROG_CHMOD scponly_PROG_CHOWN scponly_PROG_CHGRP scponly_PROG_MKDIR scponly_PROG_RMDIR scponly_PROG_PWD scponly_PROG_GROUPS scponly_PROG_ID scponly_PROG_ECHO scponly_PROG_UNISON scponly_PROG_RSYNC scponly_PROG_SVNSERV scponly_PROG_SVN scponly_PROG_PASSWD scponly_PROG_QUOTA CPP EGREP ALLOCA LIBOBJS LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -847,8 +847,6 @@ if test -n "$ac_init_help"; then
 Optional Features:
   --disable-FEATURE       do not include FEATURE (same as --enable-FEATURE=no)
   --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
-  --disable-chroot-checkdir
-                          disable checking chroot dir ownership
   --disable-restrictive-names
                           disable restrictive filename checks
   --disable-wildcards     disable wildcard processing
@@ -861,9 +859,12 @@ Optional Features:
   --enable-rsync-compat   enable rsync compatibility
   --enable-chrooted-binary
                           install chrooted binary 'scponlyc'
+  --disable-chroot-checkdir
+                          disable checking chroot dir ownership
   --enable-svn-compat     enable subversion SCS cli compatibility
   --enable-svnserv-compat enable subversion SCS svnserve compatibility
   --enable-passwd-compat  enable passwd compatibility
+  --enable-quota-compat   enable quota compatibility
 
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
@@ -2953,26 +2954,6 @@ fi
 
 
 
-# Check whether --enable-chroot-checkdir or --disable-chroot-checkdir was given.
-if test "${enable_chroot_checkdir+set}" = set; then
-  enableval="$enable_chroot_checkdir"
-
-              if test "x$enableval" != "xno"; then
-                      cat >>confdefs.h <<\_ACEOF
-#define CHROOT_CHECKDIR 1
-_ACEOF
-
-              fi
-
-else
-
-              cat >>confdefs.h <<\_ACEOF
-#define CHROOT_CHECKDIR 1
-_ACEOF
-
-
-fi;
-
 # Check whether --enable-restrictive-names or --disable-restrictive-names was given.
 if test "${enable_restrictive_names+set}" = set; then
   enableval="$enable_restrictive_names"
@@ -3196,6 +3177,26 @@ else
 
 fi;
 
+# Check whether --enable-chroot-checkdir or --disable-chroot-checkdir was given.
+if test "${enable_chroot_checkdir+set}" = set; then
+  enableval="$enable_chroot_checkdir"
+
+              if test "x$enableval" != "xno"; then
+                      cat >>confdefs.h <<\_ACEOF
+#define CHROOT_CHECKDIR 1
+_ACEOF
+
+              fi
+
+else
+
+              cat >>confdefs.h <<\_ACEOF
+#define CHROOT_CHECKDIR 1
+_ACEOF
+
+
+fi;
+
 # Check whether --enable-svn-compat or --disable-svn-compat was given.
 if test "${enable_svn_compat+set}" = set; then
   enableval="$enable_svn_compat"
@@ -3235,6 +3236,22 @@ if test "${enable_passwd_compat+set}" = set; then
               if test "x$enableval" != "xno"; then
                       cat >>confdefs.h <<\_ACEOF
 #define PASSWD_COMPAT 1
+_ACEOF
+
+              fi
+
+else
+
+              echo -n
+fi;
+
+# Check whether --enable-quota-compat or --disable-quota-compat was given.
+if test "${enable_quota_compat+set}" = set; then
+  enableval="$enable_quota_compat"
+
+              if test "x$enableval" != "xno"; then
+                      cat >>confdefs.h <<\_ACEOF
+#define QUOTA_COMPAT 1
 _ACEOF
 
               fi
@@ -4177,6 +4194,56 @@ fi
 	  test -z $scponly_PROG_PASSWD && echo "Can't find path to 'passwd'" && exit 1
 	  cat >>confdefs.h <<_ACEOF
 #define PROG_PASSWD "$scponly_PROG_PASSWD"
+_ACEOF
+
+fi
+
+if test "x$enable_quota_compat" != "x" && test "x$enable_quota_compat" != "xno"; then
+	{ echo "$as_me:$LINENO: enabling quota compatability..." >&5
+echo "$as_me: enabling quota compatability..." >&6;}
+	# Extract the first word of "quota", so it can be a program name with args.
+set dummy quota; ac_word=$2
+echo "$as_me:$LINENO: checking for $ac_word" >&5
+echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6
+if test "${ac_cv_path_scponly_PROG_QUOTA+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  case $scponly_PROG_QUOTA in
+  [\\/]* | ?:[\\/]*)
+  ac_cv_path_scponly_PROG_QUOTA="$scponly_PROG_QUOTA" # Let the user override the test with a path.
+  ;;
+  *)
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+as_dummy="`echo "$PATH:/bin:/usr/bin:/sbin:/usr/sbin" | sed -e 's/:/ /'`"
+for as_dir in $as_dummy
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+  for ac_exec_ext in '' $ac_executable_extensions; do
+  if $as_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
+    ac_cv_path_scponly_PROG_QUOTA="$as_dir/$ac_word$ac_exec_ext"
+    echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+done
+
+  ;;
+esac
+fi
+scponly_PROG_QUOTA=$ac_cv_path_scponly_PROG_QUOTA
+
+if test -n "$scponly_PROG_QUOTA"; then
+  echo "$as_me:$LINENO: result: $scponly_PROG_QUOTA" >&5
+echo "${ECHO_T}$scponly_PROG_QUOTA" >&6
+else
+  echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6
+fi
+
+	  test -z $scponly_PROG_QUOTA && echo "Can't find path to 'quota'" && exit 1
+	  cat >>confdefs.h <<_ACEOF
+#define PROG_QUOTA "$scponly_PROG_QUOTA"
 _ACEOF
 
 fi
@@ -6200,6 +6267,7 @@ s,@scponly_PROG_RSYNC@,$scponly_PROG_RSYNC,;t t
 s,@scponly_PROG_SVNSERV@,$scponly_PROG_SVNSERV,;t t
 s,@scponly_PROG_SVN@,$scponly_PROG_SVN,;t t
 s,@scponly_PROG_PASSWD@,$scponly_PROG_PASSWD,;t t
+s,@scponly_PROG_QUOTA@,$scponly_PROG_QUOTA,;t t
 s,@CPP@,$CPP,;t t
 s,@EGREP@,$EGREP,;t t
 s,@ALLOCA@,$ALLOCA,;t t
