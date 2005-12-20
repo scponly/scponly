@@ -131,13 +131,27 @@ echo for this reason, a writeable subdirectory will be created that
 echo the scponly user can write into.  
 echo
 
+if [ "$2" != "" ] ; then
+	targetuser=$2
+else
 targetuser=`getwd "Username to install" "$defaultusername"`
+fi
 username_collision=`id $targetuser > /dev/null 2> /dev/null; echo $?`
 if [ $username_collision -eq 0 ] ; then
 	fail "the user $targetuser already exists.  please remove this user and their home directory and try again."
 fi 
+
+if [ "$1" != "" ] ; then
+	targetdir=$1
+else
 targetdir=`getwd "home directory you wish to set for this user" "$defaulthomedirprefix/$targetuser"`
+fi
+
+if [ "$3" != "" ] ; then
+	writeabledir=$3
+else
 writeabledir=`getwd "name of the writeable subdirectory" "$defaultwriteabledir"`
+fi
 
 #
 #	if you would like to overwrite/extend any of the variables above, do so in the system specific
