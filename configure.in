@@ -229,6 +229,16 @@ AC_ARG_ENABLE([passwd-compat],
               echo -n      dnl  Defaults to off, must be turned on explicitly
       ])
 
+AC_ARG_ENABLE([quota-compat],
+      AC_HELP_STRING([--enable-quota-compat], [enable quota compatibility]),
+      [
+              if test "x$enableval" != "xno"; then
+                      AC_DEFINE([QUOTA_COMPAT])
+              fi
+      ],[
+              echo -n      dnl  Defaults to off, must be turned on explicitly
+      ])
+
 if test "x$scponly_scp_compat" != "x"; then
 	AC_MSG_NOTICE([enabling core WinSCP and Vanilla SCP binaries...])
 	SCPONLY_PATH_PROG_DEFINE([PROG_SFTP_SERVER], [sftp-server],[/usr/lib:/usr/libexec:/usr/libexec/openssh:/usr/lib/ssh:/usr/local/libexec])
@@ -280,6 +290,11 @@ fi
 if test "x$enable_passwd_compat" != "x" && test "x$enable_passwd_compat" != "xno"; then
 	AC_MSG_NOTICE([enabling passwd compatability...])
 	SCPONLY_PATH_PROG_DEFINE([PROG_PASSWD],   [passwd],   [/bin:/usr/bin:/sbin:/usr/sbin])
+fi
+
+if test "x$enable_quota_compat" != "x" && test "x$enable_quota_compat" != "xno"; then
+	AC_MSG_NOTICE([enabling quota compatability...])
+	SCPONLY_PATH_PROG_DEFINE([PROG_QUOTA],   [quota],   [/bin:/usr/bin:/sbin:/usr/sbin])
 fi
 
 dnl with-sftp-server conditionals:

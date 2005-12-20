@@ -89,3 +89,8 @@
 #undef PROG_PASSWD
 #endif
 
+/* quota compatibility */
+#ifdef QUOTA_COMPAT
+#undef PROG_QUOTA
+#endif
+

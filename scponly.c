@@ -63,6 +63,10 @@ cmd_t commands[] =
 	{ PROG_PASSWD, 1 },
 #endif /*ENABLE_PASSWD*/
 
+#ifdef QUOTA_COMPAT
+	{ PROG_QUOTA, 1 },
+#endif /*QUOTA_COMPAT*/
+
 #ifdef SVN_COMPAT
 	{ PROG_SVN, 1 },
 #endif /*ENABLE_SVN*/
