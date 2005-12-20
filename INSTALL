@@ -118,6 +118,19 @@ Step 6. Create/Edit a user intended for scponly use.
 
 	Where the home directory is "/pub" and the username is "scpdemo".
 
+	It is very important that the user's home directory be unwritable
+	by the user, as a writable homedir will make it possible for users
+	to subvert scponly by modifying ssh configuration files.
+
+	If users complain about being unable to write into their homedir,
+	there is a provision to specify both the chroot directory and a 
+	subdirectory of the chroot to chdir into:
+
+	/home/userchroot//writable/subdir
+
+	Everything before the // is the directory to chroot into and everything
+	after the // is the subdir to chdir into after chrooting.
+
 	Naturally, set the password for this user.
 
 ADDITIONAL STEPS FOR CHROOT-ENABLED INSTALLATIONS ONLY:
