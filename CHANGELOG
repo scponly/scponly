@@ -1,5 +1,8 @@
-
 scponly v4.2 - 20 dec 2005
+
+	added CHROOT_CHECKDIR directive
+		issue reported by Max Vozeler <max@decl.org> 
+
 	fix for openbsd ldd in setup_chroot
 		G 0kita <goo13c@gmail.com>
 
@@ -11,6 +14,9 @@ scponly v4.2 - 20 dec 2005
 	
 	patch for command line args to setup_chroot invocation
 		Anish Mistry <amistry@am-productions.biz>
+
+	patches to fix passwd support and add quota support
+		Richard Fuller <rpfuller@cs.york.ac.uk>
 
 scponly v4.1 - 12 apr 2005
 	follow up fix for additional executable rsync argument "-6e" (see v4.0)

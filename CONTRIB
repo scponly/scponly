@@ -109,3 +109,10 @@ G 0kita <goo13c@gmail.com>
 
 Anish Mistry <amistry@am-productions.biz>
 	- patch for command line setup_chroot invocation
+
+Richard Fuller <rpfuller@cs.york.ac.uk>
+	- patch for quota support
+	- patch for fixing passwd support
+
+Max Vozeler <max@decl.org> 
+	- reported issue with user writable home directories and chroot() calls
