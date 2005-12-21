@@ -2,7 +2,9 @@ scponly v4.2 - 20 dec 2005
 
 	improved argument processing
 		Pekka Pessi <ppessi@gmail.com> reported that scponly processed scp args 
-		by literal comparison, which is insufficient to catch getopt style arguments
+		by literal comparison, which is insufficient to catch getopt style 
+		arguments.
+		this also resulted in scp and winscp compat turned off by default.
 
 	added CHROOT_CHECKDIR directive
 		issue reported by Max Vozeler <max@decl.org> wherein non-scponly users
