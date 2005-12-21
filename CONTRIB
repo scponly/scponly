@@ -116,3 +116,6 @@ Richard Fuller <rpfuller@cs.york.ac.uk>
 
 Max Vozeler <max@decl.org> 
 	- reported issue with user writable home directories and chroot() calls
+
+Pekka Pessi <ppessi@gmail.com>
+	- improved getopt style argument checking for malicious arguments
