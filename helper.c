@@ -5,7 +5,7 @@
 #include <string.h>	/* for str* */
 #include <sys/types.h>	/* for stat, getpwuid */
 #include <sys/stat.h>	/* for stat */
-#include <unistd.h>	/* for exit, access, getpwuid, execve */
+#include <unistd.h>	/* for exit, access, getpwuid, execve, getopt */
 #include <errno.h>	/* for debugging */
 #include <pwd.h>	/* to get username for config parsing */
 #include <time.h>	/* time */
@@ -33,6 +33,10 @@ extern cmd_t commands[];
 extern cmd_arg_t dangerous_args[];
 extern char * allowed_env_vars[];
 extern char * safeenv[MAX_ENV];
+
+extern char *optarg;
+extern int optind;
+extern int optreset;
 
 #ifdef UNIX_COMPAT
 char* solaris_needs_strsep(char** str, char* delims)
@@ -120,6 +124,8 @@ int check_dangerous_args(char **av)
 {
 	cmd_arg_t	*cmdarg=dangerous_args;
 	char		**tmpptr=av;
+	int			ch;
+	int			ac=0;
 
 	while (cmdarg != NULL)
 	{
@@ -131,18 +137,53 @@ int check_dangerous_args(char **av)
 			 *	the command matches one of our dangerous commands
 			 *	check the rest of the vector for dangerous command
 			 *	line arguments
+			 *
+			 *	if the "getoptflag" is set for this command, use getopt
+			 *	to determine if the flag is present, otherwise
+			 *	to a string match on each element of the argument vector
 			 */
-			tmpptr=av;
-			*tmpptr++;
-			while (*tmpptr!=NULL)
+			if (1 == cmdarg->getoptflag)
 			{
-				if(exact_match(*tmpptr, cmdarg->badarg))
-				{
-					syslog(LOG_ERR, "%s is not permitted for use with %s (%s))", 
-						cmdarg->badarg, cmdarg->name, logstamp());
-					return 1;
+				/*	
+				 *	first count the arguments in the vector, discounting the program name
+				 */
+				tmpptr=av;
+				while (*tmpptr!=NULL)
+				{	
+					*tmpptr++;
+					ac++;
 				}
+				/* 
+				 *	now use getopt to look for our problem option
+				 */
+				optreset=1;
+				optind=1;
+				/*
+				 *	tell getopt to only be strict if the 'opts' is well defined
+				 */
+				opterr=cmdarg->strict;
+				while ((ch = getopt(ac, av, cmdarg->opts)) != -1)
+					if (ch == cmdarg->badarg[0])
+					{
+						syslog(LOG_ERR, "option %s is not permitted for use with %s (arg was %s)(%s))", 
+							cmdarg->badarg, cmdarg->name, optarg, logstamp());
+						return 1;
+					}
+			}
+			else
+			{
+				tmpptr=av;
 				*tmpptr++;
+				while (*tmpptr!=NULL)
+				{
+					if(strbeg(*tmpptr, cmdarg->badarg))
+					{
+						syslog(LOG_ERR, "%s is not permitted for use with %s (%s))", 
+							cmdarg->badarg, cmdarg->name, logstamp());
+						return 1;
+					}
+					*tmpptr++;
+				}
 			}
 		}
 		cmdarg++;

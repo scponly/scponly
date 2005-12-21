@@ -27,7 +27,10 @@ typedef struct
 typedef struct
 {
 	char *name;
+	int  getoptflag;
+	int  strict;
 	char *badarg;
+	char *opts;
 } cmd_arg_t;
  
 /*
