@@ -112,7 +112,7 @@ dnl                   be present.
       ])
 
 AC_ARG_ENABLE([winscp-compat],
-      AC_HELP_STRING([--disable-winscp-compat], [disable WinSCP compatibility mode]),
+      AC_HELP_STRING([--enable-winscp-compat], [enable winscp (and scp) compatibility]),
       [
               if test "x$enableval" != "xno"; then
                       scponly_scp_compat=1
@@ -120,9 +120,7 @@ AC_ARG_ENABLE([winscp-compat],
                       AC_DEFINE([WINSCP_COMPAT])
               fi
       ],[
-              scponly_scp_compat=1
-              AC_DEFINE([ENABLE_SCP2])
-              AC_DEFINE([WINSCP_COMPAT])
+              echo -n      dnl  Defaults to off, must be turned on explicitly
       ])
 
 AC_ARG_WITH([default-chdir],
@@ -133,18 +131,6 @@ AC_ARG_WITH([default-chdir],
 		],[
 			echo -n      dnl  Defaults to off, must be turned on explicitly
 		])
-
-AC_ARG_ENABLE([scp-compat],
-      AC_HELP_STRING([--disable-scp-compat], [disable vanilla scp compatibility too!]),
-      [
-              if test "x$enableval" != "xno"; then
-                      scponly_scp_compat=1
-                      AC_DEFINE([ENABLE_SCP2])
-              fi
-      ],[
-              scponly_scp_compat=1
-              AC_DEFINE([ENABLE_SCP2])
-      ])
 
 AC_ARG_ENABLE([sftp-logging-compat],
       AC_HELP_STRING([--enable-sftp-logging-compat], [Enable SFTP logging compatibility]),
@@ -167,6 +153,17 @@ AC_ARG_ENABLE([unison-compat],
               echo -n      dnl  Defaults to off, must be turned on explicitly
       ])
 		
+AC_ARG_ENABLE([scp-compat],
+      AC_HELP_STRING([--enable-scp-compat], [enable scp compatibility]),
+      [
+              if test "x$enableval" != "xno"; then
+					AC_DEFINE([ENABLE_SCP2])
+					scponly_scp_compat=1
+              fi
+      ],[
+              echo -n      dnl  Defaults to off, must be turned on explicitly
+      ])
+
 AC_ARG_ENABLE([rsync-compat],
       AC_HELP_STRING([--enable-rsync-compat], [enable rsync compatibility]),
       [
