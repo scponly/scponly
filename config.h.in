@@ -21,6 +21,8 @@
 #undef CHROOT_CHECKDIR
 #undef HAVE_WORDEXP
 #undef HAVE_GLOB
+#undef HAVE_GETOPT
+#undef HAVE_GETOPT_H
 
 #undef ENABLE_DEFAULT_CHDIR
 /* cd to this directory after authentication */

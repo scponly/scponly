@@ -317,7 +317,7 @@ fi
 dnl Checks for libraries.
 dnl Checks for header files.
 AC_HEADER_STDC
-AC_CHECK_HEADERS([stdlib.h string.h syslog.h unistd.h wordexp.h glob.h libgen.h])
+AC_CHECK_HEADERS([stdlib.h string.h syslog.h unistd.h wordexp.h glob.h libgen.h getopt.h])
 
 dnl Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
@@ -325,7 +325,7 @@ AC_C_INLINE
 
 dnl Checks for library functions.
 AC_FUNC_ALLOCA
-AC_CHECK_FUNCS([malloc atexit bzero strchr strerror glob wordexp strspn basename])
+AC_CHECK_FUNCS([malloc atexit bzero strchr strerror glob wordexp strspn basename getopt])
 
 dnl AC_CONFIG_FILES([Makefile])
 AC_OUTPUT([Makefile setup_chroot.sh])

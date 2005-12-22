@@ -4789,7 +4789,8 @@ done
 
 
 
-for ac_header in stdlib.h string.h syslog.h unistd.h wordexp.h glob.h libgen.h
+
+for ac_header in stdlib.h string.h syslog.h unistd.h wordexp.h glob.h libgen.h getopt.h
 do
 as_ac_Header=`echo "ac_cv_header_$ac_header" | $as_tr_sh`
 if eval "test \"\${$as_ac_Header+set}\" = set"; then
@@ -5486,7 +5487,8 @@ fi
 
 
 
-for ac_func in malloc atexit bzero strchr strerror glob wordexp strspn basename
+
+for ac_func in malloc atexit bzero strchr strerror glob wordexp strspn basename getopt
 do
 as_ac_var=`echo "ac_cv_func_$ac_func" | $as_tr_sh`
 echo "$as_me:$LINENO: checking for $ac_func" >&5

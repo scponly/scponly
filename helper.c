@@ -6,6 +6,9 @@
 #include <sys/types.h>	/* for stat, getpwuid */
 #include <sys/stat.h>	/* for stat */
 #include <unistd.h>	/* for exit, access, getpwuid, execve, getopt */
+#ifdef HAVE_GETOPT_H
+#include <getopt.h> /* for getopt */
+#endif
 #include <errno.h>	/* for debugging */
 #include <pwd.h>	/* to get username for config parsing */
 #include <time.h>	/* time */
@@ -142,6 +145,7 @@ int check_dangerous_args(char **av)
 			 *	to determine if the flag is present, otherwise
 			 *	to a string match on each element of the argument vector
 			 */
+#ifdef HAVE_GETOPT
 			if (1 == cmdarg->getoptflag)
 			{
 				/*	
@@ -171,6 +175,7 @@ int check_dangerous_args(char **av)
 					}
 			}
 			else
+#endif
 			{
 				tmpptr=av;
 				*tmpptr++;
