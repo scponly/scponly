@@ -38,8 +38,9 @@ to the rest of the filesystem.
 worked great.  this is probably the cleanest and most usable way 
 for an scponly user to access files.
 
-- sftp logging: if the ./configure directive "--enable-sftp-logging" 
-is used, scponly will support sftp logging
+- sftp logging: if the ./configure directive 
+"--enable-sftp-logging-compat" is used, scponly will support sftp 
+logging
 
 - WinSCP 2.0/3.0 compatibility.
 
