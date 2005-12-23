@@ -9,12 +9,12 @@ PATH="$PATH:/usr/local/bin"
 
 dnl
 dnl Say what we are:
-AC_INIT(scponly, 4.2, joe@sublimation.org)                                                                      
+AC_INIT(scponly, 4.3, joe@sublimation.org)                                                                      
 PACKAGE=scponly
 AC_DEFINE(PACKAGE)
 PACKAGE_NAME=scponly
 AC_DEFINE(PACKAGE_NAME)
-PACKAGE_VERSION=4.1
+PACKAGE_VERSION=4.3
 AC_DEFINE(PACKAGE_VERSION)
 PACKAGE_BUGREPORT=joe@sublimation.org
 AC_DEFINE(PACKAGE_BUGREPORT)
