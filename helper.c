@@ -119,7 +119,7 @@ char *flatten_vector(char **av)
 
 /*
  *	since some programs support invoking other programs for their encryption
- *	(dropings to replace ssh), we must refuse to support these arguments
+ *	(dropins to replace ssh), we must refuse to support these arguments
  *
  *	RETURN: 1 means reject this command, 0 means it is safe.
  */
@@ -145,11 +145,10 @@ int check_dangerous_args(char **av)
 			 *	to determine if the flag is present, otherwise
 			 *	to a string match on each element of the argument vector
 			 */
-#ifdef HAVE_GETOPT
 			if (1 == cmdarg->getoptflag)
 			{
 				/*	
-				 *	first count the arguments in the vector, discounting the program name
+				 *	first count the arguments in the vector
 				 */
 				tmpptr=av;
 				while (*tmpptr!=NULL)
@@ -160,6 +159,7 @@ int check_dangerous_args(char **av)
 				/* 
 				 *	now use getopt to look for our problem option
 				 */
+#ifdef HAVE_GETOPT
 				optreset=1;
 				optind=1;
 				/*
@@ -173,9 +173,11 @@ int check_dangerous_args(char **av)
 							cmdarg->badarg, cmdarg->name, optarg, logstamp());
 						return 1;
 					}
+#elif
+				syslog(LOG_ERR, "a getopt() argument check could not be performed for %s, recompile scponly without support for %s or rebuild scponly with getopt", av[0], av[0]);
+#endif
 			}
 			else
-#endif
 			{
 				tmpptr=av;
 				*tmpptr++;
