@@ -67,7 +67,7 @@ if [ x@PROG_LDD@ = x ]; then
 	fail "shared libraries to copy into your chrooted dir..."
 fi
 
-if [ `uname -s` == "OpenBSD" ]; then
+if [ `uname -s` = "OpenBSD" ]; then
 	for bin in $BINARIES; do
 		GREP_LIST="$GREP_LIST -e $bin"
 	done

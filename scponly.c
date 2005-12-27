@@ -145,7 +145,7 @@ int main (int argc, char **argv)
 	FILE *debugfile;
 	int logopts = LOG_PID|LOG_NDELAY;
 	struct stat	homedirstat;
-	
+
 	/*
 	 * set debuglevel.  any nonzero number will result in debugging info to log
 	 */
@@ -242,6 +242,7 @@ int main (int argc, char **argv)
 			root_dir++;
 		}
 #ifdef CHROOT_CHECKDIR
+		bzero(&homedirstat, sizeof(struct stat));
 		if (-1 == stat(chrootdir, &homedirstat))
 		{
 			syslog (LOG_ERR, "couldnt stat chroot dir: %s with errno %u", chrootdir, errno);
@@ -257,9 +258,14 @@ int main (int argc, char **argv)
 			syslog (LOG_ERR, "chroot dir not owned by root: %s", chrootdir);
 			exit(EXIT_FAILURE);
 		}
-		if (0 != (homedirstat.st_mode | (S_IWOTH & S_IWGRP)))
+		if (0 != (homedirstat.st_mode & S_IWOTH))
 		{
-			syslog (LOG_ERR, "chroot dir writable by group/other: %s", chrootdir);
+			syslog (LOG_ERR, "chroot dir writable by other: %s", chrootdir);
+			exit(EXIT_FAILURE);
+		}
+		if (0 != (homedirstat.st_mode & S_IWGRP))
+		{
+			syslog (LOG_ERR, "chroot dir writable by group: %s", chrootdir);
 			exit(EXIT_FAILURE);
 		}
 #endif
