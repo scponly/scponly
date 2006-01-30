@@ -1,3 +1,16 @@
+
+scponly v4.4 - jan 30 2005
+
+	fixes that hopefully improve the optarg compilation situation
+		Christophe GRENIER <grenier@cgsecurity.org>
+		Bryan ?\230stergaard <kloeri@gentoo.org>
+
+	UNISON $HOME environment fix
+		Martin Werthmoeller <mw@lw-systems.de>
+
+	fixes to setup_chroot.sh/in
+		Hideyuki KURASHINA <rushani@bl.mmtr.or.jp>
+
 scponly v4.3 - 27 dec 2005
 
 	numerous small fixes to 4.2

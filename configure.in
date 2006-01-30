@@ -9,15 +9,8 @@ PATH="$PATH:/usr/local/bin"
 
 dnl
 dnl Say what we are:
-AC_INIT(scponly, 4.3, joe@sublimation.org)                                                                      
-PACKAGE=scponly
-AC_DEFINE(PACKAGE)
-PACKAGE_NAME=scponly
-AC_DEFINE(PACKAGE_NAME)
-PACKAGE_VERSION=4.3
-AC_DEFINE(PACKAGE_VERSION)
-PACKAGE_BUGREPORT=joe@sublimation.org
-AC_DEFINE(PACKAGE_BUGREPORT)
+AC_INIT(scponly, 4.4, joe@sublimation.org)                                                                      
+
 dnl AC_CONFIG_SRCDIR([helper.c])
 AC_CONFIG_HEADER([config.h])
 
@@ -326,6 +319,11 @@ AC_C_INLINE
 dnl Checks for library functions.
 AC_FUNC_ALLOCA
 AC_CHECK_FUNCS([malloc atexit bzero strchr strerror glob wordexp strspn basename getopt])
+
+AC_CHECK_DECL(optreset,
+ AC_DEFINE([HAVE_OPTRESET],[1],[have optreset]),
+ AC_DEFINE([HAVE_OPTRESET],[0],[do not have optreset]),
+ [#include <getopt.h>] )
 
 dnl AC_CONFIG_FILES([Makefile])
 AC_OUTPUT([Makefile setup_chroot.sh])

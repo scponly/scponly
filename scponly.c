@@ -579,6 +579,10 @@ int process_ssh_request(char *request)
 	if (valid_arg_vector(av))
 	{
 
+/*                                                                                                                   
+ * Unison needs the HOME environment variable be set to the directory                                                  
+ * where the .unison directory resides.                                                                                
+ */                                                                                                                    
 #ifdef USE_SAFE_ENVIRONMENT
 		safeenv[0] = NULL;
 		filter_allowed_env_vars();
@@ -591,13 +595,26 @@ int process_ssh_request(char *request)
 #endif
 
 #ifdef UNISON_COMPAT
-		if (((strlen(homedir) + 6 ) > FILENAME_MAX) || !mysetenv("HOME",homedir))
+		if (chrooted)                                                                                           
+		{                                                                                                       
+			if (!mysetenv("HOME","/"))                                                                       
+			{                                                                                               
+				syslog(LOG_ERR, "could not set HOME environment variable to '/' (%s)", logstamp());           
+				exit(EXIT_FAILURE);                                                                     
+			}                                                                                               
+			if (debuglevel)                                                                                 
+				syslog(LOG_DEBUG, "set HOME environment variable to / %s", logstamp());           
+		}                                                                                                       
+		else
 		{
-			syslog(LOG_ERR, "could not set HOME environment variable(%s))", logstamp());
-			exit(EXIT_FAILURE);
+			if (((strlen(homedir) + 6 ) > FILENAME_MAX) || !mysetenv("HOME",homedir))
+			{
+				syslog(LOG_ERR, "could not set HOME environment variable (%s)", logstamp());
+				exit(EXIT_FAILURE);
+			}
+			if (debuglevel)
+				syslog(LOG_DEBUG, "set HOME environment variable to %s (%s)", homedir, logstamp());
 		}
-		if (debuglevel)
-			syslog(LOG_DEBUG, "set HOME environment variable to %s (%s))", homedir, logstamp());
 #endif 
 		syslog(LOG_INFO, "running: %s (%s)", flat_request, logstamp());
 

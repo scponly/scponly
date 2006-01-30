@@ -37,9 +37,13 @@ extern cmd_arg_t dangerous_args[];
 extern char * allowed_env_vars[];
 extern char * safeenv[MAX_ENV];
 
+#ifdef HAVE_GETOPT
 extern char *optarg;
 extern int optind;
+#ifdef HAVE_OPTRESET
 extern int optreset;
+#endif
+#endif
 
 #ifdef UNIX_COMPAT
 char* solaris_needs_strsep(char** str, char* delims)
@@ -160,8 +164,18 @@ int check_dangerous_args(char **av)
 				 *	now use getopt to look for our problem option
 				 */
 #ifdef HAVE_GETOPT
+#ifdef HAVE_OPTRESET
+				/*
+				 * if we have optreset, use it to reset the global variables
+				 */
 				optreset=1;
 				optind=1;
+#else
+				/*
+				 *	otherwise, try a glibc-style reset of the global getopt vars
+				 */
+				optind=0
+#endif
 				/*
 				 *	tell getopt to only be strict if the 'opts' is well defined
 				 */
@@ -465,7 +479,6 @@ int mysetenv(const char *name, const char *value) {
 	}
 	return 0;
 }
-
 
 void filter_allowed_env_vars() {
 	

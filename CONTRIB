@@ -53,6 +53,7 @@ David N. Blank-Edelman
 Martin Werthmoeller <mw@werthmoeller.de>
 	- linux libnss_compat* fix
 	- setup_chroot improvements
+	- UNISON compat fixes
 
 Olaf Menkens <Olaf.Menkens@IMK.Fraunhofer.DE>
 	- IRIX compatibility notes
@@ -119,3 +120,7 @@ Max Vozeler <max@decl.org>
 
 Pekka Pessi <ppessi@gmail.com>
 	- improved getopt style argument checking for malicious arguments
+
+Christophe GRENIER <grenier@cgsecurity.org>
+Bryan ?\230stergaard <kloeri@gentoo.org>
+	- suggestions leading to a autoconf fix for getopt issues
