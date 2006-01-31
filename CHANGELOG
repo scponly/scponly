@@ -1,4 +1,4 @@
-scponly v4.5 - jan 30 2006
+scponly v4.5 - jan 31 2006
 
 	fixes the configure.in script to not define HAVE_OPTRESET, not even to a value of 0
 		Ilya Evseev <ilya_evseev@mail.ru>
