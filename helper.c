@@ -174,7 +174,7 @@ int check_dangerous_args(char **av)
 				/*
 				 *	otherwise, try a glibc-style reset of the global getopt vars
 				 */
-				optind=0
+				optind=0;
 #endif
 				/*
 				 *	tell getopt to only be strict if the 'opts' is well defined
