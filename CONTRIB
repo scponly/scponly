@@ -11,6 +11,7 @@ Kaleb Pederson <kpederson@mail.ewu.edu>
 Paul Hyder <Paul.Hyder@noaa.gov>     
 	- building jails document
 	- fix for autoconf AC_INIT macro
+	- minor compilation issues
 
 David Ramsden <david@hexstream.eu.org> 
 	- chdir/chroot patch

@@ -1,3 +1,7 @@
+scponly v4.6 - jan 31 2006
+
+	added missing semicolon to helper.c
+
 scponly v4.5 - jan 31 2006
 
 	fixes the configure.in script to not define HAVE_OPTRESET, not even to a value of 0
