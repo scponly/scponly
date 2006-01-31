@@ -1,5 +1,9 @@
+scponly v4.5 - jan 30 2006
 
-scponly v4.4 - jan 30 2005
+	fixes the configure.in script to not define HAVE_OPTRESET, not even to a value of 0
+		Ilya Evseev <ilya_evseev@mail.ru>
+
+scponly v4.4 - jan 30 2006
 
 	fixes that hopefully improve the optarg compilation situation
 		Christophe GRENIER <grenier@cgsecurity.org>

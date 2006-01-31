@@ -124,3 +124,6 @@ Pekka Pessi <ppessi@gmail.com>
 Christophe GRENIER <grenier@cgsecurity.org>
 Bryan ?\230stergaard <kloeri@gentoo.org>
 	- suggestions leading to a autoconf fix for getopt issues
+
+Ilya Evseev <ilya_evseev@mail.ru>
+    - fixes the configure.in script to not define HAVE_OPTRESET, not even to a value of 0

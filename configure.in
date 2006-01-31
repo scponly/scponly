@@ -9,7 +9,7 @@ PATH="$PATH:/usr/local/bin"
 
 dnl
 dnl Say what we are:
-AC_INIT(scponly, 4.4, joe@sublimation.org)                                                                      
+AC_INIT(scponly, 4.5, joe@sublimation.org)                                                                      
 
 dnl AC_CONFIG_SRCDIR([helper.c])
 AC_CONFIG_HEADER([config.h])
@@ -321,8 +321,7 @@ AC_FUNC_ALLOCA
 AC_CHECK_FUNCS([malloc atexit bzero strchr strerror glob wordexp strspn basename getopt])
 
 AC_CHECK_DECL(optreset,
- AC_DEFINE([HAVE_OPTRESET],[1],[have optreset]),
- AC_DEFINE([HAVE_OPTRESET],[0],[do not have optreset]),
+ AC_DEFINE([HAVE_OPTRESET],[1],[have optreset]),,
  [#include <getopt.h>] )
 
 dnl AC_CONFIG_FILES([Makefile])
