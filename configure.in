@@ -231,7 +231,7 @@ AC_ARG_ENABLE([quota-compat],
 
 if test "x$scponly_scp_compat" != "x"; then
 	AC_MSG_NOTICE([enabling core WinSCP and Vanilla SCP binaries...])
-	SCPONLY_PATH_PROG_DEFINE([PROG_SFTP_SERVER], [sftp-server],[/usr/lib:/usr/libexec:/usr/libexec/openssh:/usr/lib/ssh:/usr/local/libexec])
+	SCPONLY_PATH_PROG_DEFINE([PROG_SFTP_SERVER], [sftp-server],[/usr/lib:/usr/libexec:/usr/libexec/openssh:/usr/lib/ssh:/usr/local/libexec:/usr/lib/misc:/usr/lib/openssh])
 	SCPONLY_PATH_PROG_DEFINE([PROG_LS],    [ls],    [/bin:/usr/bin:/sbin:/usr/sbin])
 	SCPONLY_PATH_PROG_DEFINE([PROG_SCP],   [scp],   [/bin:/usr/bin:/sbin:/usr/sbin])
 	SCPONLY_PATH_PROG_DEFINE([PROG_RM],    [rm],    [/bin:/usr/bin:/sbin:/usr/sbin])
