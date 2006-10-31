@@ -68,6 +68,25 @@ char* solaris_needs_strsep(char** str, char* delims)
 }
 #endif
 
+/*
+ * perform a deep copy of an argument vector, ignoring all vector elements which begin with "--"
+ */
+char **strip_vector(char **sav)
+{
+	char 	**tmpptr=sav;  
+	char 	**dav=(char **)malloc(MAX_ARGC * (sizeof(char *)));
+	int		dac=0;
+
+	bzero(dav,sizeof(dav));
+    while (*tmpptr!=NULL)
+	{
+		if(NULL == strbeg(*tmpptr, "--"))
+			dav[dac++]=strdup(*tmpptr);
+		tmpptr++;
+	}
+	return dav;
+}
+
 void discard_vector(char **av)
 {
 	char **tmpptr=av;	
@@ -100,7 +119,7 @@ char *flatten_vector(char **av)
 			len = 0;
 			newlen=strlen(*tmpptr);
 		}
-		if (NULL == (temp = realloc (outbuf, newlen + 1)))
+		if (NULL == (temp = realloc(outbuf, newlen + 1)))
 		{
 			perror("realloc");
 			if (outbuf)
@@ -131,8 +150,15 @@ int check_dangerous_args(char **av)
 {
 	cmd_arg_t	*cmdarg=dangerous_args;
 	char		**tmpptr=av;
+	char 		**sav=NULL;
 	int			ch;
 	int			ac=0;
+	/*
+	 * for getop processing, we will discard opts which begin with '--'
+ 	 * sav is a copy of av with all the '--foo ' args removed
+	 * when we do getopt checking, we will use sav instead of av
+	 */
+	sav = strip_vector(av);
 
 	while (cmdarg != NULL)
 	{
@@ -154,7 +180,7 @@ int check_dangerous_args(char **av)
 				/*	
 				 *	first count the arguments in the vector
 				 */
-				tmpptr=av;
+				tmpptr=sav;
 				while (*tmpptr!=NULL)
 				{	
 					*tmpptr++;
@@ -177,21 +203,26 @@ int check_dangerous_args(char **av)
 				optind=0;
 #endif
 				/*
-				 *	tell getopt to only be strict if the 'opts' is well defined
+				 *	tell getopt to only be strict if the 'opts' are well defined
 				 */
 				opterr=cmdarg->strict;
-				while ((ch = getopt(ac, av, cmdarg->opts)) != -1)
+				while ((ch = getopt(ac, sav, cmdarg->opts)) != -1)
+				{
 					if (ch == cmdarg->badarg[0])
 					{
 						syslog(LOG_ERR, "option %s is not permitted for use with %s (arg was %s)(%s))", 
 							cmdarg->badarg, cmdarg->name, optarg, logstamp());
 						return 1;
 					}
+				}
 #elif
-				syslog(LOG_ERR, "a getopt() argument check could not be performed for %s, recompile scponly without support for %s or rebuild scponly with getopt", av[0], av[0]);
+				syslog(LOG_ERR, "a getopt() argument check could not be performed for %s, recompile scponly without support for %s or rebuild scponly with getopt support", av[0], av[0]);
 #endif
 			}
 			else
+			/*
+			 * command does not require getopt processing
+			 */
 			{
 				tmpptr=av;
 				*tmpptr++;
@@ -209,6 +240,7 @@ int check_dangerous_args(char **av)
 		}
 		cmdarg++;
 	}
+	discard_vector(sav);
 	return 0;
 }
 

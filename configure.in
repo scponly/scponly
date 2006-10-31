@@ -9,7 +9,7 @@ PATH="$PATH:/usr/local/bin"
 
 dnl
 dnl Say what we are:
-AC_INIT(scponly, 4.6, joe@sublimation.org)                                                                      
+AC_INIT(scponly, 4.7, joe@sublimation.org)                                                                      
 
 dnl AC_CONFIG_SRCDIR([helper.c])
 AC_CONFIG_HEADER([config.h])

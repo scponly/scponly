@@ -89,7 +89,7 @@ cmd_arg_t dangerous_args[] =
 	 *	'oplist' only neccesary where 'use getopt' is 1
 	 *	'strict optlist' only applicable where 'use getopt?' is 1
 	 *
-	 * program name		use getopt?		strict optlist?	optname			optlist
+	 * program name		use getopt?		strict optlist?	badarg			optlist
 	 */
 #ifdef ENABLE_SCP2
 	{ PROG_SCP, 		1, 				1,				"S",			"dfl:prtvBCc:i:P:q1246S:o:F:" },
