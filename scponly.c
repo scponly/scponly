@@ -29,7 +29,7 @@ char *safeenv[MAX_ENV];
 cmd_t commands[] =
 { 
 #ifdef ENABLE_SFTP
-	{ PROG_SFTP_SERVER, 0 },
+	{ PROG_SFTP_SERVER, 1 },
 #endif /*ENABLE_SFTP*/
 #ifdef ENABLE_SCP2
 	{ PROG_LS, 1 }, 
@@ -91,6 +91,9 @@ cmd_arg_t dangerous_args[] =
 	 *
 	 * program name		use getopt?		strict optlist?	badarg			optlist
 	 */
+#ifdef ENABLE_SFTP
+	{ PROG_SFTP_SERVER,	1,				1,				NULL,			"f:l:"},
+#endif
 #ifdef ENABLE_SCP2
 	{ PROG_SCP, 		1, 				1,				"S",			"dfl:prtvBCc:i:P:q1246S:o:F:" },
 #endif
