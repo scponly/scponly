@@ -89,10 +89,15 @@ char **strip_vector(char **sav)
 
 void discard_vector(char **av)
 {
+	discard_child_vectors(av);
+	free(av);
+}
+
+void discard_child_vectors(char **av)
+{
 	char **tmpptr=av;	
 	while (*tmpptr!=NULL)
 		free(*tmpptr++);
-	free(av);
 }
 
 char *flatten_vector(char **av)

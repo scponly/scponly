@@ -49,4 +49,5 @@ int valid_arg_vector(char **);
 char *substitute_known_path(char *);
 char *flatten_vector(char **);
 void discard_vector(char **);
+void discard_child_vectors(char **);
 int check_dangerous_args(char **av);

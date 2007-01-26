@@ -638,7 +638,7 @@ int process_ssh_request(char *request)
 				fflush(stderr);
 				discard_vector(av);
 #ifdef USE_SAFE_ENVIRONMENT                                                                                            
-				discard_vector(safeenv);
+				discard_child_vectors(safeenv);
 #endif
 				free(flat_request);
 				free(tmprequest);
@@ -658,7 +658,7 @@ int process_ssh_request(char *request)
 		free(flat_request);
 		discard_vector(av);
 #ifdef USE_SAFE_ENVIRONMENT                                                                                            
-		discard_vector(safeenv);
+		discard_child_vectors(safeenv);
 #endif
 #ifdef WINSCP_COMPAT
 		if (winscp_mode)
