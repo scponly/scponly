@@ -104,7 +104,7 @@ cmd_arg_t dangerous_args[] =
 #ifdef UNISON_COMPAT	
 	{ PROG_UNISON, 		0, 				0,				"-rshcmd",		NULL },
 	{ PROG_UNISON, 		0, 				0,				"-sshcmd",		NULL },
-	{ PROG_UNISON, 		0, 				0,				"-servercmd,	NULL" },
+	{ PROG_UNISON, 		0, 				0,				"-servercmd",	NULL },
 #endif
 	NULL
 };
