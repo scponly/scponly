@@ -36,6 +36,7 @@ extern cmd_t commands[];
 extern cmd_arg_t dangerous_args[];
 extern char * allowed_env_vars[];
 extern char * safeenv[MAX_ENV];
+extern void (*debug)(int priority, const char* format, ...);
 
 #ifdef HAVE_GETOPT
 extern char *optarg;
@@ -45,23 +46,28 @@ extern int optreset;
 #endif
 #endif
 
+void noop_syslog(int priority, const char* format, ...)
+{
+	/* purposefully does nothing, used when debuglevel <= 0 */
+}
+
 #ifdef UNIX_COMPAT
 char* solaris_needs_strsep(char** str, char* delims)
 {
     char* tmpstr;
 
     if (*str==NULL) {
-        return NULL;
+	return NULL;
     }
 
     tmpstr=*str;
     while (**str!='\0') {
-        if (strchr(delims,**str)!=NULL) {
-            **str='\0';
-            (*str)++;
-            return tmpstr;
-        }
-        (*str)++;
+	if (strchr(delims,**str)!=NULL) {
+	    **str='\0';
+	    (*str)++;
+	    return tmpstr;
+	}
+	(*str)++;
     }
     *str=NULL;
     return tmpstr;
@@ -291,8 +297,8 @@ char *substitute_known_path(char *request)
 char **build_arg_vector(char *request)
 {
 	/*
-	 *  	i strdup vector elements so i know they are
-	 * 	mine to free later.
+	 * i strdup vector elements so i know they are
+	 * mine to free later.
 	 */
 	char **ap, *argv[MAX_ARGC], *inputstring, *tmpstring, *freeme;
 	char **ap2,**av=(char **)malloc(MAX_ARGC * (sizeof(char *)));
@@ -300,7 +306,7 @@ char **build_arg_vector(char *request)
 	ap=argv;
 	freeme=inputstring=strdup(request); /* make a local copy  */
 
-        while (ap < &argv[(MAX_ARGC-1)]) 
+	while (ap < &argv[(MAX_ARGC-1)]) 
 	{
 		if (inputstring && (*inputstring=='"'))
 		{
@@ -317,23 +323,23 @@ char **build_arg_vector(char *request)
 					break;
 				inputstring=tmpstring;
 		
-       			        if (**ap != '\0')
-        				ap++;
+       				if (**ap != '\0')
+					ap++;
 				continue;
 			}
 		}
 		
 #ifdef UNIX_COMPAT
-        	if ((*ap = solaris_needs_strsep(&inputstring, WHITE)) == NULL)
+		if ((*ap = solaris_needs_strsep(&inputstring, WHITE)) == NULL)
 #else
-        	if ((*ap = strsep(&inputstring, WHITE)) == NULL)
+		if ((*ap = strsep(&inputstring, WHITE)) == NULL)
 #endif
 			break;
 		
-                if (**ap != '\0')
-        		ap++;
-        }
-        *ap = NULL;
+		if (**ap != '\0')
+			ap++;
+	}
+	*ap = NULL;
 	ap=argv;
 	ap2=av;
 	while (*ap != NULL)
@@ -342,7 +348,7 @@ char **build_arg_vector(char *request)
 		ap2++;
 		ap++;
 	}
-        *ap2 = NULL;
+	*ap2 = NULL;
 	free(freeme);
 	
 	return (av);	
@@ -364,7 +370,7 @@ char **expand_wildcards(char **av_old)
 
 	while(av_old[c_old] != NULL )
 	{
-        	if (0 == glob(av_old[c_old++],flags,NULL,&g))
+		if (0 == glob(av_old[c_old++],flags,NULL,&g))
 		{
 			c=0;
 			while((g.gl_pathv[c] != NULL) && (c_new < (MAX_ARGC-1)))
@@ -488,9 +494,11 @@ int get_uservar(void)
 		}
 		return 0;
 	}
-	if (debuglevel)
-		syslog(LOG_DEBUG, "retrieved home directory of \"%s\" for user \"%s\"",
-		       userinfo->pw_dir, userinfo->pw_name);
+	debug(
+		LOG_DEBUG,\
+		"retrieved home directory of \"%s\" for user \"%s\"",
+		userinfo->pw_dir, userinfo->pw_name
+		);
 	strncpy(username,userinfo->pw_name,MAX_USERNAME);
 	strncpy(homedir,userinfo->pw_dir,FILENAME_MAX);
 	return 1;
@@ -506,12 +514,10 @@ int replace_env_entry(const char* name, const char* value) {
 	char buf[257]; /* make sure I don't overflow */
 	snprintf(buf, 255, "%s=", name);
 	while (*base != NULL) {
-		if (debuglevel)
-			syslog(LOG_DEBUG, "Looking for '%s' in '%s'", buf, *base);
+		debug(LOG_DEBUG, "Looking for '%s' in '%s'", buf, *base);
 		if (strbeg(*base, buf) != NULL) {
 			strcpy(*base + strlen(buf), value);
-			if (debuglevel)
-				syslog(LOG_DEBUG, "'%s' env entry now reads '%s'", name, *base);
+			debug(LOG_DEBUG, "'%s' env entry now reads '%s'", name, *base);
 			return 0;
 		}
 		base++;
@@ -551,14 +557,14 @@ void filter_allowed_env_vars() {
 		
 		p_env = (char*)getenv(*p_valid);
 		if (NULL != p_env) {
-			if (debuglevel)
-				syslog(LOG_DEBUG, "Found \"%s\" and setting it to \"%s\"", *p_valid, p_env);
+			debug(LOG_DEBUG, "Found \"%s\" and setting it to \"%s\"", *p_valid, p_env);
 			if (!mysetenv(*p_valid, p_env))
 				syslog(LOG_ERR, "Unable to set environment var \"%s\" to \"%s\"", *p_valid, p_env);
-		} else if (debuglevel) {
-			syslog(LOG_DEBUG, "Unable to find \"%s\" in the environment", *p_valid);
+		} else {
+			debug(LOG_DEBUG, "Unable to find \"%s\" in the environment", *p_valid);
 		}
 		p_valid++;
 	}
 }
 
+/* vim: set noet sw=4 ts=4: */

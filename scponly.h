@@ -53,3 +53,6 @@ void discard_child_vectors(char **);
 int check_dangerous_args(char **av);
 int mysetenv(const char *name, const char *value);
 int replace_env_entry(const char *name, const char *value);
+void noop_syslog(int priority, const char* format, ...);
+
+/* vim: set noet sw=4 ts=4: */

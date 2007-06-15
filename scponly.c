@@ -26,6 +26,9 @@ char homedir[FILENAME_MAX];
 char chrootdir[FILENAME_MAX];
 char *safeenv[MAX_ENV];
 
+/* will point to syslog or a noop */
+void (*debug)(int priority, const char* format, ...);
+
 cmd_t commands[] =
 { 
 #ifdef ENABLE_SFTP
@@ -163,14 +166,19 @@ int main (int argc, char **argv)
 #endif
 
 #ifdef UNIX_COMPAT 
-        openlog(PACKAGE_NAME, logopts, LOG_AUTH);
+	openlog(PACKAGE_NAME, logopts, LOG_AUTH);
 #elif IRIX_COMPAT
-        openlog(PACKAGE_NAME, logopts, LOG_AUTH);
+	openlog(PACKAGE_NAME, logopts, LOG_AUTH);
 #else
-        if (debuglevel > 1) /* debuglevel 1 will still log to syslog */
-                logopts |= LOG_PERROR;
-        openlog(PACKAGE_NAME, logopts, LOG_AUTHPRIV);
+	if (debuglevel > 1) /* debuglevel 1 will still log to syslog */
+		logopts |= LOG_PERROR;
+	openlog(PACKAGE_NAME, logopts, LOG_AUTHPRIV);
 #endif
+
+	if (debuglevel > 0)
+		debug = syslog;
+	else
+		debug = noop_syslog;
 
 #ifdef CHROOTED_NAME
 	/*
@@ -184,8 +192,7 @@ int main (int argc, char **argv)
 	if (0==strncmp(argv[0],CHROOTED_NAME,FILENAME_MAX))
 #endif
 	{
-		if (debuglevel)
-			syslog(LOG_INFO, "chrooted binary in place, will chroot()");
+		debug(LOG_INFO, "chrooted binary in place, will chroot()");
 		chrooted=1;
 	}
 #endif /* CHROOTED_NAME */
@@ -197,11 +204,11 @@ int main (int argc, char **argv)
 		for (i=0;i<argc;i++)
 			syslog(LOG_DEBUG, "\targ %u is %s", i, argv[i]);
 	}
-        if (debuglevel)
+
 #ifdef UNIX_COMPAT
-                syslog(LOG_DEBUG, "opened log at LOG_AUTH, opts 0x%08x", logopts);
+	debug(LOG_DEBUG, "opened log at LOG_AUTH, opts 0x%08x", logopts);
 #else
-                syslog(LOG_DEBUG, "opened log at LOG_AUTHPRIV, opts 0x%08x", logopts);
+	debug(LOG_DEBUG, "opened log at LOG_AUTHPRIV, opts 0x%08x", logopts);
 #endif
 
 	if (getuid()==0)
@@ -216,13 +223,12 @@ int main (int argc, char **argv)
 	if (argc!=3)
 #endif
 	{
-		if (debuglevel)
-			syslog (LOG_ERR, "incorrect number of args");
+		debug(LOG_ERR, "incorrect number of args");
 		exit(EXIT_FAILURE);
 	}
 	if (!get_uservar())
 	{
-		syslog (LOG_ERR, "%s is misconfigured. contact sysadmin.", argv[0]);
+		syslog(LOG_ERR, "%s is misconfigured. contact sysadmin.", argv[0]);
 		exit (EXIT_FAILURE);
 	}
 
@@ -278,35 +284,25 @@ int main (int argc, char **argv)
 			exit(EXIT_FAILURE);
 		}
 #endif
-		if (debuglevel)
-			syslog (LOG_DEBUG, "chrooting to dir: \"%s\"", chrootdir);
+		debug(LOG_DEBUG, "chrooting to dir: \"%s\"", chrootdir);
 		if (-1==(chroot(chrootdir)))
 		{
-			if (debuglevel)
-			{
-				syslog (LOG_ERR, "chroot: %m");
-			}
-			syslog (LOG_ERR, "couldn't chroot to %s [%s]", chrootdir, logstamp());
+			debug(LOG_ERR, "chroot: %m");
+			syslog(LOG_ERR, "couldn't chroot to %s [%s]", chrootdir, logstamp());
 			exit(EXIT_FAILURE);
 		}
-	    if (debuglevel)                                                                                                
-		{                                                                                                              
-			syslog (LOG_DEBUG, "chdiring to dir: \"%s\"", chdir_path);                                             
-		}                                                                                                              
-		if (-1==(chdir(chdir_path)))                                                                                   
-		{                                                                                                              
-			if (debuglevel)                                                                                        
-			{                                                                                                      
-				syslog (LOG_ERR, "chdir: %m");                                                                 
-			}                                                                                                      
-			syslog (LOG_ERR, "couldn't chdir to %s [%s]", chdir, logstamp());                                      
+		
+		debug(LOG_DEBUG, "chdiring to dir: \"%s\"", chdir_path);					     
+		if (-1==(chdir(chdir_path)))										   
+		{													      
+			debug(LOG_ERR, "chdir: %m");								 
+			syslog (LOG_ERR, "couldn't chdir to %s [%s]", chdir, logstamp());				      
 			exit(EXIT_FAILURE);     
 		}
 	}
 #endif /* CHROOTED_NAME */
 
-	if (debuglevel)
-		syslog (LOG_DEBUG, "setting uid to %u", getuid());
+	debug(LOG_DEBUG, "setting uid to %u", getuid());
 	if (-1==(seteuid(getuid())))
 	{
 		syslog (LOG_ERR, "couldn't revert to my real uid. seteuid: %m");
@@ -316,8 +312,7 @@ int main (int argc, char **argv)
 #ifdef WINSCP_COMPAT
 	if (argc==1)
 	{
-		if (debuglevel)
-			syslog (LOG_DEBUG, "entering WinSCP compatibility mode [%s]",logstamp());
+		debug(LOG_DEBUG, "entering WinSCP compatibility mode [%s]",logstamp());
 		if (-1==process_winscp_requests())
 		{
 			syslog(LOG_ERR, "failed WinSCP compatibility mode [%s]", logstamp());
@@ -332,8 +327,7 @@ int main (int argc, char **argv)
 		syslog(LOG_ERR, "bad request: %s [%s]", argv[2], logstamp());
 		exit(EXIT_FAILURE);
 	}
-	if (debuglevel)
-		syslog(LOG_DEBUG, "scponly completed");
+	debug(LOG_DEBUG, "scponly completed");
 	exit(EXIT_SUCCESS);
 }
 
@@ -412,7 +406,7 @@ int winscp_regular_request(char *request)
 
 int process_winscp_requests(void)
 {
-        char    linebuf[MAX_REQUEST];
+	char    linebuf[MAX_REQUEST];
 	int	count=0;		/* num of semicolons in cmd */
 	int	ack=0;
 
@@ -466,8 +460,7 @@ int process_ssh_request(char *request)
 	int reqlen=strlen(request);
 	char **env = NULL;
 
-	if (debuglevel)
-		syslog(LOG_DEBUG, "processing request: \"%s\"\n", request);
+	debug(LOG_DEBUG, "processing request: \"%s\"\n", request);
 
 	tmprequest=strdup(request);
 
@@ -513,32 +506,31 @@ int process_ssh_request(char *request)
 #endif
 
 #ifdef WINSCP_COMPAT
-        if (strbeg(tmprequest,PROG_CD))
-        {
-                char *destdir=(char *)malloc(reqlen);
-                if (destdir == NULL)
-                {
-                        perror("malloc");
-                        exit(EXIT_FAILURE);
-                }
+	if (strbeg(tmprequest,PROG_CD))
+	{
+		char *destdir=(char *)malloc(reqlen);
+		if (destdir == NULL)
+		{
+			perror("malloc");
+			exit(EXIT_FAILURE);
+		}
 
-                /*
-                 * well, now that scponly is a persistent shell
-                 * i have to maintain a $PWD.  damn.
-                 * we're going to INSIST upon a double quote
-                 * encapsulated new directory to change to.
-                 */
-                if ((tmprequest[(reqlen-1)]=='"') && (tmprequest[3]=='"'))
-                {
-                        bzero(destdir,reqlen);
-                        strncpy(destdir,&tmprequest[4],reqlen-5);
-                        if (debuglevel)
-                                syslog(LOG_INFO, "chdir: %s (%s)", tmprequest, logstamp());
-                        retval=chdir(destdir);
-                        free(destdir);
+		/*
+		 * well, now that scponly is a persistent shell
+		 * i have to maintain a $PWD.  damn.
+		 * we're going to INSIST upon a double quote
+		 * encapsulated new directory to change to.
+		 */
+		if ((tmprequest[(reqlen-1)]=='"') && (tmprequest[3]=='"'))
+		{
+			bzero(destdir,reqlen);
+			strncpy(destdir,&tmprequest[4],reqlen-5);
+						debug(LOG_INFO, "chdir: %s (%s)", tmprequest, logstamp());
+			retval=chdir(destdir);
+			free(destdir);
 						free(tmprequest);
-                        return(retval);
-                }
+			return(retval);
+		}
 		syslog(LOG_ERR, "bogus chdir request: %s (%s)", tmprequest, logstamp());
 		free(tmprequest);
 		return(-1);
@@ -588,10 +580,10 @@ int process_ssh_request(char *request)
 	if (valid_arg_vector(av))
 	{
 
-/*                                                                                                                   
- * Unison needs the HOME environment variable be set to the directory                                                  
- * where the .unison directory resides.                                                                                
- */                                                                                                                    
+/*														   
+ * Unison needs the HOME environment variable be set to the directory						  
+ * where the .unison directory resides.										
+ */														    
 #ifdef USE_SAFE_ENVIRONMENT
 		safeenv[0] = NULL;
 		filter_allowed_env_vars();
@@ -614,8 +606,7 @@ int process_ssh_request(char *request)
 			syslog(LOG_ERR, "could not set HOME environment variable (%s)", logstamp());
 			exit(EXIT_FAILURE);
 		}
-		if (debuglevel)
-			syslog(LOG_DEBUG, "set non-chrooted HOME environment variable to %s (%s)", homedir, logstamp());
+		debug(LOG_DEBUG, "set non-chrooted HOME environment variable to %s (%s)", homedir, logstamp());
 #endif 
 		syslog(LOG_INFO, "running: %s (%s)", flat_request, logstamp());
 
@@ -631,7 +622,7 @@ int process_ssh_request(char *request)
 				fflush(stdout);
 				fflush(stderr);
 				discard_vector(av);
-#ifdef USE_SAFE_ENVIRONMENT                                                                                            
+#ifdef USE_SAFE_ENVIRONMENT											    
 				discard_child_vectors(safeenv);
 #endif
 				free(flat_request);
@@ -647,7 +638,7 @@ int process_ssh_request(char *request)
 		syslog(LOG_ERR, "failed: %s with error %s(%u) (%s)", flat_request, strerror(errno), errno, logstamp());
 		free(flat_request);
 		discard_vector(av);
-#ifdef USE_SAFE_ENVIRONMENT                                                                                            
+#ifdef USE_SAFE_ENVIRONMENT											    
 		discard_child_vectors(safeenv);
 #endif
 #ifdef WINSCP_COMPAT
@@ -685,3 +676,4 @@ int process_ssh_request(char *request)
 		exit(EXIT_FAILURE);
 }
 
+/* vim: set noet sw=4 ts=4: */
