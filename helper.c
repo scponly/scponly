@@ -444,7 +444,7 @@ inline char *strend (char *big, char *small)
  *	if big starts with small, return the char after 
  *	the last char in small from big. ahem.
  */
-inline char *strbeg (char *big, char *small)
+inline char *strbeg(char *big, char *small)
 {
 	if (strlen(big) <= strlen(small))
 		return NULL;
@@ -493,6 +493,29 @@ int get_uservar(void)
 		       userinfo->pw_dir, userinfo->pw_name);
 	strncpy(username,userinfo->pw_name,MAX_USERNAME);
 	strncpy(homedir,userinfo->pw_dir,FILENAME_MAX);
+	return 1;
+}
+
+/*
+ * look through safeenv for the "name" environment variable and replace
+ * it's value with "value".
+ */
+int replace_env_entry(const char* name, const char* value) {
+	
+	char** base = safeenv;
+	char buf[257]; /* make sure I don't overflow */
+	snprintf(buf, 255, "%s=", name);
+	while (*base != NULL) {
+		if (debuglevel)
+			syslog(LOG_DEBUG, "Looking for '%s' in '%s'", buf, *base);
+		if (strbeg(*base, buf) != NULL) {
+			strcpy(*base + strlen(buf), value);
+			if (debuglevel)
+				syslog(LOG_DEBUG, "'%s' env entry now reads '%s'", name, *base);
+			return 0;
+		}
+		base++;
+	}
 	return 1;
 }
 

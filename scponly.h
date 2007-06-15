@@ -51,3 +51,5 @@ char *flatten_vector(char **);
 void discard_vector(char **);
 void discard_child_vectors(char **);
 int check_dangerous_args(char **av);
+int mysetenv(const char *name, const char *value);
+int replace_env_entry(const char *name, const char *value);

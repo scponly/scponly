@@ -234,11 +234,17 @@ int main (int argc, char **argv)
 
 		strcpy(chrootdir, homedir);
 		strcpy(chdir_path, "/");
+		syslog(LOG_ERR, "About to enter while loop.");
 		while((root_dir = strchr(root_dir, '/')) != NULL) 
 		{
+			syslog(LOG_ERR, "Looking at root_dir: %s", root_dir);
 			if (strncmp(root_dir, "//", 2) == 0) 
 			{
 				snprintf(chdir_path, FILENAME_MAX, "%s", root_dir + 1);
+				/* make sure HOME will be set to something correct if used*/
+				syslog(LOG_ERR, "Setting homedir to %s", chdir_path);
+				strcpy(homedir, chdir_path);
+				syslog(LOG_ERR, "homedir is now %s", homedir);
 				*root_dir = '\0';
 				break;
 			}
@@ -458,7 +464,7 @@ int process_ssh_request(char *request)
 	char bad_winscp3str[] = "test -x /usr/lib/sftp-server && exec /usr/lib/sftp-server test -x /usr/local/lib/sftp-server && exec /usr/local/lib/sftp-server exec sftp-server";
 	int retval;
 	int reqlen=strlen(request);
-	char *env[2] = { NULL, NULL };
+	char **env = NULL;
 
 	if (debuglevel)
 		syslog(LOG_DEBUG, "processing request: \"%s\"\n", request);
@@ -595,29 +601,21 @@ int process_ssh_request(char *request)
 				syslog(LOG_DEBUG, "Environment contains \"%s\"", *tenv++);
 			}
 		}
+		env = safeenv;
 #endif
 
 #ifdef UNISON_COMPAT
-		if (chrooted)                                                                                           
-		{                                                                                                       
-			if (!mysetenv("HOME","/"))                                                                       
-			{                                                                                               
-				syslog(LOG_ERR, "could not set HOME environment variable to '/' (%s)", logstamp());           
-				exit(EXIT_FAILURE);                                                                     
-			}                                                                                               
-			if (debuglevel)                                                                                 
-				syslog(LOG_DEBUG, "set HOME environment variable to / %s", logstamp());           
-		}                                                                                                       
-		else
+		/* the HOME environment variable should have been set above, but I need to make sure
+		 * that it's value as read from the environment is replaced with the actual value
+		 * as it exists within the chroot, which is what the applications will expect to see.
+		 */
+		if (replace_env_entry("HOME",homedir) && (((strlen(homedir) + 6 ) > FILENAME_MAX) || !mysetenv("HOME",homedir)))
 		{
-			if (((strlen(homedir) + 6 ) > FILENAME_MAX) || !mysetenv("HOME",homedir))
-			{
-				syslog(LOG_ERR, "could not set HOME environment variable (%s)", logstamp());
-				exit(EXIT_FAILURE);
-			}
-			if (debuglevel)
-				syslog(LOG_DEBUG, "set HOME environment variable to %s (%s)", homedir, logstamp());
+			syslog(LOG_ERR, "could not set HOME environment variable (%s)", logstamp());
+			exit(EXIT_FAILURE);
 		}
+		if (debuglevel)
+			syslog(LOG_DEBUG, "set non-chrooted HOME environment variable to %s (%s)", homedir, logstamp());
 #endif 
 		syslog(LOG_INFO, "running: %s (%s)", flat_request, logstamp());
 
@@ -626,11 +624,7 @@ int process_ssh_request(char *request)
 		{
 			int status=0;
 			if (fork() == 0)
-#ifdef USE_SAFE_ENVIRONMENT
-				retval=execve(av[0],av,safeenv);
-#else
-				retval=execve(av[0],av,NULL);
-#endif
+				retval=execve(av[0],av,env);
 			else
 			{
 				wait(&status);
@@ -648,11 +642,7 @@ int process_ssh_request(char *request)
 		else
 #endif
 		{
-#ifdef USE_SAFE_ENVIRONMENT
-			retval=execve(av[0],av,safeenv);
-#else
-			retval=execve(av[0],av,NULL);
-#endif
+			retval=execve(av[0],av,env);
 		}
 		syslog(LOG_ERR, "failed: %s with error %s(%u) (%s)", flat_request, strerror(errno), errno, logstamp());
 		free(flat_request);
