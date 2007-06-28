@@ -161,15 +161,9 @@ int check_dangerous_args(char **av)
 {
 	cmd_arg_t	*cmdarg=dangerous_args;
 	char		**tmpptr=av;
-	char 		**sav=NULL;
 	int			ch;
 	int			ac=0;
-	/*
-	 * for getop processing, we will discard opts which begin with '--'
- 	 * sav is a copy of av with all the '--foo ' args removed
-	 * when we do getopt checking, we will use sav instead of av
-	 */
-	sav = strip_vector(av);
+	int			longopt_index = 0;
 
 	while (cmdarg != NULL)
 	{
@@ -188,10 +182,11 @@ int check_dangerous_args(char **av)
 			 */
 			if (1 == cmdarg->getoptflag)
 			{
+				debug(LOG_DEBUG, "Using getopt processing for cmd %s\n (%s)", cmdarg->name, logstamp());
 				/*	
 				 *	first count the arguments in the vector
 				 */
-				tmpptr=sav;
+				tmpptr=av;
 				while (*tmpptr!=NULL)
 				{	
 					*tmpptr++;
@@ -214,20 +209,34 @@ int check_dangerous_args(char **av)
 				optind=0;
 #endif
 				/*
-				 *	tell getopt to only be strict if the 'opts' are well defined
+				 *	tell getopt to only be strict if the 'opts' is well defined
 				 */
 				opterr=cmdarg->strict;
-				while ((ch = getopt(ac, sav, cmdarg->opts)) != -1)
-				{
-					if (ch == cmdarg->badarg[0])
+				while ((ch = getopt_long(ac, av, cmdarg->opts, cmdarg->longopts, &longopt_index)) != -1) {
+					
+					debug(LOG_DEBUG, "getopt processing returned '%c' (%s)", ch, logstamp());
+					
+					/* if the character is found in badarg, then it's not a permitted option */
+					if (strchr(cmdarg->badarg, ch) != NULL)
 					{
-						syslog(LOG_ERR, "option %s is not permitted for use with %s (arg was %s)(%s))", 
-							cmdarg->badarg, cmdarg->name, optarg, logstamp());
+						syslog(LOG_ERR, "option '%c' or a related long option is not permitted for use with %s (arg was %s) (%s))", 
+							ch, cmdarg->name, optarg, logstamp());
+						return 1;
+					}
+					else if (cmdarg->strict && ch == '?')
+					{
+						syslog(LOG_ERR, "an unrecognized option was encountered while processing cmd %s (arg was %s) (%s))", 
+							cmdarg->name, optarg, logstamp());
 						return 1;
 					}
 				}
 #elif
-				syslog(LOG_ERR, "a getopt() argument check could not be performed for %s, recompile scponly without support for %s or rebuild scponly with getopt support", av[0], av[0]);
+				/*
+				 * make sure that processing doesn't continue if we can't validate a rsync check
+				 * and if the getopt flag is set.
+				 */
+				syslog(LOG_ERR, "a getopt() argument check could not be performed for %s, recompile scponly without support for %s or rebuild scponly with getopt", av[0], av[0]);
+				return 1;
 #endif
 			}
 			else
@@ -235,10 +244,14 @@ int check_dangerous_args(char **av)
 			 * command does not require getopt processing
 			 */
 			{
+				debug(LOG_DEBUG, "Not using getopt processing on cmd %s (%s)", cmdarg->name, logstamp());
+
 				tmpptr=av;
 				*tmpptr++;
 				while (*tmpptr!=NULL)
 				{
+					debug(LOG_DEBUG, "Verifying that %s is an allowed option (%s)", *tmpptr, logstamp());
+						
 					if(strbeg(*tmpptr, cmdarg->badarg))
 					{
 						syslog(LOG_ERR, "%s is not permitted for use with %s (%s))", 
@@ -251,7 +264,6 @@ int check_dangerous_args(char **av)
 		}
 		cmdarg++;
 	}
-	discard_vector(sav);
 	return 0;
 }
 

@@ -82,6 +82,44 @@ cmd_t commands[] =
 };
 
 /*
+ * The array of longopts to be used for validation
+ * longopts := (name, has_args, *flag, val)
+ */
+struct option empty_longopts[] = {
+	{ NULL,			0,	NULL,	0 },
+	};
+
+#ifdef RSYNC_COMPAT
+struct option rsync_longopts[] = {
+	/* I use 'e' for val here because that's what's listed in cmd_arg_t->badarg  */
+	{"rsh", 		1,	0,		(int)'e'}, /* bad */
+	{"daemon",		0,	0,		(int)'e'}, /* bad */
+	{ NULL,			0,	NULL,	0 },
+	};
+#endif
+
+#ifdef SVNSERV_COMPAT
+struct option svnserv_longopts[] = {
+	/* bad */
+	{"daemon",		0,	NULL,	(int)'d' },
+	{"listen-port",	1,	NULL,	(int)'d' },
+	{"listen-host",	1,	NULL,	(int)'d' },
+	{"foreground",	0,	NULL, 	(int)'d' },
+	{"inetd",		0,	NULL, 	(int)'i' },
+	{"threads",		0,	NULL,	(int)'T' },
+	{"listen-once",	0,	NULL,	(int)'X' },
+	/* good */
+	{"read-only",	0,	NULL,	(int)'R' },
+	{"help",		0,	NULL,	(int)'h' },
+	{"root",		0,	NULL,	(int)'r' },
+	{"tunnel",		0,	NULL,	(int)'t' },
+	{"tunnel-user",	1,	NULL,	0 },
+	{ NULL,			0,	NULL,	0 },
+	};
+#endif
+
+
+/*
  *	several binaries support arbitrary command execution in their arguments
  *	to prevent this we have to check the arguments for these binaries before
  *	invoking them.  
@@ -91,23 +129,26 @@ cmd_arg_t dangerous_args[] =
 	/*
 	 *	'oplist' only neccesary where 'use getopt' is 1
 	 *	'strict optlist' only applicable where 'use getopt?' is 1
+	 *	'badarg' is a string to look for if not in rsync mode, if in rsync mode a list of invalid options
 	 *
-	 * program name		use getopt?		strict optlist?	badarg			optlist
+	 * program name		use getopt?		strict optlist?	badarg			optlist			longopts\n
 	 */
 #ifdef ENABLE_SFTP
-	{ PROG_SFTP_SERVER,	1,				1,				NULL,			"f:l:"},
+	{ PROG_SFTP_SERVER,	1,				1,				NULL,			"f:l:",			empty_longopts },
 #endif
 #ifdef ENABLE_SCP2
-	{ PROG_SCP, 		1, 				1,				"S",			"dfl:prtvBCc:i:P:q1246S:o:F:" },
+	{ PROG_SCP, 		1, 				1,				"S",			"dfl:prtvBCc:i:P:q1246S:o:F:", empty_longopts },
 #endif
 #ifdef RSYNC_COMPAT
-	{ PROG_RSYNC, 		1, 				0,				"e",			"e:" },
-	{ PROG_RSYNC, 		0, 				0,				"-rsh",			NULL },
-#endif 	
+	{ PROG_RSYNC, 		1, 				0,				"e",			"e:",			rsync_longopts },
+#endif	
 #ifdef UNISON_COMPAT	
-	{ PROG_UNISON, 		0, 				0,				"-rshcmd",		NULL },
-	{ PROG_UNISON, 		0, 				0,				"-sshcmd",		NULL },
-	{ PROG_UNISON, 		0, 				0,				"-servercmd",	NULL },
+	{ PROG_UNISON, 		0, 				0,				"-rshcmd",		NULL, 			empty_longopts },
+	{ PROG_UNISON, 		0, 				0,				"-sshcmd",		NULL, 			empty_longopts },
+	{ PROG_UNISON, 		0, 				0,				"-servercmd",	NULL, 			empty_longopts },
+#endif
+#ifdef SVNSERV_COMPAT
+	{ PROG_SVNSERV,		1, 				1,				"diTX",			"dihr:RtTX",	svnserv_longopts },
 #endif
 	NULL
 };
@@ -500,6 +541,7 @@ int process_ssh_request(char *request)
 	 */
 	if (!valid_chars(tmprequest))
 	{
+		debug(LOG_DEBUG, "rejected because of invalid chars (%s)", logstamp());
 		free(tmprequest);
 		return(-1);
 	}
