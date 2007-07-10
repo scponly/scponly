@@ -150,6 +150,9 @@ cmd_arg_t dangerous_args[] =
 #ifdef SVNSERV_COMPAT
 	{ PROG_SVNSERV,		1, 				1,				"diTX",			"dihr:RtTX",	svnserv_longopts },
 #endif
+#ifdef QUOTA_COMPAT
+	{ PROG_QUOTA,		1,				1,				NULL,			"-F:guvsilqQ",	empty_longopts },
+#endif
 	NULL
 };
 
@@ -183,6 +186,7 @@ char * allowed_env_vars[] =
 };
 
 int process_ssh_request(char *request);
+int process_pre_chroot_request(char *request);
 int winscp_regular_request(char *request);
 int winscp_transit_request(char *request);
 int process_winscp_requests(void);
@@ -281,17 +285,16 @@ int main (int argc, char **argv)
 
 		strcpy(chrootdir, homedir);
 		strcpy(chdir_path, "/");
-		syslog(LOG_ERR, "About to enter while loop.");
 		while((root_dir = strchr(root_dir, '/')) != NULL) 
 		{
-			syslog(LOG_ERR, "Looking at root_dir: %s", root_dir);
+			debug(LOG_DEBUG, "Looking at root_dir: %s", root_dir);
 			if (strncmp(root_dir, "//", 2) == 0) 
 			{
 				snprintf(chdir_path, FILENAME_MAX, "%s", root_dir + 1);
 				/* make sure HOME will be set to something correct if used*/
-				syslog(LOG_ERR, "Setting homedir to %s", chdir_path);
+				debug(LOG_DEBUG, "Setting homedir to %s", chdir_path);
 				strcpy(homedir, chdir_path);
-				syslog(LOG_ERR, "homedir is now %s", homedir);
+				debug(LOG_DEBUG, "homedir is now %s", homedir);
 				*root_dir = '\0';
 				break;
 			}
@@ -325,6 +328,37 @@ int main (int argc, char **argv)
 			exit(EXIT_FAILURE);
 		}
 #endif
+
+/* already within CHROOTED_NAME block */
+#if defined(PASSWD_COMPAT) || defined(QUOTA_COMPAT)
+		
+		/*
+		 * perhaps we need to refactor so we don't have to exit right
+		 * in the middle of the code, but we can't chroot and expect to be
+		 * able to change the password and have it be of any use unless
+		 * there is some additional process that scponly is unaware of
+		 * happening on the back end.
+		 */
+		if (
+			(exact_match(argv[2],"passwd"))
+			|| (exact_match(argv[2],PROG_PASSWD))
+			|| (exact_match(argv[2],"quota"))
+			|| (exact_match(argv[2],PROG_QUOTA))
+		) {
+			
+			int status = 0;
+			status = process_pre_chroot_request(argv[2]);
+			if (status) {
+				syslog(LOG_ERR, "process_pre_chroot_request(%s) failed with code %i [%s]",
+					argv[2],WEXITSTATUS(status),logstamp());
+				exit(EXIT_FAILURE);
+			}
+			debug(LOG_DEBUG, "scponly completed");
+			exit(EXIT_SUCCESS);
+		}
+
+#endif /* passwd or quota */
+
 		debug(LOG_DEBUG, "chrooting to dir: \"%s\"", chrootdir);
 		if (-1==(chroot(chrootdir)))
 		{
@@ -371,6 +405,86 @@ int main (int argc, char **argv)
 	debug(LOG_DEBUG, "scponly completed");
 	exit(EXIT_SUCCESS);
 }
+
+#ifdef CHROOTED_NAME
+#if defined(PASSWD_COMPAT) || defined(QUOTA_COMPAT)
+
+int process_pre_chroot_request(char *request) {
+
+	char ** av = NULL;
+	char *tmpstring = NULL;
+	char *tmprequest = NULL;
+	char *flat_request = NULL;
+	char *env[2] = { NULL, NULL };
+	int retval = -1;
+	
+	/* revert to real user so I'm not changing the passwd as root */
+	debug(LOG_DEBUG, "handling pre-chroot request");
+	debug(LOG_DEBUG, "setting uid to %u", getuid());
+
+	if (-1==(seteuid(getuid())))
+	{
+		syslog (LOG_ERR, "couldn't revert to my real uid. seteuid: %m");
+		exit(EXIT_FAILURE);
+	}
+
+	tmprequest = strdup(request);
+	av = build_arg_vector(tmprequest);
+	av[0] = substitute_known_path(av[0]);
+	flat_request = flatten_vector(av);
+	
+	/* 
+	 * sanity check, substitute_known_path should have given the exact path,
+	 * ONLY execute if an exact match was found
+	 */
+	if (!exact_match(av[0], PROG_PASSWD) && !exact_match(av[0], PROG_QUOTA)) {
+		syslog(LOG_ERR, "Invalid pre-chroot request attempted: '%s' [%s]", request, logstamp());
+		exit(EXIT_FAILURE);
+	}
+	
+	if(check_dangerous_args(av))
+	{
+		syslog(LOG_ERR, "requested command (%s) tried to use disallowed argument [%s])", 
+			flat_request, logstamp());
+		exit(EXIT_FAILURE);
+	}
+
+	if (valid_arg_vector(av))
+	{
+		int status = 0;
+		
+		debug(LOG_DEBUG, "about to fork (%s) [%s]",flat_request,logstamp());
+		
+		if (fork() == 0)
+			retval=execve(av[0],av,env);
+		else
+		{
+			wait(&status);
+			fflush(stdout);
+			fflush(stderr);
+			discard_vector(av);
+			free(flat_request);
+			free(tmprequest);
+			
+			debug(LOG_DEBUG, "forked child returned... [%s]",logstamp());
+			
+			return WEXITSTATUS(status);
+		}
+
+	} else {
+		syslog(LOG_ERR, "invalid argument vector (%s) [%s]", 
+			flat_request,logstamp());
+		discard_vector(av);
+		free(flat_request);
+		free(tmprequest);
+		
+		exit(EXIT_FAILURE);
+	}
+	return retval;
+}
+
+#endif /* passwd or quota support */
+#endif /* chrooted support */
 
 #ifdef WINSCP_COMPAT
 
@@ -509,7 +623,7 @@ int process_ssh_request(char *request)
 
 	bad_winscp3str[57]=10;
 	bad_winscp3str[127]=10;
-
+			
 	if(strcmp(request,bad_winscp3str)==0)
 	{
 	    /*

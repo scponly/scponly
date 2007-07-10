@@ -1,3 +1,14 @@
+CVS
+	fix support for quota and passwd when running within the chroot (exec pre-chroot)
+	disallow rsync and svnserve from being run as daemons that listen on a port
+	switch to getopt_long for command processing, use getopt for
+		sftp-server, and svnserve
+	abort processing on commands that require getopt when getopt is not available
+	switched to slightly optimized and more compact debug code
+	fix unison support within chroots
+	fix for unison command execution bug thanks to Dan Knapp <dankna@gmail.com>
+
+
 scponly v4.6 - jan 31 2006
 
 	added missing semicolon to helper.c

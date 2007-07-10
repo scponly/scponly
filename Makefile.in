@@ -62,4 +62,6 @@ distclean: clean
 maintainer-clean: distclean
 	rm -f configure 
 
+ctags:
+	ctags -R .
 
