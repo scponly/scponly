@@ -217,7 +217,7 @@ int check_dangerous_args(char **av)
 					debug(LOG_DEBUG, "getopt processing returned '%c' (%s)", ch, logstamp());
 					
 					/* if the character is found in badarg, then it's not a permitted option */
-					if (strchr(cmdarg->badarg, ch) != NULL)
+					if (cmdarg->badarg != NULL && (strchr(cmdarg->badarg, ch) != NULL))
 					{
 						syslog(LOG_ERR, "option '%c' or a related long option is not permitted for use with %s (arg was %s) (%s))", 
 							ch, cmdarg->name, optarg, logstamp());
