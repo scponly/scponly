@@ -495,19 +495,30 @@ int valid_chars(char *string)
 int get_uservar(void)
 {
 	struct passwd *userinfo;
-	
-	if (NULL==(userinfo=getpwuid(getuid())))
-	{
-		syslog (LOG_WARNING, "no knowledge of uid %d [%s]", getuid(), logstamp());
-		if (debuglevel)
+
+	char *user = (char *)getenv("USER");
+	if (user) {
+		if (NULL==(userinfo=getpwnam(user)))
 		{
-			fprintf (stderr, "no knowledge of uid %d\n", getuid());
-			perror ("getpwuid");
+			syslog(LOG_WARNING, "no knowledge of username %s [%s]", user, logstamp());
+			return 0;
 		}
-		return 0;
+		if (userinfo->pw_uid != getuid())
+		{
+			syslog(LOG_WARNING, "%s's uid doesn't match getuid(): %d [%s]", 
+                                              user, getuid(), logstamp());
+			return 0;
+		}
+		debug(LOG_DEBUG, "determined USER is \"%s\" from environment", user);
+	} else {
+		if (NULL==(userinfo=getpwuid(getuid())))
+		{
+			syslog (LOG_WARNING, "no knowledge of uid %d [%s]", getuid(), logstamp());
+			return 0;
+		}
 	}
 	debug(
-		LOG_DEBUG,\
+		LOG_DEBUG,
 		"retrieved home directory of \"%s\" for user \"%s\"",
 		userinfo->pw_dir, userinfo->pw_name
 		);
