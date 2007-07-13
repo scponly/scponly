@@ -47,8 +47,8 @@ Security checks:  root login is disallowed, seteuid after chroot.
 .IP \(bu
 WinSCP compatibility:
 \fBscponly\fP
-can be compiled in WinSCP compatibility mode (it will by default) that will
-permit a "semi-interactive" shell that WinSCP can use.
+can be compiled in WinSCP compatibility mode that will permit a
+"semi-interactive" shell that WinSCP can use.
 .IP \(bu
 gftp compatibility.
 \fBscponly\fP is also fully compatible with gFTP in sftp mode.
