@@ -146,7 +146,7 @@ char *flatten_vector(char **av)
 		}
 		else
 			strcpy(outbuf,*tmpptr);	
-		*tmpptr++;
+		tmpptr++;
 	}
 	return (outbuf);
 }
@@ -189,7 +189,7 @@ int check_dangerous_args(char **av)
 				tmpptr=av;
 				while (*tmpptr!=NULL)
 				{	
-					*tmpptr++;
+					tmpptr++;
 					ac++;
 				}
 				/* 
@@ -247,7 +247,7 @@ int check_dangerous_args(char **av)
 				debug(LOG_DEBUG, "Not using getopt processing on cmd %s (%s)", cmdarg->name, logstamp());
 
 				tmpptr=av;
-				*tmpptr++;
+				tmpptr++;
 				while (*tmpptr!=NULL)
 				{
 					debug(LOG_DEBUG, "Verifying that %s is an allowed option (%s)", *tmpptr, logstamp());
@@ -258,7 +258,7 @@ int check_dangerous_args(char **av)
 							cmdarg->badarg, cmdarg->name, logstamp());
 						return 1;
 					}
-					*tmpptr++;
+					tmpptr++;
 				}
 			}
 		}
@@ -562,7 +562,7 @@ int mysetenv(const char *name, const char *value) {
 			return 0;
 	if (snprintf(buff, sizeof(buff), "%s=%s", name, value) < 0)
 			return 0;
-	if (safeenv[count] = strdup(buff)) {
+	if ((safeenv[count] = strdup(buff))) {
 		safeenv[++count] = NULL;
 		return 1;
 	}
@@ -571,8 +571,7 @@ int mysetenv(const char *name, const char *value) {
 
 void filter_allowed_env_vars() {
 	
-	int slen = 0;
-	char *p_env, *p_str;
+	char *p_env;
 	char **p_valid = allowed_env_vars;
 	
 	/* check each allowed variable */

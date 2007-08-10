@@ -3,7 +3,7 @@
  */
 #include <stdio.h>
 
-main()
+int main()
 {
         printf("root users\n");
         return 0;

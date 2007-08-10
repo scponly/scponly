@@ -287,14 +287,12 @@ int main (int argc, char **argv)
 		strcpy(chdir_path, "/");
 		while((root_dir = strchr(root_dir, '/')) != NULL) 
 		{
-			debug(LOG_DEBUG, "Looking at root_dir: %s", root_dir);
 			if (strncmp(root_dir, "//", 2) == 0) 
 			{
 				snprintf(chdir_path, FILENAME_MAX, "%s", root_dir + 1);
 				/* make sure HOME will be set to something correct if used*/
 				debug(LOG_DEBUG, "Setting homedir to %s", chdir_path);
 				strcpy(homedir, chdir_path);
-				debug(LOG_DEBUG, "homedir is now %s", homedir);
 				*root_dir = '\0';
 				break;
 			}
@@ -371,7 +369,7 @@ int main (int argc, char **argv)
 		if (-1==(chdir(chdir_path)))										   
 		{													      
 			debug(LOG_ERR, "chdir: %m");								 
-			syslog (LOG_ERR, "couldn't chdir to %s [%s]", chdir, logstamp());				      
+			syslog (LOG_ERR, "couldn't chdir to %s [%s]", chdir_path, logstamp());				      
 			exit(EXIT_FAILURE);     
 		}
 	}
@@ -412,7 +410,6 @@ int main (int argc, char **argv)
 int process_pre_chroot_request(char *request) {
 
 	char ** av = NULL;
-	char *tmpstring = NULL;
 	char *tmprequest = NULL;
 	char *flat_request = NULL;
 	char *env[2] = { NULL, NULL };
@@ -635,7 +632,7 @@ int process_ssh_request(char *request)
 	}
 #endif
 
-
+	
 #ifdef GFTP_COMPAT 
 	/*
 	 *	gFTP compatibility hack
@@ -681,10 +678,10 @@ int process_ssh_request(char *request)
 		{
 			bzero(destdir,reqlen);
 			strncpy(destdir,&tmprequest[4],reqlen-5);
-						debug(LOG_INFO, "chdir: %s (%s)", tmprequest, logstamp());
+			debug(LOG_INFO, "chdir: %s (%s)", tmprequest, logstamp());
 			retval=chdir(destdir);
 			free(destdir);
-						free(tmprequest);
+			free(tmprequest);
 			return(retval);
 		}
 		syslog(LOG_ERR, "bogus chdir request: %s (%s)", tmprequest, logstamp());
@@ -733,6 +730,7 @@ int process_ssh_request(char *request)
 		exit(EXIT_FAILURE);
 	}
 
+	
 	if (valid_arg_vector(av))
 	{
 
@@ -789,12 +787,13 @@ int process_ssh_request(char *request)
 		else
 #endif
 		{
+			debug(LOG_DEBUG, "about to exec \"%s\" (%s)", av[0], logstamp());
 			retval=execve(av[0],av,env);
 		}
 		syslog(LOG_ERR, "failed: %s with error %s(%u) (%s)", flat_request, strerror(errno), errno, logstamp());
 		free(flat_request);
 		discard_vector(av);
-#ifdef USE_SAFE_ENVIRONMENT											    
+#ifdef USE_SAFE_ENVIRONMENT
 		discard_child_vectors(safeenv);
 #endif
 #ifdef WINSCP_COMPAT
