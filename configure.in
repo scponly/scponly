@@ -268,11 +268,13 @@ fi
 
 dnl Find the svnserve and svn binaries
 if test "x$enable_svnserv_compat" != "x" && test "x$enable_svnserv_compat" != "xno"; then
+	AC_MSG_WARN([read the SECURITY document before enabling svnserv compatibility])
 	AC_MSG_NOTICE([enabling svnserv compatibility...])
 	SCPONLY_PATH_PROG_DEFINE([PROG_SVNSERV], [svnserve], [/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin])
 fi
 
 if test "x$enable_svn_compat" != "x" && test "x$enable_svn_compat" != "xno"; then
+	AC_MSG_WARN([read the SECURITY document before enabling svn compatibility])
 	AC_MSG_NOTICE([enabling subversion compatability...])
 	SCPONLY_PATH_PROG_DEFINE([PROG_SVN],   [svn],   [/bin:/usr/bin:/usr/local/bin:/usr/local/bin])
 fi
