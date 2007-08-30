@@ -704,7 +704,6 @@ int process_ssh_request(char *request)
 	 * we only process wildcards for scp commands
 	 */
 #ifdef ENABLE_WILDCARDS
-	av = expand_wildcards(av);
 #ifdef ENABLE_SCP2
 	if (exact_match(av[0],PROG_SCP))
 		av = expand_wildcards(av);
