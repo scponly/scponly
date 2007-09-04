@@ -118,6 +118,15 @@ struct option svnserv_longopts[] = {
 	};
 #endif
 
+#ifdef SVN_COMPAT
+struct option svn_longopts[] = {
+	/* bad */
+	{"editor-cmd",	1,	NULL,	(int)'X' },
+	{"diff-cmd",	1,	NULL,	(int)'X' },
+	{"config-dir", 	1,	NULL,	(int)'X' },
+	{ NULL,			0,	NULL,	0 },
+	};
+#endif
 
 /*
  *	several binaries support arbitrary command execution in their arguments
@@ -149,6 +158,9 @@ cmd_arg_t dangerous_args[] =
 #endif
 #ifdef SVNSERV_COMPAT
 	{ PROG_SVNSERV,		1, 				1,				"diTX",			"dihr:RtTX",	svnserv_longopts },
+#endif
+#ifdef SVN_COMPAT
+	{ PROG_SVN,			1, 				0,				"X",			"r:qm:F:",		svn_longopts },
 #endif
 #ifdef QUOTA_COMPAT
 	{ PROG_QUOTA,		1,				1,				NULL,			"-F:guvsilqQ",	empty_longopts },
