@@ -163,6 +163,7 @@ cmd_arg_t dangerous_args[] =
 	{ PROG_UNISON, 		0, 				0,				"-rshcmd",		NULL, 			empty_longopts },
 	{ PROG_UNISON, 		0, 				0,				"-sshcmd",		NULL, 			empty_longopts },
 	{ PROG_UNISON, 		0, 				0,				"-servercmd",	NULL, 			empty_longopts },
+	{ PROG_UNISON, 		0, 				0,				"-addversionno",NULL, 			empty_longopts },
 #endif
 #ifdef SVNSERV_COMPAT
 	{ PROG_SVNSERV,		1, 				1,				"diTX",			"dihr:RtTX",	svnserv_longopts },

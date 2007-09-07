@@ -4,6 +4,7 @@ Here are a few important things to know about security and scponly.  This is a
 brief attempt to document what should be done to correctly secure scponly.
 
 1) Configure scponly to use a chroot
+
 2) Configure scponly to use as few extra options and services as possible.  If
    possible, try to use something similar to the following:
 
@@ -22,25 +23,39 @@ brief attempt to document what should be done to correctly secure scponly.
       repository root.  Thus, unless you are *very* careful about security,
       the user WILL BE ABLE TO EXECUTE SCRIPTS OR PROGRAMS INDIRECTLY!  This
       can be prevented by a careful configuration.
+   -- The following programs use configuration files that might allow the user
+      to bypass security restrictions placed on command line arguments:
+
+	  svn, svnserve, rsync, and unison
 
 4) Make sure that all files required for the chroot have the IMMUTABLE and
    UNDELETABLE bits set.  Other bits might also be prudent. See: man 1 chattr.
 
-5) Make sure that every directory the users have write permissions to are
+5) Only put files in the chroot that are absolutely essential to its
+   functionality.
+
+6) Make sure the following directories are locked down appropriately:
+
+   ~/.ssh, ~/.unison, ~/.subversion
+
+   NOTE: depending on file permissions in the above, ssh, unison, and
+   subversion may not work correctly.
+
+7) Make sure that every directory the users have write permissions to are
    on a filesystem that is mounted NODEV, NOEXEC.  Eg. Make sure that they
    cannot execute files that they have permissions to upload.  They should
    also not need permissions to create any devices.  If the user can't execute
    any files that he has access to upload, then you need not worry about the
    security problems referencing svn/svnserve above!
 
-6) Monitor your logs!  If you start to see something funny, odd, or strange in
+8) Monitor your logs!  If you start to see something funny, odd, or strange in
    the logs, please let us know so that we can investigate and make sure any
    problems are resolved.
 
-7) Stay up-to-date with the scponly installs.  We don't have releases too
+9) Stay up-to-date with the scponly installs.  We don't have releases too
    often, but the changes we do make are usually important!
 
-8) Enjoy!
+10) Enjoy!
 
 Lastly, if you have other suggestions and thoughts that would help secure an
 scponly install, please send them to us!
