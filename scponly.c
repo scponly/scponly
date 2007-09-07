@@ -92,9 +92,16 @@ struct option empty_longopts[] = {
 #ifdef RSYNC_COMPAT
 struct option rsync_longopts[] = {
 	/* I use 'e' for val here because that's what's listed in cmd_arg_t->badarg  */
-	{"rsh", 		1,	0,		(int)'e'}, /* bad */
-	{"daemon",		0,	0,		(int)'e'}, /* bad */
-	{ NULL,			0,	NULL,	0 },
+	{"rsh", 			1,	0,		(int)'e'},
+	/* the following are disabled because they use daemon mode */
+	{"daemon",			0,	0,		(int)'e'},
+	{"rsync-path",		1,	0,		(int)'e'},
+	{"address",			1,	0,		(int)'e'},
+	{"port",			1,	0,		(int)'e'},
+	{"sockopts",		1,	0,		(int)'e'},
+	{"config",			1,	0,		(int)'e'},
+	{"no-detach",		0,	0,		(int)'e'},
+	{ NULL,				0,	NULL,	0 },
 	};
 #endif
 
@@ -123,6 +130,7 @@ struct option svn_longopts[] = {
 	/* bad */
 	{"editor-cmd",	1,	NULL,	(int)'X' },
 	{"diff-cmd",	1,	NULL,	(int)'X' },
+	{"diff3-cmd",	1,	NULL,	(int)'X' },
 	{"config-dir", 	1,	NULL,	(int)'X' },
 	{ NULL,			0,	NULL,	0 },
 	};
@@ -160,7 +168,7 @@ cmd_arg_t dangerous_args[] =
 	{ PROG_SVNSERV,		1, 				1,				"diTX",			"dihr:RtTX",	svnserv_longopts },
 #endif
 #ifdef SVN_COMPAT
-	{ PROG_SVN,			1, 				0,				"X",			"r:qm:F:",		svn_longopts },
+	{ PROG_SVN,			1, 				0,				"Xx",			"NvxuRr:qm:F:",		svn_longopts },
 #endif
 #ifdef QUOTA_COMPAT
 	{ PROG_QUOTA,		1,				1,				NULL,			"-F:guvsilqQ",	empty_longopts },
