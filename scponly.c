@@ -207,7 +207,7 @@ char * allowed_env_vars[] =
 };
 
 int process_ssh_request(char *request);
-int process_pre_chroot_request(char *request);
+int process_pre_chroot_request(char **av);
 int winscp_regular_request(char *request);
 int winscp_transit_request(char *request);
 int process_winscp_requests(void);
@@ -301,8 +301,11 @@ int main (int argc, char **argv)
 #ifdef CHROOTED_NAME
 	if (chrooted)
 	{
+		char **av = NULL;
+		char *tmprequest = NULL;
 		char *root_dir = chrootdir;
 		char chdir_path[FILENAME_MAX];
+		
 
 		strcpy(chrootdir, homedir);
 		strcpy(chdir_path, "/");
@@ -358,15 +361,24 @@ int main (int argc, char **argv)
 		 * there is some additional process that scponly is unaware of
 		 * happening on the back end.
 		 */
+		tmprequest = strdup(argv[2]);
+		av = build_arg_vector(tmprequest);
+		free(tmprequest);
 		if (
-			(exact_match(argv[2],"passwd"))
-			|| (exact_match(argv[2],PROG_PASSWD))
-			|| (exact_match(argv[2],"quota"))
-			|| (exact_match(argv[2],PROG_QUOTA))
+#ifdef PASSWD_COMPAT
+			(exact_match(av[0],"passwd"))
+			|| (exact_match(av[0],PROG_PASSWD))
+#else
+			0
+#endif
+#ifdef QUOTA_COMPAT
+			|| (exact_match(av[0],"quota"))
+			|| (exact_match(av[0],PROG_QUOTA))
+#endif
 		) {
+			int status = process_pre_chroot_request(av);
+			discard_vector(av);
 			
-			int status = 0;
-			status = process_pre_chroot_request(argv[2]);
 			if (status) {
 				syslog(LOG_ERR, "process_pre_chroot_request(%s) failed with code %i [%s]",
 					argv[2],WEXITSTATUS(status),logstamp());
@@ -374,6 +386,8 @@ int main (int argc, char **argv)
 			}
 			debug(LOG_DEBUG, "scponly completed");
 			exit(EXIT_SUCCESS);
+		} else {
+			discard_vector(av);
 		}
 
 #endif /* passwd or quota */
@@ -428,10 +442,8 @@ int main (int argc, char **argv)
 #ifdef CHROOTED_NAME
 #if defined(PASSWD_COMPAT) || defined(QUOTA_COMPAT)
 
-int process_pre_chroot_request(char *request) {
+int process_pre_chroot_request(char ** av) {
 
-	char ** av = NULL;
-	char *tmprequest = NULL;
 	char *flat_request = NULL;
 	char *env[2] = { NULL, NULL };
 	int retval = -1;
@@ -446,8 +458,6 @@ int process_pre_chroot_request(char *request) {
 		exit(EXIT_FAILURE);
 	}
 
-	tmprequest = strdup(request);
-	av = build_arg_vector(tmprequest);
 	av[0] = substitute_known_path(av[0]);
 	flat_request = flatten_vector(av);
 	
@@ -455,8 +465,17 @@ int process_pre_chroot_request(char *request) {
 	 * sanity check, substitute_known_path should have given the exact path,
 	 * ONLY execute if an exact match was found
 	 */
-	if (!exact_match(av[0], PROG_PASSWD) && !exact_match(av[0], PROG_QUOTA)) {
-		syslog(LOG_ERR, "Invalid pre-chroot request attempted: '%s' [%s]", request, logstamp());
+	if (
+#ifdef PASSWD_COMPAT
+		(!exact_match(av[0], PROG_PASSWD))
+#else
+		1
+#endif
+#ifdef QUOTA_COMPAT
+		&& (!exact_match(av[0], PROG_QUOTA))
+#endif
+	) {
+		syslog(LOG_ERR, "Invalid pre-chroot request attempted: '%s' [%s]", av[0], logstamp());
 		exit(EXIT_FAILURE);
 	}
 	
@@ -480,9 +499,7 @@ int process_pre_chroot_request(char *request) {
 			wait(&status);
 			fflush(stdout);
 			fflush(stderr);
-			discard_vector(av);
 			free(flat_request);
-			free(tmprequest);
 			
 			debug(LOG_DEBUG, "forked child returned... [%s]",logstamp());
 			
@@ -492,9 +509,7 @@ int process_pre_chroot_request(char *request) {
 	} else {
 		syslog(LOG_ERR, "invalid argument vector (%s) [%s]", 
 			flat_request,logstamp());
-		discard_vector(av);
 		free(flat_request);
-		free(tmprequest);
 		
 		exit(EXIT_FAILURE);
 	}
