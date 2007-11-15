@@ -641,7 +641,7 @@ int process_winscp_requests(void)
 
 int process_ssh_request(char *request)
 {
-	char **av, **tenv;
+	char **av, **tmp_av, **tenv;
 	char *flat_request,*tmpstring, *tmprequest;
 	char bad_winscp3str[] = "test -x /usr/lib/sftp-server && exec /usr/lib/sftp-server test -x /usr/local/lib/sftp-server && exec /usr/local/lib/sftp-server exec sftp-server";
 	int retval;
@@ -735,7 +735,7 @@ int process_ssh_request(char *request)
 	 * clean any path info from request and substitute our known pathnames
 	 */
 	av[0] = substitute_known_path(av[0]);
-
+	
 	/*
 	 * we only process wildcards for scp commands
 	 */
@@ -756,17 +756,24 @@ int process_ssh_request(char *request)
 		chdir(DEFAULT_CHDIR);
 	}
 #endif
+	
 
 	flat_request = flatten_vector(av);
 
-	if(check_dangerous_args(av))
+	/* 
+	 * Use a temp arg vector since getopt will permute the command line arguments
+	 * for anything that it does not know about.  If all rsync options are well
+	 * defined this isn't necessary.
+	 */
+	tmp_av = build_arg_vector(flat_request);
+	if(check_dangerous_args(tmp_av))
 	{
 		syslog(LOG_ERR, "requested command (%s) tried to use disallowed argument (%s))", 
 			flat_request, logstamp());
 		exit(EXIT_FAILURE);
 	}
+	discard_vector(tmp_av);
 
-	
 	if (valid_arg_vector(av))
 	{
 
