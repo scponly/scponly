@@ -154,7 +154,7 @@ cmd_arg_t dangerous_args[] =
 	{ PROG_SFTP_SERVER,	1,				1,				NULL,			"f:l:",			empty_longopts },
 #endif
 #ifdef ENABLE_SCP2
-	{ PROG_SCP, 		1, 				1,				"S",			"dfl:prtvBCc:i:P:q1246S:o:F:", empty_longopts },
+	{ PROG_SCP, 		1, 				1,				"SoF",			"dfl:prtvBCc:i:P:q1246S:o:F:", empty_longopts },
 #endif
 #ifdef RSYNC_COMPAT
 	{ PROG_RSYNC, 		1, 				0,				"e",			"e:",			rsync_longopts },
