@@ -1,4 +1,4 @@
-CVS
+scponly v4.8 - jan 14 2008
 	fix support for quota and passwd when running within the chroot (exec pre-chroot)
 	disallow rsync and svnserve from being run as daemons that listen on a port
 	switch to getopt_long for command processing, use getopt for
@@ -11,6 +11,7 @@ CVS
 	allow multiple users with the same uid using USER environment variable
 		Steve Kehlet <stevek@webreachinc.com>
 
+scponly 4.7 - change information unknown mismanaged - check CVS diffs if needed
 
 scponly v4.6 - jan 31 2006
 
