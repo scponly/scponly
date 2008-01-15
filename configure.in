@@ -9,7 +9,7 @@ PATH="$PATH:/usr/local/bin"
 
 dnl
 dnl Say what we are:
-AC_INIT(scponly, 4.7, joe@sublimation.org)                                                                      
+AC_INIT(scponly, 4.8, joe@sublimation.org)                                                                      
 
 dnl AC_CONFIG_SRCDIR([helper.c])
 AC_CONFIG_HEADER([config.h])
@@ -256,12 +256,14 @@ fi
 
 # unison-compat conditionals:
 if test "x$enable_unison_compat" != "x" && test "x$enable_unison_compat" != "xno"; then
+	AC_MSG_WARN([read the SECURITY document before enabling unison compatibility])
 	AC_MSG_NOTICE([enabling unison compatability...])
 	SCPONLY_PATH_PROG_DEFINE([PROG_UNISON],   [unison], [/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin])
 fi	
 
 # rsync-compat conditionals:
 if test "x$enable_rsync_compat" != "x" && test "x$enable_rsync_compat" != "xno"; then
+	AC_MSG_WARN([read the SECURITY document before enabling rsync compatibility])
 	AC_MSG_NOTICE([enabling rsync compatability...])
 	SCPONLY_PATH_PROG_DEFINE([PROG_RSYNC],   [rsync], [/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin])
 fi	
