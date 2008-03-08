@@ -1,3 +1,7 @@
+CVS
+	Fix for rsync-3.0 which now uses a short -e option, with an optional argument as
+		a server side option indicating protocol compatibility.
+
 scponly v4.8 - jan 14 2008
 	fix support for quota and passwd when running within the chroot (exec pre-chroot)
 	disallow rsync and svnserve from being run as daemons that listen on a port
