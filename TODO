@@ -1,4 +1,5 @@
 TODO file added octover 24th, 2002
 
 - cvs support (compile time option, off by default)
+- getopt is for all realistic purposes required (scponly doesn't build on stock AIX)
 
