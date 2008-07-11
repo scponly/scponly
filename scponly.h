@@ -1,6 +1,9 @@
 #include <stdio.h>	/* FILENAME_MAX */
+#include "config.h" /* include before most other files */
+
+#ifdef HAVE_GETOPT_H
 #include <getopt.h> /* struct option */ 
-#include "config.h"
+#endif
 
 #define MAX_USERNAME 32
 #define MAX_REQUEST (1024)		/* any request exceeding this is truncated */

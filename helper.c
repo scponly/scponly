@@ -6,17 +6,15 @@
 #include <sys/types.h>	/* for stat, getpwuid */
 #include <sys/stat.h>	/* for stat */
 #include <unistd.h>	/* for exit, access, getpwuid, execve, getopt */
-#ifdef HAVE_GETOPT_H
-#include <getopt.h> /* for getopt */
-#endif
 #include <errno.h>	/* for debugging */
 #include <pwd.h>	/* to get username for config parsing */
 #include <time.h>	/* time */
 #include <libgen.h>	/* basename */
 #include <stdlib.h>	/* realloc */
 #include <syslog.h>
-#include "scponly.h"
+
 #include "config.h"
+#include "scponly.h" /* includes getopt */
 
 #ifdef HAVE_GLOB
 #include <glob.h>	/* for glob() */
@@ -194,7 +192,7 @@ int check_dangerous_args(char **av)
 			 */
 			if (1 == cmdarg->getoptflag)
 			{
-				debug(LOG_DEBUG, "Using getopt processing for cmd%s\n (%s)", cmdarg->name, logstamp());
+				debug(LOG_DEBUG, "Using getopt processing for cmd %s\n (%s)", cmdarg->name, logstamp());
 				/*	
 				 *	first count the arguments in the vector
 				 */
@@ -244,13 +242,13 @@ int check_dangerous_args(char **av)
 					if (cmdarg->badarg != NULL && (strchr(cmdarg->badarg, ch) != NULL))
 					{
 						syslog(LOG_ERR, "option '%c' or a related long option is not permitted for use with %s (arg was %s) (%s))", 
-							ch, cmdarg->name, optarg, logstamp());
+							ch, cmdarg->name, (optarg!=NULL ? optarg : "<NULL>"), logstamp());
 						return 1;
 					}
 					else if (cmdarg->strict && ch == '?')
 					{
 						syslog(LOG_ERR, "an unrecognized option was encountered while processing cmd %s (arg was %s) (%s))", 
-							cmdarg->name, optarg, logstamp());
+							cmdarg->name, (optarg!=NULL ? optarg : "<NULL>"), logstamp());
 						return 1;
 					}
 				}
