@@ -2,7 +2,7 @@
 #include "config.h" /* include before most other files */
 
 #ifdef HAVE_GETOPT_H
-#include <getopt.h> /* struct option */ 
+#include <getopt.h> /* for struct option for getopt */
 #endif
 
 #define MAX_USERNAME 32
