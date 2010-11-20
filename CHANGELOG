@@ -1,4 +1,5 @@
 CVS
+	Remove inline references to satisify certain compilers
 	Remove the now unnecessary sftp-logging compatibility mode.
 	When getopt_long is not available, like on AIX, use bundled NetBSD
 		getopt_long.

@@ -43,8 +43,8 @@ typedef struct
 /*
  * function prototypes
  */
-inline char *strbeg (char *, char *);
-inline char *strend (char *, char *);
+char *strbeg (char *, char *);
+char *strend (char *, char *);
 int valid_chars(char *);
 int get_uservar(void);
 void show_usage(void);
