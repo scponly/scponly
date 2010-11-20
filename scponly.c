@@ -225,6 +225,7 @@ int main (int argc, char **argv)
 {
 	FILE *debugfile;
 	int logopts = LOG_PID|LOG_NDELAY;
+	int chars_read = 0;
 #ifdef CHROOT_CHECKDIR
 	struct stat	homedirstat;
 #endif
@@ -234,7 +235,9 @@ int main (int argc, char **argv)
 	 */
 	if (NULL!=(debugfile=fopen(DEBUGFILE,"r")))
 	{
-		fscanf(debugfile,"%d",&debuglevel);
+		chars_read = fscanf(debugfile,"%d",&debuglevel);
+		if (chars_read < 1)
+			debuglevel = 0;
 		fclose(debugfile);
 	}
 #ifndef UNIX_COMPAT

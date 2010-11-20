@@ -51,13 +51,6 @@
 #define PROG_CD "cd"
 #endif /*ENABLE_SCP2*/
 
-/* sftp logging compatibility mode */
-#undef SFTP_LOGGING
-
-#ifdef SFTP_LOGGING
-#define USE_SAFE_ENVIRONMENT
-#endif
-
 /* Binaries launched in WinSCP compatibility mode */
 #ifdef WINSCP_COMPAT
 #undef PROG_PWD
@@ -74,9 +67,7 @@
 /* Unison compatability mode */
 #ifdef UNISON_COMPAT
 #undef PROG_UNISON
-#ifndef USE_SAFE_ENVIRONMENT
 #define USE_SAFE_ENVIRONMENT
-#endif
 #endif
 
 /* subversion cli compatibility */

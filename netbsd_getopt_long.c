@@ -41,8 +41,6 @@
 #define __UNCONST(a)	((void *)(size_t)(const void *)(a))
 
 #define IGNORE_FIRST	(*options == '-' || *options == '+')
-#define PRINT_ERROR	((opterr) && ((*options != ':') \
-				      || (IGNORE_FIRST && options[1] != ':')))
 #define IS_POSIXLY_CORRECT (getenv("POSIXLY_CORRECT") != NULL)
 #define PERMUTE         (!IS_POSIXLY_CORRECT && !IGNORE_FIRST)
 /* XXX: GNU ignores PC if *options == '-' */
@@ -81,22 +79,6 @@ static const char illoptchar[] = "unknown option -- %c";
 static const char illoptstring[] = "unknown option -- %s";
 
 char opterrmsg[128];
-
-static void warnx(int print_error, const char *fmt, ...)
-{
-        va_list ap;
-        va_start(ap, fmt);
-        if (fmt != NULL)
-                vsnprintf(opterrmsg, 128, fmt, ap);
-        else
-                opterrmsg[0]='\0';
-        va_end(ap);
-        if (print_error) {
-                fprintf(stderr, opterrmsg);
-                fprintf(stderr, "\n");
-        }
-}
-
 
 /*
  * Compute the greatest common divisor of a and b.
@@ -243,8 +225,6 @@ start:
 		/* option letter unknown or ':' */
 		if (!*place)
 			++optind;
-		if (PRINT_ERROR)
-			warnx((int)illoptchar, optchar);
 		optopt = optchar;
 		return BADCH;
 	}
@@ -255,8 +235,6 @@ start:
 
 		if (++optind >= nargc) {	/* no arg */
 			place = EMSG;
-			if (PRINT_ERROR)
-				warnx(recargchar, optchar);
 			optopt = optchar;
 			return BADARG;
 		} else				/* white space */
@@ -278,8 +256,6 @@ start:
 		else if (oli[1] != ':') {	/* arg not optional */
 			if (++optind >= nargc) {	/* no arg */
 				place = EMSG;
-				if (PRINT_ERROR)
-					warnx(recargchar, optchar);
 				optopt = optchar;
 				return BADARG;
 			} else
@@ -369,18 +345,12 @@ netbsd_getopt_long(int nargc, char * const *nargv, const char *options,
 		}
 		if (ambiguous) {
 			/* ambiguous abbreviation */
-			if (PRINT_ERROR)
-				warnx(ambig, (int)current_argv_len,
-				     current_argv);
 			optopt = 0;
 			return BADCH;
 		}
 		if (match != -1) {			/* option found */
 		        if (long_options[match].has_arg == no_argument
 			    && has_equal) {
-				if (PRINT_ERROR)
-					warnx(noarg, (int)current_argv_len,
-					     current_argv);
 				/*
 				 * XXX: GNU sets optopt to val regardless of
 				 * flag
@@ -410,8 +380,6 @@ netbsd_getopt_long(int nargc, char * const *nargv, const char *options,
 				 * Missing argument; leading ':'
 				 * indicates no error should be generated
 				 */
-				if (PRINT_ERROR)
-					warnx(recargstring, current_argv);
 				/*
 				 * XXX: GNU sets optopt to val regardless
 				 * of flag
@@ -424,8 +392,6 @@ netbsd_getopt_long(int nargc, char * const *nargv, const char *options,
 				return BADARG;
 			}
 		} else {			/* unknown option */
-			if (PRINT_ERROR)
-				warnx(illoptstring, current_argv);
 			optopt = 0;
 			return BADCH;
 		}
