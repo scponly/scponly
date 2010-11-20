@@ -1,4 +1,6 @@
 CVS
+	When getopt_long is not available, like on AIX, use bundled 
+	NetBSD getopt_long.
 	Update the SECURITY document to include a reference to /etc/popt and ~/.popt as
 		they relate to rsync.
 	Fix for rsync-3.0 which now uses a short -e option, with an optional argument as
