@@ -5,7 +5,7 @@ exec_prefix	 = @exec_prefix@
 bindir		 = @bindir@
 sbindir		 = @sbindir@
 mandir		 = @mandir@
-CFLAGS		 = @CFLAGS@ -I$(srcdir) -I.
+CFLAGS		 = @CFLAGS@ -I$(srcdir) -I. -Wall -pedantic
 INSTALL		 = @INSTALL@
 CC		 = @CC@
 CHROOTED_NAME   = @CHROOTED_NAME@
@@ -22,8 +22,8 @@ clean:
 
 love: clean all
 
-scponly: scponly.o helper.o
-	${CC} ${CFLAGS} ${DEFS} -o $@ scponly.o helper.o
+scponly: scponly.o helper.o netbsd_getopt_long.o
+	${CC} ${CFLAGS} ${DEFS} -o $@ scponly.o helper.o netbsd_getopt_long.o
 
 groups: groups.c
 	${CC} ${CFLAGS} ${DEFS} -o $@ groups.c
@@ -33,6 +33,9 @@ scponly.o: scponly.c config.h scponly.h
 
 helper.o: helper.c config.h scponly.h
 	${CC} ${CFLAGS} ${DEFS} -o $@ -c helper.c
+
+netbsd_getopt_long.o: netbsd_getopt_long.c config.h scponly.h
+	${CC} ${CFLAGS} ${DEFS} -o $@ -c netbsd_getopt_long.c
 
 install: scponly debuglevel scponly.8
 	${INSTALL} -d ${DESTDIR}${bindir}

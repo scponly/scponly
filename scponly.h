@@ -3,6 +3,8 @@
 
 #ifdef HAVE_GETOPT_H
 #include <getopt.h> /* for struct option for getopt */
+#else
+#include "scponly_getopt.h"
 #endif
 
 #define MAX_USERNAME 32

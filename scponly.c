@@ -28,6 +28,13 @@ char *safeenv[MAX_ENV];
 
 /* will point to syslog or a noop */
 void (*debug)(int priority, const char* format, ...);
+int (*scponly_getopt_long)(
+		int argc,
+		char * const argv[],
+		const char *optstring,
+		const struct option *longopts,
+		int *longindex
+		);
 
 cmd_t commands[] =
 { 
@@ -78,7 +85,7 @@ cmd_t commands[] =
 	{ PROG_SVNSERV, 1 },
 #endif /*ENABLE_SVNSERV*/
 	
-	NULL
+	{ NULL }
 };
 
 /*
@@ -176,7 +183,7 @@ cmd_arg_t dangerous_args[] =
 #ifdef QUOTA_COMPAT
 	{ PROG_QUOTA,		1,				1,				NULL,			"-F:guvsilqQ",	empty_longopts },
 #endif
-	NULL
+	{ NULL }
 };
 
 /*
@@ -218,14 +225,16 @@ int main (int argc, char **argv)
 {
 	FILE *debugfile;
 	int logopts = LOG_PID|LOG_NDELAY;
+#ifdef CHROOT_CHECKDIR
 	struct stat	homedirstat;
+#endif
 
 	/*
 	 * set debuglevel.  any nonzero number will result in debugging info to log
 	 */
 	if (NULL!=(debugfile=fopen(DEBUGFILE,"r")))
 	{
-		fscanf(debugfile,"%u",&debuglevel);
+		fscanf(debugfile,"%d",&debuglevel);
 		fclose(debugfile);
 	}
 #ifndef UNIX_COMPAT
@@ -247,6 +256,13 @@ int main (int argc, char **argv)
 		debug = syslog;
 	else
 		debug = noop_syslog;
+
+#ifdef HAVE_GETOPT_H
+	scponly_getopt_long = getopt_long;
+#else
+	debug(LOG_INFO, "using netbsd's bundled getopt_long");
+	scponly_getopt_long = netbsd_getopt_long;
+#endif
 
 #ifdef CHROOTED_NAME
 	/*
@@ -415,7 +431,7 @@ int main (int argc, char **argv)
 	debug(LOG_DEBUG, "setting uid to %u", getuid());
 	if (-1==(seteuid(getuid())))
 	{
-		syslog (LOG_ERR, "couldn't revert to my real uid. seteuid: %m");
+		syslog(LOG_ERR, "couldn't revert to my real uid. seteuid: %m");
 		exit(EXIT_FAILURE);
 	}
 

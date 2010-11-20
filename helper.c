@@ -40,6 +40,7 @@ extern cmd_arg_t dangerous_args[];
 extern char * allowed_env_vars[];
 extern char * safeenv[MAX_ENV];
 extern void (*debug)(int priority, const char* format, ...);
+extern int (*scponly_getopt_long)( int argc, char * const argv[], const char *optstring, const struct option *longopts, int *longindex);
 
 #ifdef HAVE_GETOPT
 extern char *optarg;
@@ -222,7 +223,7 @@ int check_dangerous_args(char **av)
 				 *	tell getopt to only be strict if the 'opts' is well defined
 				 */
 				opterr=cmdarg->strict;
-				while ((ch = getopt_long(ac, av, cmdarg->opts, cmdarg->longopts, &longopt_index)) != -1) {
+				while ((ch = scponly_getopt_long(ac, av, cmdarg->opts, cmdarg->longopts, &longopt_index)) != -1) {
 					
 					debug(LOG_DEBUG, "getopt processing returned '%c' (%s)", ch, logstamp());
 					
@@ -261,7 +262,7 @@ int check_dangerous_args(char **av)
 				}
 #endif /* RSYNC_COMPAT */
 
-#elif /* HAVE_GETOPT */
+#else /* HAVE_GETOPT */
 				/*
 				 * make sure that processing doesn't continue if we can't validate a rsync check
 				 * and if the getopt flag is set.
