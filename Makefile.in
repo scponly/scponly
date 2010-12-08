@@ -48,7 +48,7 @@ install: scponly debuglevel scponly.8
 		${INSTALL} -d ${DESTDIR}${sbindir};				\
 		rm -f ${DESTDIR}${sbindir}/${CHROOTED_NAME};			\
 		cp scponly ${CHROOTED_NAME};				\
-		- ${INSTALL} -o 0 -g 0 -m 4755 ${CHROOTED_NAME} ${DESTDIR}${sbindir}/${CHROOTED_NAME};	\
+		${INSTALL} -o 0 -g 0 -m 4755 ${CHROOTED_NAME} ${DESTDIR}${sbindir}/${CHROOTED_NAME};	\
 	fi
 
 debuglevel:
