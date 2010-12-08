@@ -100,7 +100,7 @@ struct option empty_longopts[] = {
 struct option rsync_longopts[] = {
 	/* options we need to know about that are safe */
 	{"server",			0,	0,		(int)'s'},
-	/* I use 'e' for val here because that's what's listed in cmd_arg_t->badarg  */
+	/* the following options have behaviors we don't want to see */
 	{"rsh", 			1,	0,		(int)'r'},
 	/* the following are disabled because they use daemon mode */
 	{"daemon",			0,	0,		(int)'d'},

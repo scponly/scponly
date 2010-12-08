@@ -1,12 +1,15 @@
+Frank Fegert <fra.nospam.nk@gmx.de>
+	- fixes for AIX and non-gcc compilers
+
 Dimitri Papadopoulos <papadopo@shfj.cea.fr>
 	- numerous corrections and patches
 
 Markus Kolb <markus-122004@tower-net.de>                     
 	- DESTDIR support for chroot creation
 
-Kaleb Pederson <kpederson@mail.ewu.edu>   
+Kaleb Pederson <kpederson@mail.ewu.edu> (now current maintainer)
 	- numerous fixes
-	- sftp-logging compatibility patch
+	- sftp-logging compatibility patch (now removed)
 
 Paul Hyder <Paul.Hyder@noaa.gov>     
 	- building jails document
