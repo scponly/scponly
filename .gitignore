@@ -1,0 +1,11 @@
+Makefile
+config.h
+config.log
+config.status
+debuglevel
+groups
+*.o
+scponly
+scponlyc
+tags
+CVS
