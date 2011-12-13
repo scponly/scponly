@@ -160,7 +160,7 @@ cmd_arg_t dangerous_args[] =
 	 * program name		use getopt?		strict optlist?	badarg			optlist			longopts\n
 	 */
 #ifdef ENABLE_SFTP
-	{ PROG_SFTP_SERVER,	1,				1,				NULL,			"f:l:u:",		empty_longopts },
+	{ PROG_SFTP_SERVER,	1,				1,				NULL,			"f:l:u:m:",		empty_longopts },
 #endif
 #ifdef ENABLE_SCP2
 	{ PROG_SCP, 		1, 				1,				"SoF",			"dfl:prtvBCc:i:P:q1246S:o:F:", empty_longopts },
