@@ -9,3 +9,5 @@ scponly
 scponlyc
 tags
 CVS
+auto*.cache
+setup_chroot.sh
