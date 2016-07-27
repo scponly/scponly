@@ -87,16 +87,8 @@ I have no plans to end-of-life scponly, though ultimately, I recognize
 that scponly should eventually become just a feature of whichever sshd 
 you may run.
 
-NOV 2003 ADDENDUM:
+JUL 2016 ADDENDUM:
 	OpenSSH still doesnt support configurable chrooting for users OR
-disallowing interactive login.  
-
-NOV 2004 ADDENDUM:
-	OpenSSH still doesnt support configurable chrooting for users OR
-disallowing interactive login.  
-
-DEC 2005 ADDENDUM:
-	OpenSSH still doesnt support configurable chrooting for users OR
-disallowing interactive login.  
+disallowing interactive login.
 
 
